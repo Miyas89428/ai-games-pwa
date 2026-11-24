@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>草原槍手大作戰</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#e8f1e0;--ink:#1d2b1a;--panel:#fffffff0;--btn:#2f80ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10170f;--ink:#e8f1e0;--panel:#1b261af0}}
+:root[data-theme="dark"]{--bg:#10170f;--ink:#e8f1e0;--panel:#1b261af0}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,"Noto Sans TC","PingFang TC",sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{display:block;width:100%;height:100%}
+#ov,#qz,#hm,#lb{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);padding:16px;box-sizing:border-box}
+.card{background:var(--panel);color:var(--ink);border-radius:18px;padding:22px 24px;max-width:420px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.card input{width:100%;box-sizing:border-box;font-size:18px;padding:10px 12px;border-radius:10px;border:2px solid #8aa0b8;background:var(--bg);color:var(--ink);text-align:center;margin:0 0 8px}
+#lbl input[type=checkbox]{width:auto;margin:0;transform:scale(1.4)}
+#lbl{text-align:left}
+#pm{color:#e11d48;font-weight:700;font-size:14px;min-height:20px;margin:0 0 8px}
+button.sm{background:#5b6b7d;font-size:14px;padding:8px 14px}
+#lbl table td,#lbl table th{padding:4px 8px;border-bottom:1px solid rgba(128,128,128,.3);text-align:center}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px}
+.row button{background:#5b6b7d;font-size:16px;padding:10px 14px;line-height:1.3}
+.row button small{font-weight:400;font-size:12px}
+.row button.on{background:var(--btn);outline:3px solid #ffb020}
+.card h1{margin:0 0 10px;font-size:32px}
+.card p,.card label,.card li{font-size:19px;line-height:1.7}
+.pind{font-size:14px;color:#888;margin:0 0 8px;text-align:center}
+.nav{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.nav button{font-size:17px;padding:10px 22px}
+.hpg{display:none}
+.card p{margin:0 0 16px;line-height:1.6;font-size:15px}
+button{background:var(--btn);color:#fff;border:0;border-radius:12px;padding:12px 28px;font-size:18px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="qz" style="display:none"><div class="card"><h1 id="qq"></h1><p>選出正確答案！答對，能量塊才會生效（電腦可按鍵盤 1、2、3）。</p><div id="qa"></div></div></div>
+<div id="hm"><div class="card"><h1>🤠 草原槍手大作戰</h1>
+<div id="hp1">
+<div class="pind">第 1 頁 / 3</div>
+<div class="row" id="sj"><button data-v="math" class="on">🧮 數學</button><button data-v="en">🔤 英文單字</button><button data-v="ch">📖 國語</button></div>
+<div class="row" id="lv"><button data-v="0" class="on">初階<br><small>1–2 年級</small></button><button data-v="1">中階<br><small>3–4 年級</small></button><button data-v="2">高階<br><small>5–6 年級</small></button></div>
+<input id="pid" placeholder="請輸入座號或姓名" maxlength="20" autocomplete="off"><div id="pm"></div>
+<p style="margin:8px 0">✅ 活到前 3 名就成功</p>
+<div class="nav"><button id="ton2">下一頁 ▶</button><button id="lbb" class="sm">🏆 排行榜</button></div>
+</div>
+<div id="hp2" class="hpg">
+<div class="pind">第 2 頁 / 3 — 計分</div>
+<ul style="text-align:left;padding-left:22px;margin:0 0 12px">
+<li>⭐ 第 1 名 1000 分，每名少 100，第 6 名起 0 分</li>
+<li>📦 打碎箱子 +100 分</li>
+<li>⚔️ 打倒對手 +200 分</li>
+<li>📝 答題答對才能獲得加成</li>
+</ul>
+<div class="nav"><button id="ton1b">◀ 上一頁</button><button id="ton3">下一頁 ▶</button></div>
+</div>
+<div id="hp3" class="hpg">
+<div class="pind">第 3 頁 / 3 — 操作</div>
+<ul style="text-align:left;padding-left:22px;margin:0 0 12px">
+<li>💻 WASD 移動、左鍵或空白鍵射擊、R 大招</li>
+<li>📱 左搖桿移動，右側按鈕攻擊和大招（拖曳瞄準，放開發射）</li>
+</ul>
+<div class="nav"><button id="ton2b">◀ 上一頁</button><button id="nx">開始戰鬥！</button><button id="ton1c" class="sm">↩ 第 1 頁</button></div>
+</div>
+</div></div>
+<div id="lb" style="display:none"><div class="card"><h1 style='font-size:28px'>🏆 排行榜</h1><div style="display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px" id="lbtabs"></div><div id="lbl"></div><div style="margin-top:12px"><button id="lbx">關閉</button> <button id="lbc" class="sm">清除勾選的紀錄</button></div><div id="lbp" style="display:none;margin-top:10px"><input id="lpin" type="password" placeholder="請輸入教師密碼" autocomplete="off"><button id="lbok" class="sm">確認清除</button></div><div id="lbm" style="margin-top:8px;font-size:14px"></div></div></div>
+<div id="ov" style="display:none"><div class="card">
+<h1 id="tt">🤠 草原槍手大作戰</h1>
+<p id="tx">⚠️ 每人只能玩一次！<br>✅ 活到前 3 名就成功<br>⭐ 第 1 名 1000 分，每名少 100，第 6 名起 0 分<br>📦 打碎箱子 +100　⚔️ 打倒對手 +200<br>📝 打碎箱子或打倒對手要答題，答對才變強<br>💻 WASD 移動、左鍵或空白鍵射擊、R 大招<br>📱 左搖桿移動，右側按鈕攻擊和大招（拖曳瞄準，放開發射）</p>
+<button id="bt">開始戰鬥</button>
+</div></div>
+<script>
+const $=id=>document.getElementById(id);
+const cv=$('c'),g=cv.getContext('2d');let W,H;
+function rs(){const d=devicePixelRatio||1;W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',rs);rs();
+
+const S=3000,HP=1500,cl=(v,a,b)=>Math.max(a,Math.min(b,v)),R=(a,b)=>a+Math.random()*(b-a);
+const NAMES=['小火龍','阿虎','菜菜子','皮皮','大壯','閃電','牛仔王','鐵拳','夜貓'];
+let P,E=[],B=[],walls=[],crates=[],cubes=[],bush=[],state='intro',backT=null,paused=false,qo=[],qn=0,qk='',asked=new Set(),fm=String,subj='math',lvl=0,toast={s:'',l:0},t=0,run=false,over=false,keys={},ms={x:0,y:0,d:false},sticks={},last=0,aimA=0,tsup=false;
+
+function mk(n,x,y,me){return{n,x,y,r:16,hp:8000,cu:0,qa:0,qc:0,pt:0,kl:0,crt:0,lh:9,sup:0,ammo:3,rl:0,me,c:me?'#2f80ff':'hsl('+Math.floor(R(0,360))+',65%,50%)',a:0,cd:R(.3,1),wt:0,tx:x,ty:y,hit:0,alive:true}}
+const gasR=()=>Math.max(160,2200-Math.max(0,t-10)*23);
+const inBush=e=>bush.some(b=>Math.hypot(b.x-e.x,b.y-e.y)<b.r);
+const alive=()=>E.filter(e=>e.alive).length;
+const mxh=e=>8000+100*e.cu;
+
+function start(){
+  t=0;over=false;B=[];walls=[];crates=[];cubes=[];bush=[];E=[];
+  const sp=[];for(let i=0;i<10;i++){const a=i/10*Math.PI*2+.4;sp.push([S/2+Math.cos(a)*1150,S/2+Math.sin(a)*1150])}
+  sp.sort(()=>Math.random()-.5);
+  P=mk('你',sp[0][0],sp[0][1],true);E.push(P);
+  for(let i=1;i<10;i++)E.push(mk(NAMES[i-1],sp[i][0],sp[i][1],false));
+  const far=(x,y,m)=>sp.every(s=>Math.hypot(s[0]-x,s[1]-y)>m);
+  while(walls.length<90){const w={x:R(60,S-200),y:R(60,S-200),w:R(50,130),h:R(50,130)};if(far(w.x+w.w/2,w.y+w.h/2,170)&&!walls.some(o=>w.x<o.x+o.w+50&&w.x+w.w+50>o.x&&w.y<o.y+o.h+50&&w.y+w.h+50>o.y))walls.push(w)}
+  while(bush.length<60){const b={x:R(80,S-80),y:R(80,S-80),r:R(55,90)};if(far(b.x,b.y,110))bush.push(b)}
+  while(crates.length<45){const c={x:R(60,S-100),y:R(60,S-100),w:46,h:46,hp:5000,fl:0};const ov=l=>l.some(w=>c.x<w.x+w.w+40&&c.x+c.w+40>w.x&&c.y<w.y+w.h+40&&c.y+c.h+40>w.y);if(far(c.x+23,c.y+23,150)&&!ov(walls)&&!ov(crates))crates.push(c)}
+  $('ov').style.display='none';run=true;state='play';paused=false;asked.clear();$('qz').style.display='none';toast.l=0;
+}
+
+function move(e,dx,dy){
+  e.x=cl(e.x+dx,e.r,S-e.r);e.y=cl(e.y+dy,e.r,S-e.r);
+  for(const w of walls.concat(crates)){
+    const cx=cl(e.x,w.x,w.x+w.w),cy=cl(e.y,w.y,w.y+w.h),ox=e.x-cx,oy=e.y-cy,d=Math.hypot(ox,oy);
+    if(d<e.r){if(d===0){e.y=w.y-e.r}else{e.x=cx+ox/d*e.r;e.y=cy+oy/d*e.r}}
+  }
+}
+function fire(e,a){
+  if(e.ammo<1)return false;e.ammo--;
+  {const s=a;B.push({x:e.x+Math.cos(a)*20,y:e.y+Math.sin(a)*20,vx:Math.cos(s)*620,vy:Math.sin(s)*620,f:e,l:.7})}
+  return true;
+}
+function dmg(e,n,by){
+  e.hp-=n;e.lh=0;
+  if(e.hp<=0&&e.alive){e.alive=false;
+    if(by&&by.me){P.pt+=200;P.kl++}else if(by){by.cu++;by.hp+=100}
+    if(e.me)end(false);else if(P.alive&&alive()===1)end(true);}
+}
+function tip(win){
+  if(win)return '🏆 太強了！你打敗了所有對手。';
+  const pl=alive()+1,enc=(pl===2||pl===3)?'差一點就第一名了，加油！<br>':'';
+  const gas=Math.hypot(P.x-S/2,P.y-S/2)>gasR();
+  return enc+(gas?'📚 毒氣會縮小，要提早往圈內移動！':P.cu===0?'📚 先打箱子變強，再去戰鬥。':'📚 邊移動邊瞄準，躲在草叢或箱子後射擊。');
+}
+function end(win){
+  over=true;
+  const place=win?1:alive()+1,pp=[1000,900,800,700,600][place-1]||0,total=pp+P.pt;
+  $('tt').textContent=win?'🏆 你是最後的王者！':(place<=3?'🎉 成功！第 '+place+' 名':'💥 失敗！第 '+place+' 名');
+  $('tx').innerHTML='<b>👤 '+esc(curName)+'　⭐ 總分 '+total+' 分</b><br>名次 '+pp+' ＋ 擊倒 '+P.kl+'×200 ＋ 箱子 '+P.crt+'×100<br><br>'+tip(win)+(P.qa?'<br><br>🧮 '+({math:'數學',en:'英文',ch:'國語'}[subj])+'挑戰：答對 '+P.qc+' / '+P.qa+' 題':'');
+  state='end';
+  putRec(curKey,{name:curName,score:total,place,kills:P.kl,crates:P.crt,qa:P.qa,qc:P.qc,subj:curSubj,lvl:curLvl,done:true,t:Date.now()});
+  let c=20;$('bt').textContent='換下一位玩家（'+c+'）';
+  clearInterval(backT);backT=setInterval(()=>{c--;$('bt').textContent='換下一位玩家（'+c+'）';if(c<=0)showIntro()},1000);$('ov').style.display='flex';
+}
+
+// ===== 英文單字庫（初階／中階／高階，皆為老師提供的單字表），格式 ['英文','中文'] =====
+const WORDS=[
+ [['boy','男孩'],['girl','女孩'],['friend','朋友'],['doctor','醫生'],['nurse','護士'],['student','學生'],['teacher','老師'],['classmate','同學'],['father','父親'],['mother','母親'],['brother','兄、弟'],['sister','姊、妹'],['grandfather','祖父'],['grandmother','祖母'],['eraser','橡皮擦'],['marker','麥克筆'],['pen','筆'],['pencil','鉛筆'],['ruler','尺'],['book','書'],['notebook','筆記本'],['desk','書桌'],['chair','椅子'],['school','學校'],['computer','電腦'],['class','班級、課'],['color','顏色'],['blue','藍色的'],['green','綠色的'],['red','紅色的'],['yellow','黃色的'],['one','一'],['two','二'],['three','三'],['four','四'],['five','五'],['six','六'],['seven','七'],['eight','八'],['nine','九'],['ten','十'],['eleven','十一'],['twelve','十二'],['apple','蘋果'],['banana','香蕉'],['orange','柳橙'],['cake','蛋糕'],['cola','可樂'],['hamburger','漢堡'],['hot dog','熱狗'],['juice','果汁'],['milk','牛奶'],['pizza','比薩'],['rice','米飯'],['sandwich','三明治'],['tea','茶'],['water','水'],['breakfast','早餐'],['lunch','午餐'],['dinner','晚餐'],['egg','蛋'],['ice cream','冰淇淋'],['bird','鳥'],['cat','貓'],['dog','狗'],['fish','魚'],['lion','獅子'],['monkey','猴子'],['pig','豬'],['rabbit','兔子'],['tiger','老虎'],['angry','生氣的'],['happy','高興的'],['sad','難過的'],['warm','溫暖的'],['hot','熱的'],['cool','涼快的'],['cold','冷的'],['tired','疲倦的'],['good','好的'],['big','大的'],['small','小的'],['long','長的'],['short','短的'],['tall','高的'],['jump','跳'],['run','跑'],['swim','游泳'],['dance','跳舞'],['draw','畫畫'],['read','閱讀'],['sing','唱歌'],['write','寫字'],['cook','煮'],['eat','吃'],['drink','喝'],['go','去'],['like','喜歡'],['look','看'],['see','看見'],['sleep','睡'],['study','學習、用功'],['walk','走'],['want','想要'],['watch','觀看、注視'],['train','火車'],['bike','腳踏車'],['bus','公車'],['car','汽車'],['MRT','大眾捷運系統'],['on foot','走路'],['taxi','計程車'],['bag','提袋'],['school bag','書包'],['box','箱、盒'],['key','鑰匙'],['name','名字'],['I','我'],['you','你、你們'],['she','她'],['he','他'],['it','它'],['we','我們'],['they','他們'],['eye','眼睛'],['ear','耳朵'],['mouth','嘴'],['nose','鼻子'],['head','頭'],['hand','手'],['hair','頭髮'],['face','臉'],['leg','腿'],['arm','手臂'],['sunny','晴朗的'],['rainy','下雨的'],['windy','颳風的'],['cloudy','多雲的'],['snowy','下雪的'],['weather','天氣'],['time','時間'],['day','天、日'],['today','今天'],['morning','早上'],['afternoon','下午'],['evening','傍晚'],['night','晚上'],['week','一星期'],['yesterday','昨天'],['last night','昨晚'],['o’clock','…點鐘'],['Sunday','星期天'],['Monday','星期一'],['Tuesday','星期二'],['Wednesday','星期三'],['Thursday','星期四'],['Friday','星期五'],['Saturday','星期六'],['art','美術'],['Chinese','中文'],['English','英文'],['math','數學'],['music','音樂'],['PE','體育'],['science','自然科學'],['dress','洋裝'],['jacket','夾克'],['jeans','牛仔褲'],['pants','褲子'],['shoes','鞋'],['shorts','短褲'],['skirt','裙子'],['T-shirt','短袖圓領汗衫'],['my','我的'],['your','你的'],['his','他的'],['her','她的'],['basketball','籃球'],['baseball','棒球'],['dodgeball','躲避球'],['get up','起床'],['go to bed','睡覺'],['go home','回家'],['what','什麼'],['where','哪裡'],['when','何時'],['who','誰'],['how','如何'],['bad','不好的'],['old','老的、舊的'],['busy','忙碌的'],['kind','親切的'],['nice','好的'],['cute','可愛的'],['smart','聰明的'],['early','早的'],['late','晚的'],['food','食物'],['drink','喝、飲料'],['card','卡片']],
+ [['animal','動物'],['any','任何的'],['ask','問'],['autumn','秋天'],['beef','牛肉'],['body','身體'],['chalk','粉筆'],['child','小孩(單數)'],['coat','大衣'],['hair','頭髮'],['hand','手'],['head','頭'],['help','幫助'],['horse','馬'],['salt','鹽'],['together','一起'],['proud','驕傲'],['puzzle','拼圖'],['try','嘗試'],['wait','等待'],['weather','氣候'],['dining room','飯廳'],['dollar','元'],['dry','乾燥的'],['invite','邀請'],['join','加入'],['kick','踢'],['kiss','親'],['learn','學習'],['money','錢'],['need','需要'],['really','真的'],['why','為什麼'],['with','和…一起'],['weigh','稱重(動詞)'],['yesterday','昨天'],['zero','零'],['petal','花瓣'],['pick','摘取'],['bookstore','書店'],['bread','麵包'],['buy','購買'],['cellphone','手機'],['city','城市'],['date','約會'],['dig','挖'],['dish','盤子'],['do','做,寫'],['does','做(第三人稱)'],['even','偶數'],['fall','掉落'],['feed','餵食'],['from','從…來'],['restaurant','餐廳'],['road','道路'],['salad','沙拉'],['same','相同的'],['season','季節'],['send','寄出'],['sir','先生(尊稱)'],['size','尺寸'],['smart','聰明的'],['smell','聞'],['snack','點心'],['snake','蛇'],['snow','雪'],['so','所以'],['soccer','英式足球'],['socks','襪子'],['tomorrow','明天'],['use','使用'],['vacation','假期'],['vegetable','蔬菜'],['visit','拜訪'],['wall','牆壁'],['weekend','周末'],['homework','作業'],['movie','電影'],['never','永遠不'],['news','新聞'],['newspaper','報紙'],['office','辦公室'],['page','頁數'],['paper','紙張'],['part','部分'],['pay','支付'],['pork','豬肉'],['some','一些'],['soon','很快的'],['sound','聲音'],['speak','說'],['spider','蜘蛛'],['sports','運動'],['spring','春天'],['station','車站'],['stay','停留'],['steak','牛排'],['still','仍然'],['street','街'],['sugar','糖(烹飪用)'],['summer','夏天'],['sure','當然'],['sweet','甜的'],['tape','膠帶'],['wet','潮濕的'],['which','哪一個'],['wind','風'],['window','窗戶'],['winter','冬天'],['wonderful','美好的'],['worry','擔心'],['writer','作家'],['wrong','錯誤的'],['afraid','害怕的'],['always','總是'],['become','變成'],['enjoy','享受'],['forget','忘記'],['frisbee','飛盤'],['motorcycle','摩托車'],['mountain','山'],['careful','小心的'],['push','推'],['about','關於'],['after','…之後'],['A.M.','早上的時間'],['ago','以前'],['blink','眨眼'],['cookie','餅乾'],['hour','小時'],['P.M.','下午的時間'],['price','價錢'],['March','三月'],['June','六月'],['July','七月'],['twenty','二十'],['thirty','三十'],['forty','四十'],['fifty','五十'],['sixty','六十'],['seventy','七十'],['eighty','八十'],['ninety','九十'],['hundred','百'],['first','第一'],['second','第二'],['third','第三'],['fourth','第四'],['fifth','第五'],['sixth','第六'],['seventh','第七'],['eighth','第八'],['ninth','第九'],['tenth','第十'],['airport','機場'],['passport','護照'],['air ticket','機票'],['boarding pass','登機證'],['boarding gate','登機門'],['boarding','登機'],['check in','報到'],['flight','班機'],['arrival','入境'],['departure','出境'],['duty free','免稅'],['air sick','暈機'],['captain','機長'],['crew','機組員'],['baggage','行李'],['service','服務'],['argue','爭吵'],['agree','同意'],['back','後'],['front','前'],['true','對'],['false','錯'],['floor','地板'],['ceiling','天花板'],['dark','黑暗的'],['light','明亮的'],['allow','允許'],['forbid','禁止'],['soft','軟'],['hard','硬'],['left','左'],['right','右'],['top','上'],['bottom','下'],['awake','清醒的'],['asleep','睡著的'],['ask','問'],['answer','答'],['follow','跟隨'],['lead','領導'],['start','開始'],['finish','結束'],['beautiful','美麗的'],['ugly','醜陋的'],['far','遠的'],['near','近的']],
+ [
+  ['something','某個東西'],['strange','奇怪的'],['spend','花(費)'],['total','全部總共'],['towel','毛巾'],['traffic','交通'],['trouble','麻煩'],['twice','兩次'],['once','一次'],['delicious','美味的'],['driver','司機'],['house wife','主婦'],['hundred','百'],['without','沒有'],['outside','外面的'],['over','在~上面'],['problem','問題'],['Wednesday','星期三'],['typhoon','颱風'],['question','疑問'],['radio','廣播電台'],['repeat','重複'],['stamp','郵票'],['surf','上網,衝浪'],['tennis','網球'],['test','考試'],['ticket','票'],['yard','庭院'],['agree','同意'],['airplane','飛機'],['airport','機場'],['apartment','公寓'],['artist','藝術家'],['August','八月'],['bakery','麵包店'],['baseball','棒球'],['basketball','籃球'],['bath','洗澡'],['chocolate','巧克力'],['Christmas','耶誕節'],['clap','拍手'],['clean','乾淨的'],['climb','爬'],['club','社團'],['comfortable','舒服的'],['convenient','方便的'],['earth','地球'],['favorite','最喜愛的'],['finger','手指'],['February','二月'],['finally','終於'],['finish','完成'],['bottle','瓶子'],['beach','海灘'],['bathroom','浴室'],['beautiful','漂亮的'],['believe','相信'],['bedroom','臥室'],['boat','船'],['bun','麵包'],['bottom','底下'],['blow','吹'],['December','十二月'],['dictionary','字典'],['different','不同的'],['glove','手套'],['guava','芭樂'],['guitar','吉他'],['during','在~期間'],['cheese','起司'],['China','中國'],['until','直到'],['health','健康'],['helpful','有幫助的'],['hike','健行'],['history','歷史'],['hospital','醫院'],['mailman','郵差'],['May','五月'],['minute','分鐘'],['MRT','捷運'],['museum','博物館'],['November','十一月'],['quiet','安靜的'],['restroom','化妝室'],['science','科學'],['September','九月'],['shape','形狀'],['share','分享'],['important','重要的'],['insect','昆蟲'],['inside','在~裡面'],['January','一月'],['kangaroo','袋鼠'],['koala','無尾熊'],['late','遲到'],['library','圖書館'],['October','十月'],['pear','梨子'],['popcorn','爆米花'],['post office','郵局'],['sick','生病了'],['headache','頭痛'],['space','太空'],['special','特別的'],['sweater','毛衣'],['thick','厚的'],['thin','薄的'],['living room','客廳'],['loud','大聲的'],['tired','疲累的'],['toast','吐司'],['tomato','番茄'],['teeth','牙齒'],['almost','幾乎'],['around','在附近'],['badminton','羽球'],['behind','在~後面'],['bell','鐘'],['belt','皮帶'],['clothes','衣服'],['comic','漫畫'],['course','課程'],['dangerous','危險的'],['dentist','牙醫'],['dream','夢想'],['drop','掉落'],['excited','感到…興奮的'],['interested','感興趣的'],['noise','噪音'],['beside','在~旁邊'],['bored','感到無聊'],['business','生意'],['candle','蠟燭'],['exciting','興奮的'],['exercise','運動'],['find','發現'],['full','飽的'],['future','未來'],['garbage','垃圾'],['glasses','眼鏡'],['grass','草'],['grow','成長'],['guess','猜'],['keep','保存'],['lamp','燈'],['lake','湖'],['lantern','燈籠'],['laugh','大笑,嘲笑'],['lid','蓋子'],['cheat','欺騙'],['check','檢查'],['chess','西洋棋'],['Halloween','萬聖節'],['handsome','帥的'],['life','生活'],['list','清單'],['machine','機器'],['mail','郵件'],['mask','面具'],['mat','地墊'],['meal','一餐'],['mean','意指'],['meat','肉'],['medicine','藥'],['menu','菜單'],['mile','英哩'],['million','百萬'],['prince','王子'],['princess','公主'],['railway','鐵路'],['prize','獎品'],['river','河'],['rock','岩石'],['screen','螢幕'],['seat','座位'],['seesaw','蹺蹺板'],['sharp','尖銳的'],['stupid','笨的'],['surprised','感到驚喜的'],['team','隊伍'],['swing','盪鞦韆'],['teenager','青少年'],['terrible','可怕的'],['theirs','他們的'],['think','想,認為'],['thousand','千'],['throw','丟擲'],['time','時間'],['top','頂端'],['mouse','滑鼠'],['mud','泥'],['nature','自然'],['neighbor','鄰居'],['nobody','無人'],['notebook','筆電'],['ours','我們的'],['show','秀/表演'],['somewhere','某處'],['someone','某人']
+ ]
+];
+const rI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const tenth=v=>(v/10).toFixed(1);
+function mkMath(){
+  let a,b,c,n,q;fm=String;
+  if(lvl===0){
+    const t=rI(0,2);
+    if(t===0){a=rI(1,20);b=rI(1,20);n=a+b;q=a+' + '+b}
+    else if(t===1){a=rI(5,30);b=rI(1,a-1);n=a-b;q=a+' − '+b}
+    else{a=rI(2,5);b=rI(2,5);n=a*b;q=a+' × '+b}
+  }else if(lvl===1){
+    const t=rI(0,3);
+    if(t===0){a=rI(100,600);b=rI(100,350);n=a+b;q=a+' + '+b}
+    else if(t===1){a=rI(300,900);b=rI(100,a-50);n=a-b;q=a+' − '+b}
+    else if(t===2){a=rI(12,60);b=rI(2,9);n=a*b;q=a+' × '+b}
+    else{b=rI(2,9);n=rI(6,40);a=b*n;q=a+' ÷ '+b}
+  }else{
+    const t=rI(0,7);
+    if(t===0){a=rI(1000,5000);b=rI(500,3000);n=a+b;q=a+' + '+b}
+    else if(t===1){a=rI(2000,9000);b=rI(500,a-500);n=a-b;q=a+' − '+b}
+    else if(t===2){a=rI(12,40);b=rI(11,25);n=a*b;q=a+' × '+b}
+    else if(t===3){b=rI(2,12);n=rI(10,99);a=b*n;q=a+' ÷ '+b}
+    else if(t===4){a=rI(10,99);b=rI(2,9);c=rI(2,9);n=a+b*c;q=a+' + '+b+' × '+c}
+    else if(t===5){a=rI(11,99);b=rI(11,99);n=a+b;fm=tenth;q=tenth(a)+' + '+tenth(b)}
+    else if(t===6){a=rI(30,99);b=rI(11,a-1);n=a-b;fm=tenth;q=tenth(a)+' − '+tenth(b)}
+    else{
+      const gcd=(x,y)=>y?gcd(y,x%y):x,sm=(x,y)=>{const d=gcd(x,y);return y/d===1?String(x/d):(x/d)+'/'+(y/d)};
+      const fb=rI(2,9),fd=rI(2,9),fa=rI(1,fb-1),fc=rI(1,fd-1);
+      const ans=sm(fa*fc,fb*fd),w=new Set();
+      [sm(fa+fc,fb+fd),sm(fa*fc,fb+fd),sm(fa*fd,fb*fc),sm(fa*fc+1,fb*fd),sm(fa*fc,fb*fd+1),sm(fa*fc,fb*fd-1)].forEach(x=>{if(x!==ans)w.add(x)});
+      while(w.size<2)w.add(sm(fa*fc+rI(2,5),fb*fd));
+      qn=ans;qo=[ans,...[...w].slice(0,2)];
+      return fa+'/'+fb+' × '+fc+'/'+fd+' = ?';
+    }
+  }
+  const off=[1,2,3,10,-1,-2,-3,-10],w=new Set();
+  while(w.size<2){const d=n+off[rI(0,7)];if(d!==n&&d>0)w.add(d)}
+  qn=n;qo=[n,...w];
+  return q+' = ?';
+}
+function mkEn(){
+  const L=WORDS[lvl],it=L[rI(0,L.length-1)],toZh=Math.random()<.5,k=toZh?1:0;
+  fm=String;qk=it[0];qn=it[k];
+  const w=new Set();
+  while(w.size<2){const o=L[rI(0,L.length-1)],x=o[k];if(x!==qn&&!o[1].includes(it[1])&&!it[1].includes(o[1])&&!o[0].includes(it[0])&&!it[0].includes(o[0]))w.add(x)}
+  qo=[qn,...w];
+  return toZh?it[0]+' 的中文是？':it[1]+' 的英文是？';
+}
+// ===== 國語題庫：初階（1–2 年級）、中階（3–4 年級）、高階（5–6 年級）=====
+const PAIR=(f,a)=>a.map(([x,y])=>({q:f(x),a:y,w:a.map(z=>z[1])}));
+const MCQ=a=>a.map(([q,y,w])=>({q,a:y,w}));
+const oppQ=x=>'「'+x+'」的相反詞是？',synQ=x=>'與「'+x+'」意思相近的詞語是？',idmQ=x=>'「'+x+'」的意思是？',rhQ=x=>'「'+x+'」使用了哪一種修辭？';
+const RHS=['譬喻','擬人','誇飾','排比','設問'];
+const RHQ=a=>a.map(([x,y])=>({q:rhQ(x),a:y,w:RHS}));
+const CH=[
+ [
+  ...PAIR(oppQ,[['大','小'],['多','少'],['高','矮'],['長','短'],['快','慢'],['冷','熱'],['上','下'],['黑','白'],['早','晚'],['開','關'],['前','後'],['左','右'],['胖','瘦'],['新','舊'],['遠','近'],['輕','重'],['出','入'],['哭','笑']]),
+  ...MCQ([
+   ['填入適當的量詞：一（　）貓','隻',['本','朵','輛']],
+   ['填入適當的量詞：一（　）書','本',['隻','輛','顆']],
+   ['填入適當的量詞：一（　）鉛筆','支',['隻','朵','座']],
+   ['填入適當的量詞：一（　）汽車','輛',['本','朵','杯']],
+   ['填入適當的量詞：一（　）樹','棵',['本','杯','隻']],
+   ['填入適當的量詞：一（　）花','朵',['輛','本','杯']],
+   ['填入適當的量詞：一（　）牛奶','杯',['隻','輛','座']],
+   ['填入適當的量詞：一（　）衣服','件',['隻','朵','杯']],
+   ['填入適當的量詞：一（　）蘋果','顆',['輛','本','座']],
+   ['填入適當的量詞：一（　）山','座',['本','杯','隻']],
+   ['填入適當的量詞：一（　）帽子','頂',['本','朵','杯']],
+   ['🐶 是什麼動物？','狗',['貓','豬','鳥']],
+   ['🐱 是什麼動物？','貓',['狗','魚','兔']],
+   ['🐷 是什麼動物？','豬',['狗','鳥','猴']],
+   ['🐦 是什麼動物？','鳥',['貓','豬','魚']],
+   ['🐟 是什麼動物？','魚',['狗','鳥','兔']],
+   ['🍎 是什麼水果？','蘋果',['香蕉','西瓜','葡萄']],
+   ['🍌 是什麼水果？','香蕉',['蘋果','西瓜','葡萄']],
+   ['🍉 是什麼水果？','西瓜',['蘋果','香蕉','葡萄']],
+   ['☀️ 是什麼？','太陽',['月亮','星星','雲']],
+   ['🌙 是什麼？','月亮',['太陽','星星','雲']],
+   ['⭐ 是什麼？','星星',['太陽','月亮','雲']]
+  ])
+ ],
+ [
+  ...PAIR(synQ,[['美麗','漂亮'],['高興','快樂'],['突然','忽然'],['立刻','馬上'],['害怕','恐懼'],['寬闊','遼闊'],['困難','艱難'],['討厭','厭惡'],['仔細','細心'],['勤勞','勤奮'],['安靜','寧靜'],['生氣','發怒']]),
+  ...PAIR(oppQ,[['勤勞','懶惰'],['勇敢','膽小'],['驕傲','謙虛'],['安靜','吵鬧'],['成功','失敗'],['昂貴','便宜'],['光明','黑暗'],['容易','困難'],['熱鬧','冷清'],['乾淨','骯髒'],['增加','減少'],['贊成','反對'],['粗','細']]),
+  ...MCQ([
+   ['哪一個詞語寫得正確？','朋友',['明友','朋有','棚友']],
+   ['哪一個詞語寫得正確？','圖書館',['圖書管','圖書觀','圖書貫']],
+   ['哪一個詞語寫得正確？','運動',['連動','運勳','運重']],
+   ['哪一個詞語寫得正確？','快樂',['快落','快勒','決樂']],
+   ['哪一個詞語寫得正確？','學校',['學較','學效','雪校']],
+   ['成語填空：一（　）兩得','舉',['得','取','拿']],
+   ['成語填空：七上八（　）','下',['左','中','出']],
+   ['成語填空：十全十（　）','美',['好','善','滿']],
+   ['成語填空：五顏六（　）','色',['彩','光','花']],
+   ['成語填空：三心二（　）','意',['想','念','情']],
+   ['成語填空：九牛一（　）','毛',['角','尾','腿']],
+   ['成語填空：千變萬（　）','化',['換','動','轉']]
+  ])
+ ],
+ [
+  ...PAIR(idmQ,[['守株待兔','不努力，只想靠運氣'],['畫蛇添足','做了多餘的事'],['亡羊補牢','出錯後趕快補救'],['掩耳盜鈴','自己欺騙自己'],['井底之蛙','見識狹小的人'],['狐假虎威','倚仗別人的勢力'],['半途而廢','做到一半就放棄'],['愚公移山','有恆心就能成功'],['對牛彈琴','對不懂的人白費口舌'],['揠苗助長','不顧規律，急著求成']]),
+  ...RHQ([['月亮像一個大盤子掛在天上。','譬喻'],['他的臉紅得像蘋果。','譬喻'],['小花對著我微笑。','擬人'],['風兒在樹林裡唱歌。','擬人'],['他的笑聲大得連屋頂都要掀翻了。','誇飾'],['我餓得可以吃下一頭牛。','誇飾'],['春天的風是溫柔的，春天的雨是細膩的，春天的花是繽紛的。','排比'],['我們要勤奮讀書，我們要誠實做人，我們要快樂生活。','排比'],['你知道什麼是快樂嗎？快樂就是和家人在一起。','設問'],['誰是我們最好的朋友？書本就是。','設問']]),
+  ...PAIR(oppQ,[['謙虛','驕傲'],['慷慨','吝嗇'],['繁榮','蕭條'],['熟練','生疏'],['興盛','衰敗'],['讚美','批評'],['勤儉','奢侈'],['堅強','脆弱'],['隱藏','顯露']]),
+  ...MCQ([
+   ['成語填空：守株待（　）','兔',['鹿','鼠','雞']],
+   ['成語填空：亡羊補（　）','牢',['圈','欄','籠']],
+   ['成語填空：畫蛇添（　）','足',['手','尾','翅']],
+   ['成語填空：井底之（　）','蛙',['魚','蝦','蛇']],
+   ['成語填空：掩耳盜（　）','鈴',['鐘','錢','鼓']],
+   ['成語填空：對牛彈（　）','琴',['箏','笛','鼓']]
+  ])
+ ]
+];
+function mkCh(){
+  const L=CH[lvl],it=L[rI(0,L.length-1)];
+  const pool=[...new Set(it.w)].filter(v=>v!==it.a&&!it.q.includes(v)).sort(()=>Math.random()-.5);
+  fm=String;qn=it.a;qo=[it.a,pool[0],pool[1]];
+  return it.q;
+}
+function ask(){
+  if(paused)return;
+  paused=true;P.qa++;
+  let text,tries=0;
+  do{qk=null;text=subj==='math'?mkMath():subj==='ch'?mkCh():mkEn();if(qk===null)qk=text;tries++}while(asked.has(qk)&&tries<80);
+  if(asked.has(qk))asked.clear();
+  asked.add(qk);
+  qo.sort(()=>Math.random()-.5);
+  $('qq').textContent=text;
+  $('qa').innerHTML='';
+  qo.forEach((v,i)=>{const b=document.createElement('button');b.textContent=(i+1)+'.  '+fm(v);b.style.margin='6px';b.onclick=()=>pick(i);$('qa').appendChild(b)});
+  $('qz').style.display='flex';
+}
+function pick(i){
+  const ok=qo[i]===qn;
+  if(ok){P.qc++;P.cu++;P.hp+=100;toast={s:'答對了！能量塊生效 ⚡',l:2}}
+  else toast={s:'答錯了，正確答案是 '+fm(qn)+'，這個能量塊失效了',l:3};
+  paused=false;qo=[];$('qz').style.display='none';
+}
+function bigShot(e){
+  e.sup=0;
+  for(let i=-7;i<=7;i++){const s=e.a+i*.07;B.push({x:e.x+Math.cos(e.a)*20,y:e.y+Math.sin(e.a)*20,vx:Math.cos(s)*800,vy:Math.sin(s)*800,f:e,l:.6,dm:800})}
+}
+const BJ=()=>({x:85,y:H-100,r:60}),BA=()=>({x:W-85,y:H-100,r:50}),BS=()=>({x:W-85,y:H-215,r:38});
+function nearestEnemy(e){
+  let tg=null,bd=470;
+  for(const o of E){if(o===e||!o.alive)continue;const d=Math.hypot(o.x-e.x,o.y-e.y);if(d<bd&&(d<130||!inBush(o))){bd=d;tg=o}}
+  return tg;
+}
+function nearestCrate(e){
+  let tg=null,bd=600;
+  for(const c of crates){const x=c.x+c.w/2,y=c.y+c.h/2,d=Math.hypot(x-e.x,y-e.y);if(d<bd){bd=d;tg={x,y}}}
+  return tg;
+}
+const nearestTarget=e=>nearestEnemy(e)||nearestCrate(e);
+function fireAttack(st){
+  if(!run||over||paused||!P.alive)return;
+  let ang=aimA;
+  if(st&&Math.hypot(st.dx,st.dy)>.25)ang=Math.atan2(st.dy,st.dx);
+  else{const tg=nearestTarget(P);if(tg)ang=Math.atan2(tg.y-P.y,tg.x-P.x)}
+  P.a=ang;aimA=ang;
+  if(P.cd<=0&&fire(P,ang))P.cd=.35;
+}
+function fireSuper(st){
+  if(!run||over||paused||!P.alive||P.sup<100)return;
+  let ang=aimA;
+  if(st&&Math.hypot(st.dx,st.dy)>.25)ang=Math.atan2(st.dy,st.dx);
+  else{const tg=nearestTarget(P);if(tg)ang=Math.atan2(tg.y-P.y,tg.x-P.x)}
+  P.a=ang;aimA=ang;bigShot(P);
+}
+function ctrl(e,dt){
+  let mx=0,my=0;
+  if(keys.a||keys.arrowleft)mx--;if(keys.d||keys.arrowright)mx++;
+  if(keys.w||keys.arrowup)my--;if(keys.s||keys.arrowdown)my++;
+  const m=sticks.m;if(m){mx+=m.dx;my+=m.dy}
+  const l=Math.hypot(mx,my);if(l>1){mx/=l;my/=l}
+  move(e,mx*190*dt,my*190*dt);
+  let want=ms.d||keys[' '];const sk=sticks.s||sticks.a;
+  if(sk){
+    if(Math.hypot(sk.dx,sk.dy)>.25)aimA=Math.atan2(sk.dy,sk.dx);
+    else{const tg=nearestTarget(e);if(tg)aimA=Math.atan2(tg.y-e.y,tg.x-e.x)}
+  }else if(keys[' ']){
+    const tg=nearestTarget(e);
+    aimA=tg?Math.atan2(tg.y-e.y,tg.x-e.x):Math.atan2(ms.y-H/2,ms.x-W/2);
+  }else aimA=Math.atan2(ms.y-H/2,ms.x-W/2);
+  e.a=aimA;e.cd-=dt;e.sup=Math.min(100,e.sup+0*dt);
+  if((keys.r||ms.r||tsup)&&e.sup>=100){const tg=nearestTarget(e);if(tg)e.a=aimA=Math.atan2(tg.y-e.y,tg.x-e.x);bigShot(e)}
+  tsup=false;
+  if(want&&e.cd<=0&&fire(e,aimA))e.cd=.35;
+}
+function ai(e,dt){
+  e.cd-=dt;e.wt-=dt;e.ig=(e.ig||0)-dt;
+  let tg=null,bd=1e9;
+  for(const o of E){if(o===e||!o.alive)continue;const d=Math.hypot(o.x-e.x,o.y-e.y);if(d<bd&&(d<130||!inBush(o))){bd=d;tg=o}}
+  let mx=0,my=0;
+  if(Math.hypot(e.x-S/2,e.y-S/2)>gasR()-120){mx=S/2-e.x;my=S/2-e.y}
+  else if(tg&&bd<460){
+    const a=Math.atan2(tg.y-e.y,tg.x-e.x),s=Math.sin(t*2+e.x)>0?1:-1;e.a=a+R(-.08,.08);
+    if(bd>260){mx=Math.cos(a)+Math.cos(a+1.57)*.5*s;my=Math.sin(a)+Math.sin(a+1.57)*.5*s}
+    else if(bd<170){mx=-Math.cos(a);my=-Math.sin(a)}
+    else{mx=Math.cos(a+1.57)*s;my=Math.sin(a+1.57)*s}
+    if(e.sup>=100&&bd<340&&e.cd<=0){bigShot(e);e.cd=R(.6,1.1)}
+    else if(e.cd<=0&&bd<430&&fire(e,e.a))e.cd=R(.4,.9);
+  }else{
+    if(e.wt<=0||Math.hypot(e.tx-e.x,e.ty-e.y)<30){e.tx=R(100,S-100);e.ty=R(100,S-100);e.wt=R(3,6)}
+    let nc=null,nd=1400;
+    if(e.ig<=0)for(const c of crates){const cx=c.x+c.w/2,cy=c.y+c.h/2,d=Math.hypot(cx-e.x,cy-e.y);if(d<nd){nd=d;nc={x:cx,y:cy}}}
+    if(nc){
+      e.cw=(e.cw||0)+dt;if(e.cw>8){e.cw=0;e.ig=5}
+      e.a=Math.atan2(nc.y-e.y,nc.x-e.x)+R(-.04,.04);
+      if(nd>320){mx=nc.x-e.x;my=nc.y-e.y}
+      else if(e.cd<=0&&fire(e,e.a))e.cd=R(.4,.8);
+    }else{e.cw=0;mx=e.tx-e.x;my=e.ty-e.y;e.a=Math.atan2(my,mx)}
+  }
+  const l=Math.hypot(mx,my)||1;move(e,mx/l*170*dt,my/l*170*dt);
+}
+function update(dt){
+  t+=dt;toast.l-=dt;const gr=gasR();
+  for(const e of E){
+    if(!e.alive)continue;
+    e.hit=Math.max(0,e.hit-dt);
+    if(e.ammo<3){e.rl+=dt;if(e.rl>1.1){e.ammo++;e.rl=0}}
+    e.lh+=dt;
+    if(e.lh>2&&e.hp<mxh(e))e.hp=Math.min(mxh(e),e.hp+R(500,800)*dt);
+    if(Math.hypot(e.x-S/2,e.y-S/2)>gr)dmg(e,1000*dt);
+    if(!e.alive)continue;
+    e.me?ctrl(e,dt):ai(e,dt);
+    for(let k=cubes.length-1;k>=0;k--){const q=cubes[k];if(Math.hypot(q.x-e.x,q.y-e.y)<e.r+14){cubes.splice(k,1);if(e.me)ask();else{e.cu++;e.hp+=100}}}
+  }
+  for(let i=B.length-1;i>=0;i--){
+    const b=B[i];b.x+=b.vx*dt;b.y+=b.vy*dt;b.l-=dt;
+    let dead=b.l<=0||b.x<0||b.y<0||b.x>S||b.y>S;
+    if(!dead)for(const w of walls)if(b.x>w.x&&b.x<w.x+w.w&&b.y>w.y&&b.y<w.y+w.h){dead=true;break}
+    if(!dead)for(let j=crates.length-1;j>=0;j--){const c=crates[j];if(b.x>c.x&&b.x<c.x+c.w&&b.y>c.y&&b.y<c.y+c.h){c.hp-=(b.dm||1500)+50*b.f.cu;c.fl=.1;dead=true;if(c.hp<=0){crates.splice(j,1);if(b.f.me){P.pt+=100;P.crt++;if(!over)ask()}else{b.f.cu++;b.f.hp+=100}}break}}
+    if(!dead)for(const e of E)if(e.alive&&e!==b.f&&Math.hypot(e.x-b.x,e.y-b.y)<e.r+3){e.hit=.1;dmg(e,(b.dm||1500)+50*b.f.cu,b.f);if(!b.dm)b.f.sup=Math.min(100,b.f.sup+34);if(!e.alive&&b.f.me&&!over)ask();dead=true;break}
+    if(dead)B.splice(i,1);
+  }
+}
+
+function drawE(e){
+  g.save();g.translate(e.x,e.y);
+  g.fillStyle='rgba(0,0,0,.2)';g.beginPath();g.ellipse(0,8,e.r,e.r*.6,0,0,7);g.fill();
+  g.save();g.rotate(e.a);g.fillStyle='#333';g.fillRect(8,-5,24,10);g.restore();
+  g.fillStyle=e.hit>0?'#fff':e.c;g.beginPath();g.arc(0,0,e.r,0,7);g.fill();
+  g.lineWidth=3;g.strokeStyle=e.me?'#fff':'#222';g.stroke();
+  g.fillStyle='#fff';g.beginPath();g.arc(Math.cos(e.a)*6-4,Math.sin(e.a)*6-3,3,0,7);g.arc(Math.cos(e.a)*6+5,Math.sin(e.a)*6-3,3,0,7);g.fill();
+  g.fillStyle='rgba(0,0,0,.5)';g.fillRect(-20,-34,40,7);
+  g.fillStyle=e.me?'#4ade80':'#f87171';g.fillRect(-20,-34,40*Math.max(0,e.hp)/mxh(e),7);
+  g.fillStyle='#fff';g.strokeStyle='rgba(0,0,0,.6)';g.lineWidth=3;g.font='bold 12px system-ui,sans-serif';g.textAlign='center';
+  g.strokeText(e.n,0,-39);g.fillText(e.n,0,-39);
+  g.restore();
+}
+function draw(){
+  g.fillStyle='#1b2a1a';g.fillRect(0,0,W,H);
+  g.save();g.translate(W/2-P.x,H/2-P.y);
+  g.fillStyle='#9bd16a';g.fillRect(0,0,S,S);
+  g.strokeStyle='rgba(0,0,0,.06)';g.lineWidth=2;g.beginPath();
+  for(let i=0;i<=S;i+=100){g.moveTo(i,0);g.lineTo(i,S);g.moveTo(0,i);g.lineTo(S,i)}g.stroke();
+  for(const w of walls){g.fillStyle='#b9824a';g.fillRect(w.x,w.y,w.w,w.h);g.strokeStyle='#6b4423';g.lineWidth=5;g.strokeRect(w.x,w.y,w.w,w.h)}
+  for(const c of crates){c.fl=Math.max(0,c.fl-.016);g.fillStyle=c.fl>0?'#fff':'#e0a93b';g.fillRect(c.x,c.y,c.w,c.h);g.strokeStyle='#8a5a12';g.lineWidth=4;g.strokeRect(c.x,c.y,c.w,c.h);g.beginPath();g.moveTo(c.x,c.y);g.lineTo(c.x+c.w,c.y+c.h);g.moveTo(c.x+c.w,c.y);g.lineTo(c.x,c.y+c.h);g.stroke();if(c.hp<5000){g.fillStyle='rgba(0,0,0,.5)';g.fillRect(c.x,c.y-10,c.w,6);g.fillStyle='#fbbf24';g.fillRect(c.x,c.y-10,c.w*c.hp/5000,6)}}
+  for(const q of cubes){g.fillStyle='#a855f7';g.fillRect(q.x-10,q.y-10,20,20);g.strokeStyle='#fff';g.lineWidth=3;g.strokeRect(q.x-10,q.y-10,20,20);g.fillStyle='#fff';g.font='bold 14px system-ui,sans-serif';g.textAlign='center';g.fillText('+',q.x,q.y+5)}
+  for(const e of E){if(!e.alive)continue;if(!e.me&&inBush(e)&&Math.hypot(e.x-P.x,e.y-P.y)>130)continue;drawE(e)}
+  for(const b of B){g.fillStyle=b.dm?'#ff7a1a':'#ffe14d';g.beginPath();g.arc(b.x,b.y,b.dm?9:5,0,7);g.fill()}
+  g.fillStyle='rgba(46,125,50,.9)';
+  for(const b of bush){g.beginPath();g.arc(b.x,b.y,b.r,0,7);g.fill()}
+  if(P.alive&&inBush(P)){g.globalAlpha=.55;drawE(P);g.globalAlpha=1}
+  const gr=gasR();g.fillStyle='rgba(150,40,200,.38)';g.beginPath();g.rect(-2000,-2000,S+4000,S+4000);g.moveTo(S/2+gr,S/2);g.arc(S/2,S/2,gr,0,7);g.fill('evenodd');
+  g.strokeStyle='#d946ef';g.lineWidth=4;g.beginPath();g.arc(S/2,S/2,gr,0,7);g.stroke();
+  if(P.alive&&(sticks.s||sticks.a)&&!(sticks.s||sticks.a).cancel){
+    const len=sticks.s?480:430;g.save();g.translate(P.x,P.y);g.rotate(aimA);
+    if(sticks.s){g.fillStyle='rgba(255,122,26,.28)';g.beginPath();g.moveTo(0,0);g.arc(0,0,len,-.49,.49);g.closePath();g.fill()}
+    else{g.strokeStyle='rgba(255,255,255,.75)';g.lineWidth=3;g.setLineDash([10,10]);g.beginPath();g.moveTo(22,0);g.lineTo(len,0);g.stroke()}
+    g.restore();
+  }
+  g.restore();
+  g.textAlign='left';g.font='bold 20px system-ui,sans-serif';g.fillStyle='#fff';g.strokeStyle='rgba(0,0,0,.6)';g.lineWidth=4;
+  g.strokeText('存活 '+alive()+' / 10',14,30);g.fillText('存活 '+alive()+' / 10',14,30);
+  g.strokeText('能量塊 '+P.cu,14,56);g.fillText('能量塊 '+P.cu,14,56);
+  g.strokeText('得分 '+P.pt,14,82);g.fillText('得分 '+P.pt,14,82);
+  if(toast.l>0){g.textAlign='center';g.font='bold 18px system-ui,sans-serif';g.strokeText(toast.s,W/2,100);g.fillText(toast.s,W/2,100);g.textAlign='left'}
+  if(Math.hypot(P.x-S/2,P.y-S/2)>gr){g.textAlign='center';const s='⚠ 毒氣！快往圈內跑';g.strokeText(s,W/2,62);g.fillText(s,W/2,62)}
+  const bx=W/2-60,by=H-44;
+  g.fillStyle='rgba(0,0,0,.5)';g.fillRect(bx,by,120,10);g.fillStyle='#4ade80';g.fillRect(bx,by,120*Math.max(0,P.hp)/mxh(P),10);
+  for(let i=0;i<3;i++){g.fillStyle='rgba(0,0,0,.5)';g.fillRect(bx+i*42,by+16,36,9);
+    const f=i<P.ammo?1:(i===P.ammo?P.rl/1.1:0);g.fillStyle='#ffb020';g.fillRect(bx+i*42,by+16,36*f,9)}
+  g.fillStyle='rgba(0,0,0,.5)';g.fillRect(bx,by+30,120,9);g.fillStyle=P.sup>=100?'#ff7a1a':'#a855f7';g.fillRect(bx,by+30,120*P.sup/100,9);
+  if(P.sup>=100){g.textAlign='center';g.fillStyle='#fff';g.strokeStyle='rgba(0,0,0,.6)';g.lineWidth=4;g.font='bold 14px system-ui,sans-serif';g.strokeText('大招就緒！R／右鍵',W/2,by-8);g.fillText('大招就緒！R／右鍵',W/2,by-8)}
+  {const A=BA(),S2=BS(),ready=P.sup>=100,held=!!sticks.a;
+   g.textAlign='center';g.lineWidth=4;
+   g.fillStyle=held?'rgba(255,90,60,.9)':'rgba(255,90,60,.65)';g.beginPath();g.arc(A.x,A.y,A.r,0,7);g.fill();g.strokeStyle='#fff';g.stroke();
+   g.fillStyle='#fff';g.font='bold 20px system-ui,sans-serif';g.fillText(sticks.a&&sticks.a.cancel?'取消':'攻擊',A.x,A.y+7);
+   g.fillStyle=sticks.s?'#ffb020':ready?'#ff7a1a':'rgba(120,60,200,.65)';g.beginPath();g.arc(S2.x,S2.y,S2.r,0,7);g.fill();g.strokeStyle=ready?'#fff':'rgba(255,255,255,.5)';g.stroke();
+   g.fillStyle='#fff';g.font='bold 16px system-ui,sans-serif';g.fillText(sticks.s&&sticks.s.cancel?'取消':'大招',S2.x,S2.y+(ready?6:1));
+   if(!ready){g.font='12px system-ui,sans-serif';g.fillText(Math.floor(P.sup)+'%',S2.x,S2.y+18)}}
+  {const J=BJ();g.fillStyle='rgba(255,255,255,.15)';g.beginPath();g.arc(J.x,J.y,J.r,0,7);g.fill();g.strokeStyle='rgba(255,255,255,.7)';g.lineWidth=3;g.stroke();
+   if(!sticks.m||!sticks.m.fixed){g.fillStyle='rgba(255,255,255,.45)';g.beginPath();g.arc(J.x,J.y,26,0,7);g.fill()}
+   g.textAlign='center';g.fillStyle='#fff';g.font='bold 14px system-ui,sans-serif';g.fillText('移動',J.x,J.y-J.r-8)}
+  for(const k in sticks){const s=sticks[k];if(!s.btn&&!s.fixed){g.strokeStyle='rgba(255,255,255,.7)';g.lineWidth=3;g.beginPath();g.arc(s.ox,s.oy,60,0,7);g.stroke()}
+    g.fillStyle='rgba(255,255,255,.45)';g.beginPath();g.arc(s.ox+s.dx*60,s.oy+s.dy*60,26,0,7);g.fill()}
+}
+
+function relStick(k){const st=sticks[k];if(!st)return;if(!st.cancel){if(k==='s')fireSuper(st);else if(k==='a')fireAttack(st)}delete sticks[k]}
+cv.addEventListener('pointerdown',e=>{
+  const x=e.offsetX,y=e.offsetY,A=BA(),S2=BS(),J=BJ(),mouse=e.pointerType==='mouse';
+  const inS=Math.hypot(x-S2.x,y-S2.y)<S2.r+6,inA=Math.hypot(x-A.x,y-A.y)<A.r+8,inJ=Math.hypot(x-J.x,y-J.y)<J.r+40;
+  let k=null;
+  if(inS)k='s';else if(inA)k='a';else if(inJ||(!mouse&&x<W/2))k='m';
+  if(!k){if(mouse){if(e.button===2)ms.r=true;else ms.d=true;ms.x=x;ms.y=y}return}
+  if(sticks[k])return;
+  if(k==='m'&&inJ){
+    let dx=(x-J.x)/60,dy=(y-J.y)/60;const l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}
+    sticks[k]={id:e.pointerId,ox:J.x,oy:J.y,dx,dy,fixed:true,mouse};
+  }else sticks[k]={id:e.pointerId,ox:x,oy:y,dx:0,dy:0,btn:k!=='m',mouse};
+  cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener('pointermove',e=>{
+  if(e.pointerType==='mouse'){ms.x=e.offsetX;ms.y=e.offsetY}
+  for(const k in sticks){const st=sticks[k];if(st.id!==e.pointerId)continue;
+    let dx=(e.offsetX-st.ox)/60,dy=(e.offsetY-st.oy)/60;const l=Math.hypot(dx,dy);if(l>1){dx/=l;dy/=l}st.dx=dx;st.dy=dy;
+    if(st.btn){const B2=k==='s'?BS():BA(),d=Math.hypot(e.offsetX-B2.x,e.offsetY-B2.y);if(d>B2.r+8)st.out=true;st.cancel=!!st.out&&d<B2.r}
+  }
+});
+const up=e=>{
+  if(e.pointerType==='mouse'){ms.d=false;ms.r=false}
+  for(const k of Object.keys(sticks))if(sticks[k].id===e.pointerId)relStick(k);
+};
+cv.addEventListener('pointerup',up);
+cv.addEventListener('pointercancel',e=>{for(const k of Object.keys(sticks))if(sticks[k].id===e.pointerId)delete sticks[k]});
+addEventListener('keydown',e=>{if(paused&&qo[+e.key-1]!==undefined)pick(+e.key-1);keys[e.key.toLowerCase()]=true;if(e.key===' '||e.key.startsWith('Arrow'))e.preventDefault()});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+addEventListener('contextmenu',e=>e.preventDefault());
+let curName='',curKey='',curSubj='math',curLvl=0,DB=null;
+const TPIN='123456'; // 教師清除紀錄的密碼，可自行修改
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pkey=n=>'p'+Array.from(n.trim().toLowerCase()).map(c=>c.codePointAt(0).toString(16)).join('_');
+const LS={get(){try{return JSON.parse(localStorage.getItem('brawl_scores')||'{}')}catch(e){return{}}},set(o){try{localStorage.setItem('brawl_scores',JSON.stringify(o))}catch(e){}}};
+try{if(window.claude&&claude.use)claude.use('db').then(d=>{DB=d||null}).catch(()=>{})}catch(e){}
+async function getRec(key){
+  let r=LS.get()[key]||null;
+  if(DB){try{const d=await DB.doc('scores/'+key).get();if(d&&d.exists)r=d.data()}catch(e){}}
+  return r;
+}
+async function putRec(key,rec){
+  if(rec.done){const old=LS.get()[key];if(old&&old.done&&old.score>=rec.score)return;}
+  const o=LS.get();o[key]=rec;LS.set(o);
+  if(DB){try{await DB.doc('scores/'+key).set(rec)}catch(e){}}
+}
+let curTab='math_0';
+const LBL={math_0:'🧮 數學初階',math_1:'🧮 數學中階',math_2:'🧮 數學高階',en_0:'🔤 英文初階',en_1:'🔤 英文中階',en_2:'🔤 英文高階',ch_0:'📖 國語初階',ch_1:'📖 國語中階',ch_2:'📖 國語高階'};
+async function showLB(tab){
+  if(tab)curTab=tab;
+  $('lbp').style.display='none';$('lbm').textContent='';
+  const tabs=$('lbtabs');tabs.innerHTML='';
+  Object.entries(LBL).forEach(([k,v])=>{
+    const b=document.createElement('button');b.textContent=v;
+    b.className='sm'+(k===curTab?' on':'');
+    b.style.cssText='font-size:30px;padding:12px 18px;font-weight:700';
+    b.onclick=()=>showLB(k);tabs.appendChild(b);
+  });
+  $('lbl').textContent='載入中…';$('lb').style.display='flex';
+  const [sbj,lv]=curTab.split('_');
+  let rows=Object.values(LS.get()).filter(r=>r&&r.done&&r.subj===sbj&&String(r.lvl)===lv);
+  if(DB){try{const q=await DB.collection('scores').where('subj','==',sbj).where('lvl','==',+lv).orderBy('score','desc').limit(100).get();const r2=q.docs.map(d=>({...d.data(),_k:d.id}));if(r2.length)rows=r2}catch(e){}}
+  rows=rows.sort((a,b)=>b.score-a.score);
+  $('lbl').innerHTML=rows.length?'<div style="max-height:50vh;overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:19px"><tr><th><input type="checkbox" id="lball"></th><th>姓名／座號</th><th>名次</th><th>分數</th></tr>'+rows.map(r=>'<tr><td><input type="checkbox" class="lbk" data-k="'+esc(r._k)+'"></td><td>'+esc(r.name)+'</td><td>'+(r.done?r.place:'未完成')+'</td><td><b>'+r.score+'</b></td></tr>').join('')+'</table></div>':'還沒有成績';
+  const all=$('lball');if(all)all.onchange=()=>$('lbl').querySelectorAll('.lbk').forEach(c=>{c.checked=all.checked});
+}
+let pend=[];
+function askClear(){
+  pend=Array.from($('lbl').querySelectorAll('.lbk')).filter(c=>c.checked).map(c=>c.dataset.k);
+  if(!pend.length){$('lbm').textContent='請先勾選要清除的紀錄';$('lbp').style.display='none';return}
+  $('lbp').style.display='block';$('lpin').value='';$('lbm').textContent='將清除 '+pend.length+' 筆，請輸入教師密碼';
+}
+async function clearAll(){
+  if($('lpin').value!==TPIN){$('lbm').textContent='密碼不對';return}
+  const o=LS.get();pend.forEach(k=>{delete o[k]});LS.set(o);let note='已清除 '+pend.length+' 筆';
+  if(DB){try{await Promise.all(pend.map(k=>DB.doc('scores/'+k).delete()))}catch(e){note='本機已清除，但共用紀錄清除失敗（權限不足）'}}
+  pend=[];await showLB();$('lbm').textContent=note;
+}
+$('lbb').onclick=()=>showLB();$('lbx').onclick=()=>{$('lb').style.display='none'};$('lbc').onclick=askClear;$('lbok').onclick=clearAll;
+const introT=$('tt').innerHTML,introX=$('tx').innerHTML;
+function showIntro(){clearInterval(backT);state='home';$('pid').value='';$('pm').textContent='';showHp(1);$('ov').style.display='none';$('hm').style.display='flex'}
+function goRules(){
+  curSubj=subj;curLvl=lvl;const sj={math:'🧮 數學',en:'🔤 英文單字',ch:'📖 國語'}[subj],lv=['初階（1–2 年級）','中階（3–4 年級）','高階（5–6 年級）'][lvl];
+  $('tt').innerHTML=introT;$('tx').innerHTML='<b>👤 '+esc(curName)+'　📚 '+sj+'・'+lv+'</b>';
+  $('bt').textContent='開始戰鬥';state='intro';$('hm').style.display='none';$('ov').style.display='flex';
+}
+async function startGame(){
+  $('bt').disabled=true;
+  await Promise.race([putRec(curKey,{name:curName,score:0,done:false,subj:curSubj,lvl:curLvl,t:Date.now()}),new Promise(r=>setTimeout(r,3000))]);
+  $('bt').disabled=false;start();
+}
+$('bt').onclick=()=>{if(state==='end')showIntro();else startGame()};
+function showHp(n){['hp1','hp2','hp3'].forEach((id,i)=>{$(id).style.display=i+1===n?'block':'none'});
+  if(n===1){
+    // 重設 subj/lvl 與 DOM
+    const sbs=$('sj').querySelectorAll('button');
+    sbs.forEach(b=>{b.classList.toggle('on',b.dataset.v===subj)});
+    const lbs=$('lv').querySelectorAll('button');
+    lbs.forEach(b=>{b.classList.toggle('on',b.dataset.v===String(lvl))});
+  }
+}
+$('ton2').onclick=()=>{const name=$('pid').value.trim();if(!name){$('pm').textContent='請先輸入座號或姓名';return}$('pm').textContent='';showHp(2)};
+$('ton1b').onclick=()=>showHp(1);
+$('ton3').onclick=()=>showHp(3);
+$('ton2b').onclick=()=>showHp(2);$('ton1c').onclick=()=>showHp(1);
+function pickRow(id,fn){const bs=$(id).querySelectorAll('button');bs.forEach(b=>b.onclick=()=>{bs.forEach(x=>x.classList.remove('on'));b.classList.add('on');fn(b.dataset.v)})}
+pickRow('sj',v=>{subj=v});pickRow('lv',v=>{lvl=+v});
+$('nx').onclick=()=>{
+  const name=$('pid').value.trim();
+  if(!name){$('pm').textContent='請先輸入座號或姓名';return}
+  $('pm').textContent='';curName=name;
+  curSubj=subj;curLvl=lvl;
+  curKey=pkey(name)+'_'+curSubj+'_'+curLvl;goRules();
+};
+showIntro();
+
+function loop(ts){
+  const dt=Math.min(.05,(ts-last)/1000||0);last=ts;
+  if(run&&!over&&!paused)update(dt);
+  if(P)draw();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

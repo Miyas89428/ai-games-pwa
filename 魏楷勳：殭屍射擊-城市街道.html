@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>殭屍射擊：城市街道</title>
+<style>
+:root{--bg:#14181a;--fg:#e8efe6;--accent:#8fd14f;--danger:#e0453a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;overflow:hidden}
+canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
+#hud{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:14px;right:14px;display:flex;justify-content:space-between;font-weight:700;pointer-events:none;text-shadow:0 1px 3px #000}
+#bar{width:140px;height:12px;background:#0006;border:1px solid #fff4;border-radius:6px;overflow:hidden;display:inline-block;vertical-align:middle}
+#hp{height:100%;width:100%;background:var(--danger)}
+#ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000a;text-align:center;padding:20px}
+#ov h1{font-size:44px;margin:0 0 10px;color:var(--accent)}
+#ov p{margin:4px 0;line-height:1.6}
+button{margin-top:18px;font-size:20px;padding:10px 32px;border:0;border-radius:8px;background:var(--accent);color:#14210a;font-weight:700;cursor:pointer}
+#ov{overflow-y:auto;justify-content:flex-start}#ov>:first-child{margin-top:auto}#ov>:last-child{margin-bottom:auto}
+#chars{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px;max-width:920px}
+.cd{width:190px;padding:10px 12px;border:2px solid #ffffff22;border-left:6px solid var(--c);border-radius:10px;background:#12181b;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:4px}
+.cd.on{border-color:var(--c);box-shadow:0 0 14px var(--c);background:#1b2428}
+.cd b{font-size:18px;color:var(--c)}.cd span{font-size:13px;opacity:.85}.cd small{font-size:12px;opacity:.7;line-height:1.5}
+#cur{display:flex;align-items:center;gap:12px;margin-top:14px}
+#btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+#hb{background:#4aa3e0;color:#fff}
+#hs{position:fixed;inset:0;z-index:5;background:#0b1012f2;flex-direction:column;align-items:center;padding:16px;overflow-y:auto;box-sizing:border-box}
+#hs h2{margin:4px 0 12px;color:var(--ac)}
+#hg{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;max-width:760px;width:100%}
+.tl{cursor:pointer;border:2px solid #ffffff22;border-radius:12px;padding:6px;text-align:center;background:#12181b;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.tl.on{border-color:var(--c);box-shadow:0 0 14px var(--c);background:#1b2428}
+.tl canvas,#cur canvas,.hdb canvas{border-radius:12px}
+#hf{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;justify-content:center}#hf button{margin:0;padding:6px 14px;font-size:14px;background:#1a2226;color:var(--fg);border:1px solid #ffffff22}#hf button.on{background:var(--ac);color:#14210a}
+#hd{max-width:760px;width:100%;margin-top:14px}
+.hdb{display:flex;gap:14px;align-items:flex-start;border:1px solid #ffffff22;border-radius:12px;padding:12px;background:#12181b}
+.hdt{display:flex;flex-direction:column;gap:5px;text-align:left}.hdt small{font-size:13px;opacity:.85;line-height:1.5}
+#qb{position:fixed;top:calc(env(safe-area-inset-top,0px) + 44px);left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;display:none;text-shadow:0 2px 6px #000}#qt{font-size:34px;font-weight:800;color:#ffd54a;letter-spacing:2px}#qbar{width:200px;height:8px;background:#0008;border-radius:4px;overflow:hidden;margin:4px auto}#qfill{height:100%;background:#8fd14f;width:100%}#qmsg{min-height:20px;font-weight:700;color:#ff6a5a}
+#qs{display:inline-block;background:#4aa3e0;color:#fff;border-radius:10px;padding:1px 12px;font-size:13px;font-weight:700;margin-bottom:2px}#qb{max-width:92vw}#qt{line-height:1.25}
+#sjl{margin-top:12px;opacity:.8;font-size:14px}#sj{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:6px}#sj button{margin:0;padding:6px 13px;font-size:14px;background:#1a2226;color:var(--fg);border:1px solid #ffffff22}#sj button.on{background:var(--ac);color:#14210a}
+#grl{margin-top:12px;opacity:.8;font-size:14px}#gr{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:6px}#gr button{margin:0;padding:6px 13px;font-size:14px;background:#1a2226;color:var(--fg);border:1px solid #ffffff22}#gr button.on{background:#4aa3e0;color:#fff}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<button id="ub" style="position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:76px;height:76px;border-radius:50%;margin:0;padding:0;font-size:16px;background:#ffb04a">大招</button>
+<button id="lb" style="position:fixed;right:106px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:76px;height:76px;border-radius:50%;margin:0;padding:0;font-size:16px;background:#e0453a;color:#fff">極限</button>
+<button id="sb" style="position:fixed;right:194px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:76px;height:76px;border-radius:50%;margin:0;padding:0;font-size:16px;background:#4aa3e0;color:#fff">技能</button>
+<div id="hud"><div>生命 <span id="bar"><div id="hp"></div></span> <span id="hn"></span></div><div id="wv">第 1 波</div><div id="sc">分數 0</div></div>
+<div id="qb"><div id="qs"></div><div id="qt"></div><div id="qbar"><div id="qfill"></div></div><div id="qmsg"></div></div>
+<div id="ov"><h1 id="t">殭屍射擊：城市街道</h1><p id="m">WASD／方向鍵移動　滑鼠瞄準，點擊（或按住）射擊</p><p>大樓會擋住玩家、子彈和殭屍；跳躍、突進與閃現也無法穿牆</p><p>躲進草叢就會隱形，殭屍找不到你；開槍會暴露位置 0.8 秒</p><p>打破青色能量箱：回復 300 血，傷害永久 +400（初始傷害 1500）</p><p>子彈數量有限，會自動回復（依角色而定）；三連發期間不耗子彈</p><p>大招（依角色不同，詳見角色卡片）：按空白鍵（手機按右下角按鈕）使出；以突擊兵為例，跳起來飛向游標方向，空中可用 WASD／方向鍵（手機用左半螢幕拖曳）改變方向，落地範圍內有答案就擊殺，擊殺 5 隻殭屍蓄能，蓄滿才能使用，跳躍期間無敵</p><p>目標：擊殺 20 隻殭屍就獲勝</p><p>每個角色的普通攻擊（按住左鍵）都不一樣：步槍、散彈槍、長弓、榴彈炮、治療槍、匕首、電擊槍、雙斧、狙擊槍、魔法彈、雙槍、氣功波</p><p>技能：按 Q 或滑鼠右鍵（手機按藍色「技能」按鈕），每個角色的技能也不同，有冷卻時間</p><p>題目：開始前先選年級（1～6 年級）和科目。1～4 年級有中文、英文、數學；5～6 年級另外有歷史、公民、社會、開根號；也可以選綜合。畫面上方會出現題目，射中頭上答案正確的殭屍；超過時間會扣血，射到答案錯誤的殭屍會再扣更多</p><p>沒被射中的殭屍碰到你就會自爆並扣血，所以邊跑邊找答案</p><p>地圖很大，右上角有小地圖可以看大樓、草叢、能量箱和殭屍的位置</p><p>力量極限：射中殭屍累積 25 次蓄能，8 秒內答題計時暫停、射速加倍、子彈無限、移速 +30%（按 E 或右下角紅色按鈕）</p><p>觸控：左半螢幕拖曳移動，右半螢幕點擊射擊</p><p>撿起殭屍掉落的黃色方塊，可獲得 8 秒三連發</p><div id="cur"></div><div id="grl">年級</div><div id="gr"></div><div id="sjl">科目</div><div id="sj"></div><div id="btns"><button id="hb">選英雄</button><button id="go">開始遊戲</button></div></div>
+<div id="hs" style="display:none"><h2>選擇英雄</h2><div id="hf"></div><div id="hg"></div><div id="hd"></div><button id="hok">確定</button></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W,H;function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight}rs();addEventListener('resize',rs);
+const $=id=>document.getElementById(id);
+let AC;function snd(f,d,type,v){try{AC=AC||new AudioContext();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type=type;o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*.4,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(t+d)}catch(e){}}
+function snN(d,v,f){try{AC=AC||new AudioContext();const n=Math.floor(AC.sampleRate*d),b=AC.createBuffer(1,n,AC.sampleRate),da=b.getChannelData(0);for(let i=0;i<n;i++)da[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);const so=AC.createBufferSource();so.buffer=b;const fl=AC.createBiquadFilter();fl.type='lowpass';fl.frequency.value=f;const g=AC.createGain();g.gain.value=v;so.connect(fl);fl.connect(g);g.connect(AC.destination);so.start()}catch(e){}}
+function blood(x,y,n){for(let i=0;i<n;i++){const a=Math.random()*6.28,d=Math.random()*18;BD.push({x:x+Math.cos(a)*d,y:y+Math.sin(a)*d,r:2+Math.random()*(n>6?7:4),a:.35+Math.random()*.35,c:Math.random()<.5?'#5a0f0f':'#3d0a0a'})}while(BD.length>320)BD.shift()}
+function ftxt(x,y,tx,c){FT.push({x,y,t:1.1,tx,c});if(FT.length>30)FT.shift()}
+function getDark(){if(!DKC||DKC.width!==W||DKC.height!==H){DKC=document.createElement('canvas');DKC.width=W;DKC.height=H}return DKC}
+const keys={};let mx=0,my=0,down=false,run=false;
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key===' '){e.preventDefault();ult()}if(e.key.toLowerCase()==='e')limit();if(e.key.toLowerCase()==='q')skill();});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+cv.addEventListener('pointermove',e=>{msx=e.clientX;msy=e.clientY;if(e.pointerId===tid){tx=e.clientX;ty=e.clientY}});
+let tid=null,tx=0,ty=0,sx=0,sy=0;
+cv.addEventListener('pointerdown',e=>{msx=e.clientX;msy=e.clientY;if(e.button===2){mx=msx+camX;my=msy+camY;skill();return}if(e.pointerType==='touch'&&e.clientX<W/2){tid=e.pointerId;sx=tx=e.clientX;sy=ty=e.clientY}else down=true});
+addEventListener('pointerup',e=>{if(e.pointerId===tid)tid=null;else down=false});
+let BL=[],BS=[],CR=[],SW=null;
+const CH=[
+{n:'突擊兵',d:'各項平均，上手最容易',col:'#4aa3e0',hp:9700,sp:220,dmg:1500,ma:3,rr:1},
+{n:'重裝兵',d:'血厚皮粗但行動遲緩',col:'#ff7a3a',hp:14000,sp:180,dmg:1300,ma:3,rr:1.2},
+{n:'遊俠',d:'跑得快、子彈多回得快',col:'#8fd14f',hp:7000,sp:270,dmg:1400,ma:4,rr:.7},
+{n:'重砲手',d:'一發入魂，但子彈很少',col:'#e056a0',hp:8500,sp:200,dmg:2400,ma:2,rr:1.4},
+{n:'醫護兵',d:'能補血的後排支援',col:'#3fd1b0',hp:8000,sp:230,dmg:1400,ma:3,rr:.9},
+{n:'刺客',d:'極快、血少，靠突進收割',col:'#a070ff',hp:6500,sp:300,dmg:1500,ma:3,rr:.8},
+{n:'工程師',d:'架設砲塔，團隊火力',col:'#f0c040',hp:9000,sp:210,dmg:1500,ma:3,rr:1},
+{n:'狂戰士',d:'近戰旋風，血厚但子彈少',col:'#ff4a4a',hp:12000,sp:200,dmg:1600,ma:2,rr:1.1},
+{n:'狙擊手',d:'一槍穿透，靠距離取勝',col:'#9fd8ff',hp:7500,sp:210,dmg:1500,ma:2,rr:1.3},
+{n:'法師',d:'追蹤魔彈，遠距離火力',col:'#6a7bff',hp:7000,sp:220,dmg:1400,ma:3,rr:.9},
+{n:'無人機師',d:'雙槍加上跟隨的無人機',col:'#b0b8c0',hp:8500,sp:220,dmg:1500,ma:3,rr:1},
+{n:'武僧',d:'氣功波穿透，近身耐打',col:'#ffd0a0',hp:11000,sp:235,dmg:1500,ma:3,rr:1}];
+const EX=[['烈焰突擊手', '步槍・定點狙擊・地雷', '#ff5a2a', 9700, 210, 1500, 3, 1.06, 0, 8, 3],
+['寒冰破門手', '散彈槍・急救爆發・地刺陷阱', '#6ad8ff', 14600, 192, 1300, 3, 1.13, 1, 4, 6],
+['雷霆射手', '長弓・急救爆發・戰吼', '#ffe14a', 7000, 265, 1400, 4, 0.71, 2, 4, 7],
+['暗影炮兵', '榴彈炮・貫穿雷射・部署無人機', '#7a5aa8', 7900, 196, 2400, 2, 1.44, 3, 3, 10],
+['疾風醫師', '治療槍・貫穿雷射・部署無人機', '#5fe0b0', 8400, 220, 1400, 3, 0.85, 4, 3, 10],
+['大地刺客', '匕首・氣爆・地雷', '#b08a5a', 6300, 291, 1500, 3, 0.74, 5, 11, 3],
+['黃金電工', '電擊槍・旋風斬・閃現', '#ffc83a', 9900, 204, 1500, 3, 1.02, 6, 7, 9],
+['赤紅戰士', '雙斧・震地怒吼・治療針', '#e0453a', 11900, 204, 1600, 2, 1.0, 7, 1, 4],
+['蒼藍狙擊手', '狙擊槍・貫穿雷射・部署無人機', '#3a7aff', 7100, 218, 1500, 2, 1.28, 8, 3, 10],
+['翡翠法師', '魔法彈・定點狙擊・偽裝', '#2fd07a', 7300, 222, 1400, 3, 0.86, 9, 8, 8],
+['紫電槍手', '雙槍・瞬間突進・手榴彈', '#b05aff', 9300, 211, 1500, 3, 0.96, 10, 5, 0],
+['白銀拳師', '氣功波・無人機群・地刺陷阱', '#cfd8e0', 11900, 232, 1500, 3, 1.1, 11, 10, 6],
+['幽靈機槍手', '步槍・急救爆發・閃現', '#8ad0c8', 9700, 231, 1500, 3, 0.93, 0, 4, 9],
+['星辰獵手', '散彈槍・無人機群・戰吼', '#8a9bff', 12700, 187, 1300, 3, 1.26, 1, 10, 7],
+['月影獵人', '長弓・跳躍砸擊・地刺陷阱', '#c0b0ff', 6900, 269, 1400, 4, 0.7, 2, 0, 6],
+['鋼鐵爆破手', '榴彈炮・無人機群・翻滾', '#8a9aa8', 9400, 215, 2400, 2, 1.39, 3, 10, 2],
+['荒野牧師', '治療槍・震地怒吼・翻滾', '#c8a040', 7300, 239, 1400, 3, 0.93, 4, 1, 2],
+['沙漠盜賊', '匕首・震地怒吼・偽裝', '#e8b070', 6300, 300, 1500, 3, 0.83, 5, 1, 8],
+['深海雷法師', '電擊槍・貫穿雷射・偽裝', '#2a8aa8', 8900, 216, 1500, 3, 1.0, 6, 3, 8],
+['極光狂徒', '雙斧・自動砲塔・飛刀斬', '#5affd0', 11200, 196, 1600, 2, 1.08, 7, 6, 5],
+['熔岩偵察兵', '狙擊槍・無人機群・翻滾', '#ff7a1a', 7100, 210, 1500, 2, 1.24, 8, 10, 2],
+['櫻花巫師', '魔法彈・瞬間突進・戰吼', '#ff8ab8', 7800, 217, 1400, 3, 0.88, 9, 5, 7],
+['晨曦賞金獵人', '雙槍・定點狙擊・金鐘罩', '#ffd08a', 9500, 236, 1500, 3, 0.93, 10, 8, 11],
+['暮光僧侶', '氣功波・瞬間突進・地雷', '#d0608a', 10500, 230, 1500, 3, 1.0, 11, 5, 3],
+['森林士官', '步槍・跳躍砸擊・地雷', '#4aa84a', 9400, 209, 1500, 3, 0.98, 0, 0, 3],
+['毒蛇衛兵', '散彈槍・定點狙擊・部署無人機', '#9ad02a', 14600, 193, 1300, 3, 1.25, 1, 8, 10],
+['銀河巡林客', '長弓・氣爆・部署無人機', '#6a6aff', 7400, 282, 1400, 4, 0.69, 2, 11, 10],
+['彗星火箭兵', '榴彈炮・震地怒吼・閃現', '#4ad0ff', 8500, 200, 2400, 2, 1.29, 3, 1, 9],
+['龍焰藥劑師', '治療槍・震地怒吼・戰吼', '#ff4a1a', 7300, 221, 1400, 3, 0.85, 4, 1, 7],
+['虎嘯忍者', '匕首・瞬間突進・翻滾', '#e89a2a', 6400, 287, 1500, 3, 0.72, 5, 5, 2],
+['狼牙工兵', '電擊槍・瞬間突進・閃現', '#aab4c0', 8300, 209, 1500, 3, 0.91, 6, 5, 9],
+['鷹眼武者', '雙斧・自動砲塔・部署無人機', '#d8c890', 11900, 206, 1600, 2, 1.2, 7, 6, 10],
+['夜梟神槍手', '狙擊槍・跳躍砸擊・地刺陷阱', '#6a6a9a', 7600, 203, 1500, 2, 1.3, 8, 0, 6],
+['狐影術士', '魔法彈・無人機群・偽裝', '#ff9a5a', 7100, 211, 1400, 3, 0.83, 9, 10, 8],
+['鯨歌特工', '雙槍・定點狙擊・手榴彈', '#3a9ac8', 8200, 233, 1500, 3, 0.93, 10, 8, 0],
+['蒼穹氣功師', '氣功波・貫穿雷射・治療針', '#5a8aff', 12500, 239, 1500, 3, 0.93, 11, 3, 4],
+['赤霄突擊手', '步槍・氣爆・盾擊', '#ff3a5a', 10600, 218, 1500, 3, 1.03, 0, 11, 1],
+['玄鐵破門手', '散彈槍・急救爆發・手榴彈', '#6a7580', 15600, 183, 1300, 3, 1.3, 1, 4, 0],
+['琉璃射手', '長弓・定點狙擊・治療針', '#6ae0e8', 7200, 284, 1400, 4, 0.68, 2, 8, 4],
+['墨竹炮兵', '榴彈炮・自動砲塔・部署無人機', '#3a8a6a', 9400, 216, 2400, 2, 1.5, 3, 6, 10],
+['流星醫師', '治療槍・自動砲塔・戰吼', '#ffe08a', 8700, 225, 1400, 3, 0.9, 4, 6, 7],
+['破曉刺客', '匕首・定點狙擊・手榴彈', '#ff9a7a', 5900, 286, 1500, 3, 0.76, 5, 8, 0],
+['炎陽電工', '電擊槍・旋風斬・治療針', '#ffb02a', 9700, 226, 1500, 3, 0.99, 6, 7, 4],
+['冰霜戰士', '雙斧・全方位彈幕・地刺陷阱', '#9ae0ff', 13700, 199, 1600, 2, 1.04, 7, 2, 6],
+['風暴狙擊手', '狙擊槍・自動砲塔・偽裝', '#7ab0d0', 7100, 205, 1500, 2, 1.33, 8, 6, 8],
+['磐石法師', '魔法彈・跳躍砸擊・盾擊', '#9a8a7a', 7100, 228, 1400, 3, 0.95, 9, 0, 1],
+['影刃槍手', '雙槍・急救爆發・金鐘罩', '#8a6aba', 7900, 220, 1500, 3, 1.04, 10, 4, 11],
+['雷鳴拳師', '氣功波・自動砲塔・偽裝', '#d0e050', 12300, 237, 1500, 3, 1.03, 11, 6, 8],
+['血月機槍手', '步槍・急救爆發・手榴彈', '#c03a4a', 9700, 220, 1500, 3, 1.09, 0, 4, 0],
+['金剛獵手', '散彈槍・全方位彈幕・地雷', '#d8a040', 13200, 174, 1300, 3, 1.12, 1, 2, 3],
+['青龍獵人', '長弓・無人機群・金鐘罩', '#2ab89a', 6600, 286, 1400, 4, 0.77, 2, 10, 11],
+['白虎爆破手', '榴彈炮・震地怒吼・地刺陷阱', '#e8e8d0', 8000, 204, 2400, 2, 1.27, 3, 1, 6],
+['朱雀牧師', '治療槍・全方位彈幕・金鐘罩', '#ff6a4a', 7400, 241, 1400, 3, 0.84, 4, 2, 11],
+['玄武盜賊', '匕首・自動砲塔・治療針', '#3a6a5a', 5900, 293, 1500, 3, 0.8, 5, 6, 4],
+['天狼雷法師', '電擊槍・跳躍砸擊・地刺陷阱', '#7ab8ff', 8700, 211, 1500, 3, 0.93, 6, 0, 6],
+['北辰狂徒', '雙斧・無人機群・金鐘罩', '#5a6aff', 12600, 214, 1600, 2, 1.08, 7, 10, 11],
+['南風偵察兵', '狙擊槍・氣爆・地雷', '#6ad88a', 7700, 214, 1500, 2, 1.17, 8, 11, 3],
+['東海巫師', '魔法彈・無人機群・地雷', '#3ab0d8', 7400, 231, 1400, 3, 0.84, 9, 10, 3]];
+EX.forEach(e=>CH.push({n:e[0],d:e[1],col:e[2],hp:e[3],sp:e[4],dmg:e[5],ma:e[6],rr:e[7],a:e[8],u:e[9],s:e[10]}));
+CH.forEach((h,i)=>{if(h.a===undefined){h.a=h.u=h.s=i}});
+let ci=0,LS=null;
+let ans=2,qT=28,qT0=28,qMsg="",qMsgT=0,qTxt="";
+let BD=[],CP=[],SC=[],FT=[],LF=[],DKC=null;
+let kills=0,boss=0,bannerT=0,TU=[],GR=[],MN=[],TR=[],SH=[],MS=[],SF=null;
+let WW=2400,WH=1600,camX=0,camY=0,msx=0,msy=0;
+const BA=['步槍：單發子彈，穩定射速','散彈槍：近距離 5 顆彈丸扇形噴射','長弓：高速穿透箭，一箭貫穿多隻','榴彈炮：慢速炮彈，撞到就爆炸，範圍內有答案就擊殺','治療槍：擊中正確答案時回復自己 200 血','匕首：近戰扇形快斬，不耗子彈','電擊槍：命中後閃電連鎖 2 隻（連到答案也算）','雙斧：近戰旋轉斬，四面八方，不耗子彈','狙擊槍：極快穿透彈，射速很慢','魔法彈：自動追蹤答案殭屍','雙槍：左右各一發平行子彈','氣功波：寬大的穿透波，慢速'];
+const SL=['手榴彈：投向游標，0.8 秒後爆炸，範圍內有答案就擊殺','盾擊：向前猛擊並擊退，短暫無敵','翻滾：朝移動方向翻滾閃避，並回復 1 發子彈','地雷：放置地雷，殭屍靠近引爆，範圍內有答案就擊殺（最多 3 顆）','治療針：立刻回復 1500 血','飛刀斬：近身一刀扇形斬擊，冷卻很短','地刺陷阱：放置 10 秒，經過的殭屍若是答案就被擊殺（最多 4 個）','戰吼：震退周圍殭屍並加速 3 秒','偽裝：隱形 4 秒（開槍會暴露）','閃現：瞬移到游標方向 300 像素（不穿牆）','部署無人機：跟隨你 12 秒自動開火','金鐘罩：無敵 2 秒'];
+const UL=['大招：跳躍砸擊，空中可轉向，範圍內有答案就擊殺','大招：震地怒吼，大範圍擊退，範圍內有答案就擊殺，短暫無敵','大招：全方位彈幕，3 波、每波 24 發環形子彈','大招：貫穿雷射，直線貫穿，路徑上有答案就擊殺','大招：急救爆發，回復 35% 血量＋範圍內有答案就擊殺＋無敵','大招：瞬間突進，路徑上有答案就擊殺（不穿牆）','大招：自動砲塔，架設 8 秒自動射擊','大招：旋風斬，3 秒近身範圍內有答案就擊殺＋無敵＋加速','大招：定點狙擊，超長貫穿光束，路徑上有答案就擊殺','大招：隕石雨，游標附近 10 顆隕石，範圍內有答案就擊殺','大招：無人機群，4 台無人機環繞並自動開火 10 秒','大招：氣爆，回復 20% 血量，大範圍內有答案就擊殺，無敵'];let P,B,Z,F,I,score,wave,toSpawn,spawnT,gap,last,shake;
+function city(){const W=WW,H=WH;BL=[];const bw=150,bh=110,g=100;
+ const cx=Math.max(1,Math.floor((W-g)/(bw+g))),cy=Math.max(1,Math.floor((H-g)/(bh+g)));
+ const ox=(W-(cx*(bw+g)-g))/2,oy=(H-(cy*(bh+g)-g))/2;
+ for(let i=0;i<cx;i++)for(let j=0;j<cy;j++){const x=ox+i*(bw+g),y=oy+j*(bh+g);
+  if(Math.hypot(x+bw/2-W/2,y+bh/2-H/2)<150||Math.random()<.2)continue;
+  const w=bw-Math.random()*40,h=bh-Math.random()*30;
+  BL.push({x:x+(bw-w)/2,y:y+(bh-h)/2,w,h,c:['#4aa3e0','#e056a0','#8fd14f','#ffd54a'][Math.random()*4|0],s:Math.random()})}
+ BS=[];for(let n=0;n<250&&BS.length<22;n++){const r=38+Math.random()*18,x=r+Math.random()*(W-2*r),y=r+Math.random()*(H-2*r);
+  if(Math.hypot(x-W/2,y-H/2)<r+70)continue;
+  if(BL.some(b=>x>b.x-r&&x<b.x+b.w+r&&y>b.y-r&&y<b.y+b.h+r))continue;
+  if(BS.some(o=>Math.hypot(o.x-x,o.y-y)<o.r+r+20))continue;
+  BS.push({x,y,r,s:Math.random()*6})}
+}
+function drawZ(z){const t=performance.now()/1000;z.ph=z.ph||Math.random()*6.28;const s=z.r/13,bob=Math.sin(t*(z.sp/12)+z.ph);
+ const C=z.boss?{sk:'#8a4a9a',cl:'#3a1a4a',gl:'#ff3a3a'}:z.big?{sk:'#6f9a45',cl:'#6b3a1f',gl:'#ff7a3a'}:{sk:'#8fbf5a',cl:['#3a5a8a','#7a4a3a','#4a4a4a','#6a3a6a'][(z.ph*100|0)%4],gl:'#8fd14f'};
+ ctx.save();ctx.translate(z.x,z.y);ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(0,z.r*.6,z.r*1.1,z.r*.5,0,0,6.28);ctx.fill();
+ ctx.rotate(z.a||0);ctx.scale(s,s);ctx.shadowBlur=12;ctx.shadowColor=C.gl;
+ ctx.strokeStyle=C.sk;ctx.lineWidth=5;ctx.lineCap='round';for(const sd of[-1,1]){ctx.beginPath();ctx.moveTo(2,sd*9);ctx.lineTo(18+bob*2*sd,sd*10+bob*sd*2);ctx.stroke()}
+ ctx.fillStyle=C.cl;ctx.beginPath();ctx.ellipse(0,0,9+bob*.6,12,0,0,6.28);ctx.fill();
+ ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-6,-4);ctx.lineTo(0,2);ctx.lineTo(-3,8);ctx.stroke();
+ ctx.shadowBlur=0;ctx.fillStyle=C.sk;ctx.beginPath();ctx.arc(5,0,8,0,6.28);ctx.fill();
+ ctx.fillStyle='#ff3a3a';ctx.shadowBlur=6;ctx.shadowColor='#ff3a3a';ctx.beginPath();ctx.arc(9,-3,1.8,0,6.28);ctx.arc(9,3,1.8,0,6.28);ctx.fill();
+ ctx.shadowBlur=0;ctx.strokeStyle='#3a0a0a';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(11.5,-2);ctx.lineTo(11.5,2);ctx.stroke();
+ if(z.boss){ctx.fillStyle='#ffd54a';for(const sd of[-1,1]){ctx.beginPath();ctx.moveTo(2,sd*6);ctx.lineTo(-4,sd*15);ctx.lineTo(7,sd*8);ctx.fill()}}
+ if(performance.now()-(z.pt||0)<120){ctx.fillStyle='rgba(255,255,255,.55)';ctx.beginPath();ctx.ellipse(0,0,10,13,0,0,6.28);ctx.fill()}
+ ctx.restore()}
+function drawGround(){for(const d of BD){ctx.globalAlpha=d.a;ctx.fillStyle=d.c;ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,6.28);ctx.fill()}
+ for(const c of CP){const al=Math.min(1,c.t/3);ctx.save();ctx.globalAlpha=al;ctx.translate(c.x,c.y);ctx.fillStyle='#3a0c0c';ctx.beginPath();ctx.ellipse(0,2,c.r*1.9,c.r*1.2,0,0,6.28);ctx.fill();ctx.rotate(c.a+1);ctx.fillStyle=c.boss?'#4a2a5a':c.big?'#3f5a2a':'#4a6a35';ctx.beginPath();ctx.ellipse(0,0,c.r*.9,c.r*.55,0,0,6.28);ctx.fill();ctx.fillStyle=c.boss?'#5a3a6a':'#5f8a45';ctx.beginPath();ctx.arc(c.r*.7,0,c.r*.38,0,6.28);ctx.fill();ctx.restore()}
+ ctx.globalAlpha=1;for(const c of SC){ctx.save();ctx.translate(c.x,c.y);ctx.rotate(c.r);ctx.globalAlpha=Math.min(1,c.t*2);ctx.fillStyle='#d9b45a';ctx.fillRect(-2,-1,4,2);ctx.restore()}ctx.globalAlpha=1}
+function drawV(z){if(z.boss){ctx.save();ctx.strokeStyle='#ff3a3a';ctx.shadowBlur=20;ctx.shadowColor='#ff3a3a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(z.x,z.y,z.r+6+Math.sin(performance.now()/150)*2,0,6.28);ctx.stroke();ctx.font='bold 18px system-ui,sans-serif';ctx.textAlign='center';ctx.fillStyle='#ff3a3a';ctx.fillText('BOSS '+'\u2665'.repeat(z.lives===undefined?3:z.lives),z.x,z.y-z.r-32);ctx.restore()}ctx.save();ctx.shadowBlur=0;const f=performance.now()-(z.pt||0)<250;const L=String(z.v).length,fs=((z.boss?20:z.big?16:13)+(f?3:0))*(L>8?.75:L>5?.88:1);ctx.font='bold '+fs+'px system-ui,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#000';const s=String(z.v);ctx.strokeText(s,z.x,z.y-z.r-8);ctx.fillStyle=f?'#ffd54a':'#fff';ctx.fillText(s,z.x,z.y-z.r-8);ctx.restore()}
+function drawCrates(){const t=performance.now()/1000;
+ for(const s of MS){ctx.save();ctx.strokeStyle='#8a9bff';ctx.globalAlpha=.8;ctx.setLineDash([6,6]);ctx.lineWidth=2;ctx.beginPath();ctx.arc(s.x,s.y,110,0,6.28);ctx.stroke();ctx.fillStyle='rgba(138,155,255,.2)';ctx.beginPath();ctx.arc(s.x,s.y,110*(1-s.t/s.t0),0,6.28);ctx.fill();ctx.restore()}
+ for(const s of SH){ctx.save();ctx.fillStyle='#e056a0';ctx.shadowBlur=14;ctx.shadowColor='#e056a0';ctx.beginPath();ctx.arc(s.x,s.y,7,0,6.28);ctx.fill();ctx.restore()}
+ for(const u of TR){ctx.save();ctx.translate(u.x,u.y);ctx.strokeStyle='#f0c040';ctx.shadowBlur=8;ctx.shadowColor='#f0c040';ctx.globalAlpha=Math.min(1,u.t);ctx.lineWidth=2;for(let i=0;i<6;i++){const a=i/6*6.28;ctx.beginPath();ctx.moveTo(Math.cos(a)*6,Math.sin(a)*6);ctx.lineTo(Math.cos(a)*18,Math.sin(a)*18);ctx.stroke()}ctx.beginPath();ctx.arc(0,0,22,0,6.28);ctx.stroke();ctx.restore()}
+ for(const m of MN){ctx.save();ctx.fillStyle='#442244';ctx.shadowBlur=8;ctx.shadowColor='#ff9ae0';ctx.beginPath();ctx.arc(m.x,m.y,8,0,6.28);ctx.fill();if(Math.floor(t*3)%2){ctx.fillStyle='#ff3a3a';ctx.beginPath();ctx.arc(m.x,m.y,3,0,6.28);ctx.fill()}ctx.restore()}
+ for(const g of GR){ctx.save();ctx.fillStyle='#ffb04a';ctx.shadowBlur=12;ctx.shadowColor='#ffb04a';const h=Math.sin((1-g.t/.8)*3.14)*20;ctx.beginPath();ctx.arc(g.x,g.y-h,6,0,6.28);ctx.fill();ctx.restore()}
+ if(SF){const q=SF.t/.2;ctx.save();ctx.globalAlpha=q;ctx.strokeStyle=SF.c;ctx.shadowBlur=16;ctx.shadowColor=SF.c;ctx.lineWidth=8*q+2;ctx.lineCap='round';ctx.beginPath();ctx.arc(SF.x,SF.y,SF.r*(.6+.4*(1-q)),SF.a-(SF.w||1.1),SF.a+(SF.w||1.1));ctx.stroke();ctx.restore()}
+ for(const u of TU){ctx.save();ctx.translate(u.x,u.y);ctx.fillStyle='#3a3a2a';ctx.shadowBlur=10;ctx.shadowColor='#f0c040';ctx.strokeStyle='#f0c040';ctx.lineWidth=2;if(u.f!==undefined){ctx.fillStyle='#b0b8c0';ctx.beginPath();ctx.arc(0,0,7,0,6.28);ctx.fill();ctx.stroke()}else{ctx.fillRect(-11,-11,22,22);ctx.strokeRect(-11,-11,22,22)}ctx.rotate(u.a);ctx.fillStyle='#f0c040';ctx.fillRect(0,-3,18,6);ctx.restore()}
+ if(P.sn>0){ctx.save();ctx.translate(P.x,P.y);ctx.rotate(performance.now()/60);ctx.strokeStyle='#ff4a4a';ctx.shadowBlur=18;ctx.shadowColor='#ff4a4a';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,120,.2,2.2);ctx.stroke();ctx.beginPath();ctx.arc(0,0,120,3.34,5.34);ctx.stroke();ctx.restore()}
+ if(P.lc>=25&&P.lb<=0){ctx.save();ctx.strokeStyle='#e0453a';ctx.shadowBlur=12;ctx.shadowColor='#e0453a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(P.x,P.y,30+Math.sin(t*10)*3,0,6.28);ctx.stroke();ctx.restore()}
+ if(LS){const q=LS.t/.4;ctx.save();ctx.globalAlpha=q;ctx.strokeStyle=LS.c||'#ffd0f0';ctx.shadowBlur=30;ctx.shadowColor=LS.c||'#e056a0';ctx.lineWidth=36*q+4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(LS.x,LS.y);ctx.lineTo(LS.x+LS.ux*(LS.L||1000),LS.y+LS.uy*(LS.L||1000));ctx.stroke();ctx.restore()}
+ if(P.lb>0){ctx.save();ctx.globalAlpha=.5+Math.sin(t*14)*.2;ctx.fillStyle='#ff3a3a';ctx.shadowBlur=30;ctx.shadowColor='#ff3a3a';ctx.beginPath();ctx.arc(P.x,P.y,26,0,6.28);ctx.fill();ctx.restore()}
+ if(P.jp>0){const lx=P.x+P.vx*P.jp,ly=P.y+P.vy*P.jp;ctx.save();ctx.strokeStyle='#ffb04a';ctx.globalAlpha=.7;ctx.setLineDash([6,6]);ctx.lineWidth=2;ctx.beginPath();ctx.arc(lx,ly,190,0,6.28);ctx.stroke();ctx.restore()}
+ if(SW){const k=1-SW.t/(SW.d||.4);ctx.save();ctx.globalAlpha=1-k;ctx.strokeStyle='#ffb04a';ctx.shadowBlur=20;ctx.shadowColor='#ffb04a';ctx.lineWidth=6;ctx.beginPath();ctx.arc(SW.x,SW.y,(SW.r||190)*k,0,6.28);ctx.stroke();ctx.restore()}
+ if(P.uc>=5&&P.jp<=0){ctx.save();ctx.strokeStyle='#ffb04a';ctx.shadowBlur=14;ctx.shadowColor='#ffb04a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(P.x,P.y,22+Math.sin(t*8)*3,0,6.28);ctx.stroke();ctx.restore()}for(const c of CR){ctx.save();ctx.shadowBlur=14+Math.sin(t*4)*5;ctx.shadowColor='#5ff0ff';ctx.fillStyle='#12333a';ctx.fillRect(c.x-16,c.y-16,32,32);ctx.strokeStyle='#5ff0ff';ctx.lineWidth=2;ctx.strokeRect(c.x-16,c.y-16,32,32);ctx.fillStyle='#5ff0ff';ctx.beginPath();ctx.moveTo(c.x+3,c.y-11);ctx.lineTo(c.x-7,c.y+2);ctx.lineTo(c.x-1,c.y+2);ctx.lineTo(c.x-3,c.y+11);ctx.lineTo(c.x+7,c.y-2);ctx.lineTo(c.x+1,c.y-2);ctx.closePath();ctx.fill();
+ if(c.hp<3000){ctx.shadowBlur=0;ctx.fillStyle='#000a';ctx.fillRect(c.x-16,c.y-24,32,4);ctx.fillStyle='#5ff0ff';ctx.fillRect(c.x-16,c.y-24,32*c.hp/3000,4)}ctx.restore()}}
+function hid(){return P.rv<=0&&(P.cl>0||BS.some(b=>Math.hypot(P.x-b.x,P.y-b.y)<b.r-8))}
+function drawBush(){const t=performance.now()/1000;ctx.save();for(const b of BS){ctx.shadowBlur=12;ctx.shadowColor='#3fa34d';ctx.fillStyle='rgba(30,110,50,.82)';
+ for(let k=0;k<7;k++){const a=k/7*6.28+b.s,rr=b.r*.55;ctx.beginPath();ctx.arc(b.x+Math.cos(a)*rr*.9+Math.sin(t*1.5+k+b.s)*1.5,b.y+Math.sin(a)*rr*.9,b.r*.5,0,6.28);ctx.fill()}
+ ctx.beginPath();ctx.arc(b.x,b.y,b.r*.6,0,6.28);ctx.fill()}
+ ctx.restore();
+ ctx.font='bold 18px system-ui,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText('⚡ '+P.en,P.x,P.y-26);ctx.fillStyle='#5ff0ff';ctx.fillText('⚡ '+P.en,P.x,P.y-26);
+ if(hid()){ctx.fillStyle='#8fd14f';ctx.strokeText('隱形中',P.x,P.y-48);ctx.fillText('隱形中',P.x,P.y-48)}}
+// 圓形角色與建築物碰撞：即使中心已進到建築物內，也要推到最近的外側。
+function push(o,r){let hit=false;for(const b of BL){const qx=Math.max(b.x,Math.min(o.x,b.x+b.w)),qy=Math.max(b.y,Math.min(o.y,b.y+b.h));let dx=o.x-qx,dy=o.y-qy,d=Math.hypot(dx,dy);if(d<r){hit=true;if(d<1e-9){const sides=[{d:o.x-b.x,axis:'x',v:b.x-r},{d:b.x+b.w-o.x,axis:'x',v:b.x+b.w+r},{d:o.y-b.y,axis:'y',v:b.y-r},{d:b.y+b.h-o.y,axis:'y',v:b.y+b.h+r}];sides.sort((a,b)=>a.d-b.d);o[sides[0].axis]=sides[0].v}else{o.x+=dx/d*(r-d);o.y+=dy/d*(r-d)}}}return hit}
+const PLAYER_WALL_RADIUS=16;
+function playerPositionFree(x,y){const r=PLAYER_WALL_RADIUS;if(x<r||x>WW-r||y<r||y>WH-r)return false;for(const b of BL){const qx=Math.max(b.x,Math.min(x,b.x+b.w)),qy=Math.max(b.y,Math.min(y,b.y+b.h));if(Math.hypot(x-qx,y-qy)<r-1e-7)return false}return true}
+// 分小步移動，避免高速移動、跳躍及後座力穿透牆壁。平常移動可沿牆滑行。
+function movePlayer(dx,dy,slide=true){const n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/3)),sx=dx/n,sy=dy/n;let blocked=false;for(let i=0;i<n;i++){if(playerPositionFree(P.x+sx,P.y+sy)){P.x+=sx;P.y+=sy;continue}blocked=true;if(!slide)break;if(playerPositionFree(P.x+sx,P.y))P.x+=sx;if(playerPositionFree(P.x,P.y+sy))P.y+=sy}return !blocked}
+function drawCity(){for(const b of BL){ctx.save();ctx.shadowBlur=14;ctx.shadowColor=b.c;ctx.fillStyle='#161d22';ctx.fillRect(b.x,b.y,b.w,b.h);ctx.strokeStyle=b.c;ctx.lineWidth=2;ctx.strokeRect(b.x,b.y,b.w,b.h);ctx.restore();
+ ctx.fillStyle=b.c;ctx.globalAlpha=.55;for(let x=b.x+12,i=0;x<b.x+b.w-12;x+=20,i++)for(let y=b.y+12,j=0;y<b.y+b.h-12;y+=20,j++)if(((i*7+j*13+Math.floor(b.s*100))%5)>1)ctx.fillRect(x,y,8,8);ctx.globalAlpha=1}}
+function init(){WW=Math.max(2400,innerWidth*2);WH=Math.max(1600,innerHeight*2);const W=WW,H=WH;city();P={x:W/2,y:H/2,hp:CH[ci].hp,mh:CH[ci].hp,sp:CH[ci].sp,col:CH[ci].col,ma:CH[ci].ma,rr:CH[ci].rr,cd:0,hit:0,pw:0,rv:0,rg:2,dmg:CH[ci].dmg,en:0,am:CH[ci].ma,ar:0,jp:0,uc:0,lb:0,k:CH[ci].a,u:CH[ci].u,s:CH[ci].s,bar:0,bt:0,sn:0,lc:0,sk:0,sb:0,cl:0,wc:0,mf:0,mfa:0};B=[];Z=[];F=[];I=[];CR=[];SW=null;LS=null;kills=0;boss=0;bannerT=0;TU=[];GR=[];MN=[];TR=[];SH=[];MS=[];SF=null;BD=[];CP=[];SC=[];FT=[];LF=[];score=0;wave=0;toSpawn=0;gap=0;shake=0;nextWave();ans="";newQ(null)}
+// 讓殭屍保持可見間距，包含大型殭屍與 Boss；牆壁和地圖邊界仍會阻擋。
+function zombieGap(a,b){return (a.r+b.r)*1.7+4}
+function zombieSpotFree(x,y,r,ignore){
+  const wallR=r*.8;
+  if(x<wallR||x>WW-wallR||y<wallR||y>WH-wallR)return false;
+  for(const b of BL){const qx=Math.max(b.x,Math.min(x,b.x+b.w)),qy=Math.max(b.y,Math.min(y,b.y+b.h));if(Math.hypot(x-qx,y-qy)<wallR)return false}
+  return !Z.some(z=>z!==ignore&&!z.dead&&Math.hypot(x-z.x,y-z.y)<zombieGap({r},z));
+}
+function placeZombie(z){
+  let x=Math.max(z.r,Math.min(WW-z.r,z.x)),y=Math.max(z.r,Math.min(WH-z.r,z.y));
+  if(zombieSpotFree(x,y,z.r,z)){z.x=x;z.y=y;return true}
+  // 優先在原位置附近找空位，找不到再從整張地圖找。
+  for(let radius=20;radius<=400;radius+=20){const steps=Math.max(12,Math.ceil(radius/10));for(let k=0;k<steps;k++){const angle=k*2*Math.PI/steps+radius*.13,nx=x+Math.cos(angle)*radius,ny=y+Math.sin(angle)*radius;if(zombieSpotFree(nx,ny,z.r,z)){z.x=nx;z.y=ny;return true}}}
+  for(let i=0;i<1000;i++){const nx=z.r+Math.random()*(WW-2*z.r),ny=z.r+Math.random()*(WH-2*z.r);if(zombieSpotFree(nx,ny,z.r,z)){z.x=nx;z.y=ny;return true}}
+  return false;
+}
+function separateZombies(){
+  const live=Z.filter(z=>!z.dead);
+  // 個別移動受牆壁限制；一隻無法移動時由另一隻補足。
+  function move(z,dx,dy){const ox=z.x,oy=z.y,r=z.r*.8;z.x=Math.max(r,Math.min(WW-r,z.x+dx));z.y=Math.max(r,Math.min(WH-r,z.y+dy));push(z,r);z.x=Math.max(r,Math.min(WW-r,z.x));z.y=Math.max(r,Math.min(WH-r,z.y));return (z.x-ox)*dx+(z.y-oy)*dy>0}
+  for(let pass=0;pass<24;pass++){
+    let overlaps=0;
+    for(let i=0;i<live.length;i++)for(let j=i+1;j<live.length;j++){
+      const a=live[i],b=live[j];let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),gap=zombieGap(a,b);
+      if(d>=gap-.01)continue;overlaps++;
+      if(d<.001){const angle=(i*2.399+j*1.71);dx=Math.cos(angle);dy=Math.sin(angle);d=1}else{dx/=d;dy/=d}
+      const amount=gap-(d===1&&Math.hypot(b.x-a.x,b.y-a.y)<.001?0:d)+.02;
+      const share=a.boss?.15:b.boss?.85:.5;
+      move(a,-dx*amount*share,-dy*amount*share);move(b,dx*amount*(1-share),dy*amount*(1-share));
+    }
+    if(!overlaps)break;
+  }
+  // 極度擁擠或卡在牆角時，移到附近的空位，避免最終畫面疊在一起。
+  for(let i=0;i<live.length;i++)for(let j=i+1;j<live.length;j++){
+    const a=live[i],b=live[j];if(Math.hypot(a.x-b.x,a.y-b.y)<zombieGap(a,b)-.5)placeZombie(b.boss?a:b);
+  }
+}
+function spawnBoss(){const wall=(x,y)=>BL.some(b=>x>b.x-60&&x<b.x+b.w+60&&y>b.y-60&&y<b.y+b.h+60);let x=0,y=0;for(let t=0;t<80;t++){x=60+Math.random()*(WW-120);y=60+Math.random()*(WH-120);if(!wall(x,y)&&Math.hypot(x-P.x,y-P.y)>600)break}
+ const z={x,y,r:40,big:true,boss:true,v:ans,lives:3,hp:1,sp:70,a:0};if(placeZombie(z)){Z.push(z);return true}return false}
+function heal(){const R=260;P.hp=Math.min(P.mh,P.hp+Math.round(P.mh*.35));P.hit=Math.max(P.hit,1.5);shake=8;
+ for(const z of Z)if(!z.dead&&Math.hypot(z.x-P.x,z.y-P.y)<R+z.r){boom(z.x,z.y,'#3fd1b0',8);dealZ(z,rb()*2)}
+ SW={x:P.x,y:P.y,t:.5,d:.5,r:R};boom(P.x,P.y,'#3fd1b0',40);snd(700,.5,'sine',.15)}
+function dash(ux,uy,d){const L=Math.min(d,380),sx=P.x,sy=P.y;movePlayer(ux*L,uy*L,false);let px=P.x,py=P.y;
+ const sl=Math.hypot(px-sx,py-sy)||1;
+ for(const z of Z){if(z.dead)continue;const rx=z.x-sx,ry=z.y-sy,t=Math.max(0,Math.min(1,(rx*(px-sx)+ry*(py-sy))/(sl*sl)));if(Math.hypot(sx+(px-sx)*t-z.x,sy+(py-sy)*t-z.y)<z.r+50){boom(z.x,z.y,'#a070ff',10);dealZ(z,rb()*4)}}
+ for(const c of CR)if(Math.hypot(c.x-px,c.y-py)<120)dealC(c,P.dmg*4);
+ for(let i=0;i<=20;i++)boom(sx+(px-sx)*i/20,sy+(py-sy)*i/20,'#a070ff',2);
+ P.x=px;P.y=py;P.hit=Math.max(P.hit,1);shake=10;SW={x:px,y:py,t:.4,d:.4,r:150};snd(400,.2,'square',.12)}
+function turret(){TU.push({x:P.x,y:P.y,t:8,cd:0,a:0});boom(P.x,P.y,'#f0c040',20);snd(500,.2,'square',.1)}
+const SKC=[6,5,3,4,8,1.2,4,8,10,5,6,10];
+function slashFx(ux,uy,r,c){SF={x:P.x,y:P.y,a:Math.atan2(uy,ux),r,t:.2,c}}
+function blast(x,y,R,r,col){for(const z of Z)if(!z.dead&&Math.hypot(z.x-x,z.y-y)<R+z.r){boom(z.x,z.y,col,6);dealZ(z,rb()*r)}for(const c of CR)if(Math.hypot(c.x-x,c.y-y)<R)dealC(c,P.dmg*r);for(let i=0;i<30;i++){const a=i/30*6.28;F.push({x:x+Math.cos(a)*10,y:y+Math.sin(a)*10,vx:Math.cos(a)*R*2.2,vy:Math.sin(a)*R*2.2,l:.35,c:col})}shake=Math.max(shake,8);LF.push({x,y,r:R*1.7,t:.22,m:.22});snN(.3,.22,500);snd(120,.25,'sawtooth',.12)}
+function mvTo(ux,uy,L){movePlayer(ux*L,uy*L,false)}
+function skill(){if(!run||P.sk>0||P.jp>0)return;const dx=mx-P.x,dy=my-P.y,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d,k=P.s;P.sk=SKC[k];
+ if(k===0){GR.push({sx:P.x,sy:P.y,x:P.x,y:P.y,tx:P.x+ux*Math.min(d,350),ty:P.y+uy*Math.min(d,350),t:.8});snd(300,.1,'square',.08)}
+ else if(k===1){for(const z of Z){if(z.dead)continue;const rx=z.x-P.x,ry=z.y-P.y,dd=Math.hypot(rx,ry)||1;if(dd<110+z.r&&(rx*ux+ry*uy)/dd>.35){z.x+=ux*120;z.y+=uy*120;push(z,z.r*.8);boom(z.x,z.y,'#ff7a3a',8);dealZ(z,rb())}}P.hit=Math.max(P.hit,.6);slashFx(ux,uy,110,'#ff9a5a');snd(100,.2,'square',.15)}
+ else if(k===2){const ax=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),ay=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0),am=Math.hypot(ax,ay);if(am)mvTo(ax/am,ay/am,170);else mvTo(ux,uy,170);P.hit=Math.max(P.hit,.4);P.am=Math.min(P.ma,P.am+1);boom(P.x,P.y,'#8fd14f',12);snd(450,.12,'sine',.08)}
+ else if(k===3){if(MN.length>=3)MN.shift();MN.push({x:P.x,y:P.y});snd(250,.1,'square',.08)}
+ else if(k===4){P.hp=Math.min(P.mh,P.hp+1500);boom(P.x,P.y,'#3fd1b0',20);snd(800,.2,'sine',.1)}
+ else if(k===5){mvTo(ux,uy,40);for(const z of Z){if(z.dead)continue;const rx=z.x-P.x,ry=z.y-P.y,dd=Math.hypot(rx,ry)||1;if(dd<95+z.r&&(rx*ux+ry*uy)/dd>.42){boom(z.x,z.y,'#d6c8ff',8);dealZ(z,rb()*3)}}for(const c of CR)if(Math.hypot(c.x-P.x,c.y-P.y)<100)dealC(c,P.dmg*3);slashFx(ux,uy,95,'#d6c8ff');snd(700,.1,'sawtooth',.1)}
+ else if(k===6){if(TR.length>=4)TR.shift();TR.push({x:P.x,y:P.y,t:10,cd:0});snd(200,.1,'square',.08)}
+ else if(k===7){for(const z of Z){if(z.dead)continue;const rx=z.x-P.x,ry=z.y-P.y;if(Math.hypot(rx,ry)<220+z.r){const a=Math.atan2(ry,rx);z.x+=Math.cos(a)*100;z.y+=Math.sin(a)*100;push(z,z.r*.8);dealZ(z,rb())}}P.sb=3;shake=10;for(let i=0;i<24;i++){const a=i/24*6.28;F.push({x:P.x,y:P.y,vx:Math.cos(a)*300,vy:Math.sin(a)*300,l:.4,c:'#ff4a4a'})}snd(90,.4,'sawtooth',.2)}
+ else if(k===8){P.cl=4;boom(P.x,P.y,'#9fd8ff',16);snd(500,.2,'sine',.08)}
+ else if(k===9){mvTo(ux,uy,Math.min(d,300));boom(P.x,P.y,'#6a7bff',16);snd(900,.15,'sine',.1)}
+ else if(k===10){TU.push({x:P.x,y:P.y,t:12,cd:0,a:0,f:Math.random()*6.28});snd(600,.12,'square',.08)}
+ else{P.hit=Math.max(P.hit,2);boom(P.x,P.y,'#ffd0a0',20);snd(300,.3,'sine',.12)}}
+const CDM=[1,2.8,1.4,3.6,1.25,1.8,1.4,2.8,6.2,1.9,1.2,2.2];
+function snipe(ux,uy){const L=2200,D=8;shake=16;const on=o=>{const rx=o.x-P.x,ry=o.y-P.y,t=rx*ux+ry*uy,pr=Math.abs(rx*uy-ry*ux);return t>0&&t<L&&pr<24+(o.r||16)};
+ for(const z of Z)if(!z.dead&&on(z)){boom(z.x,z.y,'#9fd8ff',10);dealZ(z,rb()*D)}
+ for(const c of CR)if(on(c))dealC(c,P.dmg*D);
+ LS={x:P.x,y:P.y,ux,uy,t:.4,L,c:'#bfe8ff'};snd(120,.5,'sawtooth',.25)}
+function rain(){for(let i=0;i<10;i++){const d=.6+i*.18;MS.push({x:Math.max(30,Math.min(WW-30,mx+(Math.random()-.5)*440)),y:Math.max(30,Math.min(WH-30,my+(Math.random()-.5)*440)),t:d,t0:d})}snd(600,.3,'sine',.1)}
+function drones(){for(let i=0;i<4;i++)TU.push({x:P.x,y:P.y,t:10,cd:0,a:0,f:i*1.5708});snd(700,.3,'square',.1)}
+function monk(){P.hp=Math.min(P.mh,P.hp+Math.round(P.mh*.2));P.hit=Math.max(P.hit,1.5);blast(P.x,P.y,300,3,'#ffd0a0');boom(P.x,P.y,'#ffd0a0',40);SW={x:P.x,y:P.y,t:.5,d:.5,r:300}}
+function fire(a0){const k=P.k;if(k===5||k===7){melee(a0);return}
+ a0+=(Math.random()-.5)*((k===8||k===1)?0:.035);
+ if([0,1,3,6,8,10].includes(k))snN(k===3?.2:.12,k===1||k===3?.2:.13,[2600,1800,0,900,0,0,3000,0,1500,0,2800,0][k]||2000);else snd([600,150,900,70,700,500,800,300,1100,650,550,350][k],.08,k===3?'sawtooth':'square',.06);
+ P.mf=.07;P.mfa=a0;LF.push({x:P.x+Math.cos(a0)*20,y:P.y+Math.sin(a0)*20,r:130,t:.07,m:.07});
+ {const big=(k===1||k===3||k===8);shake=Math.max(shake,big?5:1.5);movePlayer(-Math.cos(a0)*(big?3:1),-Math.sin(a0)*(big?3:1))}
+ if([0,1,4,6,8,10].includes(k)){const pa=a0+1.57+(Math.random()-.5);SC.push({x:P.x+Math.cos(a0)*12,y:P.y+Math.sin(a0)*12,vx:Math.cos(pa)*(90+Math.random()*60),vy:Math.sin(pa)*(90+Math.random()*60),r:Math.random()*6,vr:(Math.random()-.5)*24,t:1.1})}
+ for(const o of(P.pw>0?[-.2,0,.2]:[0])){const a=a0+o,c=Math.cos(a),s=Math.sin(a);
+  if(k===0)B.push({x:P.x,y:P.y,vx:c*700,vy:s*700,l:1});
+  else if(k===1){for(let i=0;i<5;i++){const aa=a+(i-2)*.14+(Math.random()-.5)*.06;B.push({x:P.x,y:P.y,vx:Math.cos(aa)*650,vy:Math.sin(aa)*650,l:.38})}}
+  else if(k===2)B.push({x:P.x,y:P.y,vx:c*950,vy:s*950,l:.9,pi:true});
+  else if(k===3)SH.push({x:P.x,y:P.y,vx:c*430,vy:s*430,t:1.3});
+  else if(k===4)B.push({x:P.x,y:P.y,vx:c*700,vy:s*700,l:1,hl:true});
+  else if(k===6)B.push({x:P.x,y:P.y,vx:c*700,vy:s*700,l:1,ch:true});
+  else if(k===8)B.push({x:P.x,y:P.y,vx:c*1400,vy:s*1400,l:.8,pi:true,m:2});
+  else if(k===9)B.push({x:P.x,y:P.y,vx:c*520,vy:s*520,l:1.4,ho:true});
+  else if(k===10){for(const sd of[-1,1])B.push({x:P.x-s*7*sd,y:P.y+c*7*sd,vx:c*700,vy:s*700,l:1})}
+  else B.push({x:P.x,y:P.y,vx:c*520,vy:s*520,l:.55,pi:true,rd:18})}}
+function melee(a0){const k=P.k,R=k===5?88:85,half=k===5?1:3.2;snd(k===5?700:200,.1,'sawtooth',.1);
+ if(k===5)mvTo(Math.cos(a0),Math.sin(a0),26);
+ for(const z of Z){if(z.dead)continue;const rx=z.x-P.x,ry=z.y-P.y,dd=Math.hypot(rx,ry)||1;if(dd>R+z.r)continue;let da=Math.atan2(ry,rx)-a0;da=Math.atan2(Math.sin(da),Math.cos(da));
+  if(k===7||Math.abs(da)<half){boom(z.x,z.y,k===5?'#d6c8ff':'#ff4a4a',6);P.lc=Math.min(25,P.lc+1);dealZ(z,0,true)}}
+ for(const c of CR)if(Math.hypot(c.x-P.x,c.y-P.y)<R+16)dealC(c,P.dmg);
+ SF={x:P.x,y:P.y,a:a0,r:R,t:.2,c:k===5?'#d6c8ff':'#ff4a4a',w:k===5?1.1:3.14}}
+function rb(){return Math.max(1,Math.floor(P.dmg/1500))*(P.lb>0?2:1)}
+const SUBJ=['開根號','數學','英文','歷史','公民','社會','中文'];let subj=7,grade=5,recentQ=[],QD=[],POOL=[],qSub='';
+const QB={"hist": {"L": [["端午節時，大家會吃什麼？", "粽子", "月餅", "湯圓", "年糕"], ["中秋節時，大家喜歡吃什麼？", "月餅", "粽子", "湯圓", "年糕"], ["過年時，長輩常給小孩什麼？", "紅包", "粽子", "月餅", "蛋糕"], ["元宵節常吃什麼？", "湯圓", "粽子", "月餅", "漢堡"], ["端午節有什麼比賽活動？", "划龍舟", "堆雪人", "打雪仗", "溜冰"], ["以前沒有電的時候，晚上用什麼照明？", "油燈", "電視", "冷氣", "電腦"], ["以前洗衣服常用手搓，現在多用什麼？", "洗衣機", "掃把", "鍋子", "冰箱"], ["清明節時，家人會做什麼？", "掃墓祭祖", "划龍舟", "賞月烤肉", "吃湯圓"], ["中秋節晚上，大家喜歡做什麼？", "賞月", "堆雪人", "看日出", "溜冰"], ["國慶日是哪一天？", "10月10日", "1月1日", "5月5日", "12月25日"], ["一年的第一天，我們稱為什麼？", "元旦", "國慶日", "兒童節", "教師節"], ["兒童節是幾月幾日？", "4月4日", "1月1日", "9月28日", "10月10日"], ["教師節是幾月幾日？", "9月28日", "4月4日", "10月10日", "12月25日"], ["母親節在哪一個月？", "5月", "3月", "8月", "12月"], ["父親節在哪一個月？", "8月", "5月", "1月", "12月"], ["以前人們用什麼寄信給遠方的人？", "郵差送信", "傳送門", "飛天掃帚", "瞬間移動"], ["過年時，家家戶戶會貼什麼？", "春聯", "粽葉", "月餅盒", "龍舟"]], "M": [["臺灣最早的主人是誰？", "原住民族", "荷蘭人", "日本人", "清朝人"], ["中國古代四大發明不包括下列哪一項？", "電燈", "造紙術", "印刷術", "指南針"], ["改良造紙術的人是誰？", "蔡倫", "孔子", "秦始皇", "張騫"], ["指南針可以用來做什麼？", "辨別方向", "測量溫度", "照明", "聽聲音"], ["印刷術讓什麼更容易流傳？", "書籍", "食物", "衣服", "水果"], ["最早統一中國文字和度量衡的皇帝是？", "秦始皇", "漢武帝", "唐太宗", "康熙"], ["秦始皇為了防禦北方民族，連接修築了什麼？", "萬里長城", "故宮", "運河", "鐵路"], ["張騫出使西域，開通了什麼路線？", "絲路", "高速公路", "海底隧道", "鐵公路"], ["鄭和下西洋是哪個朝代的事？", "明朝", "唐朝", "清朝", "漢朝"], ["荷蘭人為了貿易，在臺灣南部建了什麼城？", "熱蘭遮城", "紅毛城", "億載金城", "赤崁樓"], ["古代沒有鐘錶，人們可以用什麼看時間？", "日晷", "手機", "電腦", "冷氣"], ["古時候人們用什麼傳遞遠方的軍事消息？", "烽火", "電話", "電子郵件", "衛星"], ["國慶日紀念的是什麼？", "辛亥革命武昌起義", "臺灣光復", "鄭成功登陸", "二二八"], ["臺灣光復節是每年的幾月幾日？", "10月25日", "10月10日", "2月28日", "5月1日"], ["清朝時期，臺灣出口的重要物產「茶、糖」和什麼？", "樟腦", "稻米", "水果", "鐵"], ["臺灣第一條鐵路是由誰推動興建的？", "劉銘傳", "鄭成功", "孫中山", "八田與一"], ["古代中國人常用什麼寫字？", "毛筆", "鋼珠筆", "電腦", "打字機"], ["中華民國的國父是誰？", "孫中山", "蔣中正", "袁世凱", "康有為"]], "H": [["第一個在臺灣南部建立據點（熱蘭遮城）的是哪一國人？", "荷蘭人", "西班牙人", "日本人", "葡萄牙人"], ["西班牙人曾在臺灣北部的哪裡建城？", "基隆", "高雄", "臺南", "花蓮"], ["趕走荷蘭人的人是誰？", "鄭成功", "施琅", "劉銘傳", "沈葆楨"], ["鄭成功是哪一年趕走荷蘭人的？", "1662年", "1624年", "1683年", "1895年"], ["鄭成功是從哪裡登陸臺灣的？", "鹿耳門", "淡水", "基隆", "花蓮"], ["位在安平、由荷蘭人興建的城堡是？", "熱蘭遮城", "赤崁樓", "億載金城", "紅毛城"], ["鄭氏王朝後來被哪個朝代打敗？", "清朝", "明朝", "日本", "荷蘭"], ["清朝派誰攻打臺灣的鄭氏政權？", "施琅", "鄭成功", "劉銘傳", "林爽文"], ["清朝時期，移民到臺灣的漢人主要來自哪裡？", "福建與廣東", "日本與韓國", "山東與河北", "東南亞"], ["臺灣建省後的第一任巡撫是誰？", "劉銘傳", "鄭成功", "沈葆楨", "施琅"], ["劉銘傳在臺灣積極建設了什麼？", "鐵路", "高速公路", "機場", "捷運"], ["清朝在甲午戰爭戰敗後，把臺灣割讓給哪一國？", "日本", "荷蘭", "美國", "英國"], ["臺灣被割讓給日本是在哪一年？", "1895年", "1662年", "1945年", "1912年"], ["日本統治臺灣結束於哪一年？", "1945年", "1895年", "1949年", "1987年"], ["中華民國成立於哪一年？", "1912年", "1895年", "1945年", "1949年"], ["中華民國的國父是誰？", "孫中山", "蔣中正", "袁世凱", "康有為"], ["荷蘭人占領臺灣，主要的目的是什麼？", "發展貿易", "觀光旅遊", "躲避戰爭", "打獵"], ["「一府二鹿三艋舺」的「一府」是指哪裡？", "臺南", "臺北", "高雄", "新竹"], ["「一府二鹿三艋舺」的「二鹿」是指哪個港口？", "鹿港", "鹿野", "鹿谷", "鹿草"], ["「三艋舺」的艋舺，現在位於哪個縣市？", "臺北", "臺中", "高雄", "基隆"], ["日治時期，興建烏山頭水庫的工程師是誰？", "八田與一", "鄭成功", "劉銘傳", "後藤新平"], ["嘉南大圳主要灌溉哪一個地區的農田？", "嘉南平原", "屏東平原", "宜蘭平原", "臺北盆地"], ["鄭成功的兒子是誰？", "鄭經", "鄭克塽", "施琅", "劉銘傳"], ["清朝統治臺灣大約多少年？", "約兩百年", "約五十年", "約八十年", "約四百年"], ["日本統治臺灣大約多少年？", "約五十年", "約兩百年", "約十年", "約一百五十年"], ["荷蘭人統治臺灣南部大約多少年？", "約四十年", "約一百年", "約十年", "約兩百年"], ["荷蘭人在哪一年於臺灣建立據點（安平）？", "1624年", "1662年", "1683年", "1895年"], ["鄭成功奉哪個朝代為正統？", "明朝", "清朝", "唐朝", "元朝"], ["二二八事件發生在哪一年？", "1947年", "1945年", "1949年", "1987年"], ["臺灣解除戒嚴是在哪一年？", "1987年", "1949年", "1947年", "1996年"], ["臺灣第一次總統直接民選是哪一年？", "1996年", "1987年", "1949年", "2000年"], ["臺灣光復後，由哪個政府接收臺灣？", "中華民國政府", "清朝政府", "荷蘭政府", "日本政府"], ["清朝在臺灣設立府縣，最早的臺灣府設在哪裡？", "臺南", "臺北", "臺中", "花蓮"]], "H6": [["工業革命最早從哪一個國家開始？", "英國", "美國", "日本", "法國"], ["改良蒸汽機、推動工業革命的人是誰？", "瓦特", "愛迪生", "貝爾", "牛頓"], ["發明實用電燈泡的人是誰？", "愛迪生", "瓦特", "貝爾", "萊特兄弟"], ["發明電話的人是誰？", "貝爾", "愛迪生", "瓦特", "牛頓"], ["發明第一架動力飛機的人是誰？", "萊特兄弟", "愛迪生", "貝爾", "瓦特"], ["哥倫布發現美洲新大陸是在哪一年？", "1492年", "1066年", "1776年", "1945年"], ["第二次世界大戰結束於哪一年？", "1945年", "1918年", "1939年", "1950年"], ["聯合國成立於哪一年？", "1945年", "1919年", "1950年", "1914年"], ["古埃及法老王的陵墓是什麼？", "金字塔", "長城", "競技場", "紫禁城"], ["印刷術最早發明於哪個國家？", "中國", "埃及", "英國", "美國"], ["鄭和下西洋是哪個朝代的事？", "明朝", "清朝", "漢朝", "唐朝"], ["秦始皇統一中國是在哪一年？", "西元前221年", "西元前500年", "西元100年", "西元1000年"], ["臺灣九二一大地震發生在哪一年？", "1999年", "1949年", "1987年", "2008年"], ["第一位登上月球的人是誰？", "阿姆斯壯", "加加林", "愛迪生", "萊特"], ["下列哪一個是世界四大古文明之一？", "古埃及", "羅馬帝國", "蒙古帝國", "大英帝國"], ["文藝復興最早興起於哪個國家？", "義大利", "中國", "美國", "埃及"], ["網際網路的出現，改變了人們的什麼？", "取得資訊與溝通方式", "季節變化", "地形", "星座"]]}, "civ": {"L": [["看到紅燈時，我們應該怎麼做？", "停下來等待", "快速通過", "邊走邊看手機", "跟著別人走"], ["綠燈亮了，過馬路還要注意什麼？", "看看左右有沒有來車", "閉著眼睛走", "一邊跑一邊玩", "不用看"], ["行人應該走在哪裡才安全？", "人行道", "馬路中間", "車道上", "鐵軌旁"], ["借了別人的東西，用完要怎麼做？", "歸還並說謝謝", "偷偷放回去", "假裝不知道", "留起來"], ["遇到壞人或危險時，要撥打哪支電話？", "110", "119", "165", "113"], ["發生火災或有人受傷，要撥打哪支電話？", "119", "110", "165", "104"], ["排隊時應該怎麼做？", "依序等待", "插隊", "推擠", "大聲吵鬧"], ["看到老人或孕婦在車上，我們可以怎麼做？", "讓座", "搶座位", "假裝睡覺", "大聲說話"], ["課堂上想發言，應該怎麼做？", "先舉手", "大聲喊", "直接離開座位", "敲桌子"], ["吃完東西，垃圾要丟到哪裡？", "垃圾桶", "地上", "抽屜", "水溝"], ["哪一個行為是有禮貌的？", "說請和謝謝", "搶別人玩具", "罵人", "不理人"], ["在教室裡，哪個行為是對的？", "輕聲細語", "追逐打鬧", "大聲尖叫", "亂丟東西"], ["對於別人的物品，我們要怎麼做？", "愛惜不亂拿", "隨便拿走", "弄壞", "藏起來"], ["看到同學跌倒了，可以怎麼做？", "關心並幫忙", "哈哈大笑", "假裝沒看到", "跑開"], ["寶特瓶用完後，要放到哪裡？", "回收桶", "水溝", "花盆", "馬路"], ["夏天出門要怎麼避免中暑？", "戴帽子多喝水", "不喝水", "穿很厚外套", "曬太陽不休息"], ["不認識的人說要帶你走，你應該怎麼做？", "拒絕並找大人", "跟他走", "收下糖果", "告訴他地址"]], "M": [["班上選班長，最公平的方法是什麼？", "全班投票", "老師指定好朋友", "誰高誰當", "誰吵誰當"], ["團體生活中，大家共同遵守的約定叫什麼？", "規則", "玩具", "零食", "作業"], ["什麼是「公共場所」？", "大家都能使用的地方", "只有自己的房間", "私人住家", "別人的書包"], ["使用公共設施後，應該怎麼做？", "保持整潔愛惜使用", "隨意破壞", "刻字塗鴉", "占為己有"], ["有人受傷需要救護車，要撥打哪支電話？", "119", "110", "165", "1999"], ["被陌生人跟蹤，可以到哪裡求助？", "便利商店或警察局", "偏僻小巷", "網咖", "公園暗處"], ["過馬路時，應該走哪裡？", "斑馬線", "安全島", "車道", "護欄"], ["騎腳踏車時，應該戴什麼保護自己？", "安全帽", "墨鏡", "圍巾", "手套"], ["不同族群有不同的文化，我們應該怎麼做？", "互相尊重", "互相嘲笑", "排斥別人", "只學自己的"], ["廚餘指的是什麼？", "吃剩的食物", "寶特瓶", "舊衣服", "紙箱"], ["下列哪一個是節約能源的做法？", "隨手關燈", "開冷氣又開窗", "整天開電視", "白天開所有燈"], ["志工是指什麼樣的人？", "自願幫助別人、不拿報酬的人", "領薪水的員工", "老闆", "客人"], ["訂班規的好方法是什麼？", "全班討論後訂定", "老師一人決定", "各玩各的", "不需要規則"], ["遇到不同意見時，最好的做法是？", "傾聽並理性討論", "大聲嘲笑", "動手推人", "完全不理"], ["兒童在社會上享有哪些保障？", "受保護與受教育的權利", "沒有任何權利", "只有義務", "只能工作"], ["愛護公物是什麼表現？", "公德心", "小氣", "自私", "偷懶"], ["在圖書館或電影院，應該保持什麼？", "安靜", "吵鬧", "邊吃邊聊", "大聲討論"]], "H": [["我國的國家元首是誰？", "總統", "行政院長", "立法院長", "縣市長"], ["我國總統每一任的任期是幾年？", "4年", "2年", "3年", "6年"], ["負責制定法律的機關是？", "立法院", "行政院", "司法院", "考試院"], ["負責審判案件、維護公平正義的是？", "法院", "立法院", "警察局", "議會"], ["我國採用的政治制度是？", "民主", "君主", "獨裁", "帝制"], ["我國人民的三大義務是納稅、服兵役和什麼？", "接受國民教育", "參加選舉", "看電影", "運動健身"], ["保障人民基本權利的最高法律是？", "憲法", "民法", "刑法", "校規"], ["縣市政府的最高首長是？", "縣市長", "總統", "行政院長", "立法委員"], ["民意代表由誰選出來的？", "人民", "總統", "法官", "警察"], ["班級開會討論事情，最民主的決定方式是？", "多數決並尊重少數", "老師說了算", "聲音最大的人決定", "抽籤決定"], ["遇到壞人或緊急危險，應該撥打哪支電話報警？", "110", "119", "165", "113"], ["發生火災或需要救護車，應該撥打哪支電話？", "119", "110", "165", "104"], ["接到可疑的詐騙電話，可以撥打哪支專線諮詢？", "165", "110", "119", "113"], ["未經同意使用他人的創作，侵害了他人的什麼？", "智慧財產權", "隱私權", "選舉權", "工作權"], ["在網路上未經同意公開別人的照片，侵害了別人的什麼？", "隱私權", "受教權", "選舉權", "工作權"], ["消費者服務專線是哪一支電話？", "1950", "110", "119", "1999"], ["垃圾減量的3R是減量、再利用和什麼？", "回收", "浪費", "焚燒", "丟棄"], ["搭乘大眾運輸時，下列哪個行為是正確的？", "讓座給需要的人", "在車廂內飲食", "大聲講電話", "擋住車門"], ["關於權利與義務，下列敘述何者正確？", "享有權利也要盡義務", "只有權利沒有義務", "只有義務沒有權利", "權利和義務沒關係"], ["家庭中的性別平等，是指什麼？", "不因性別而受到不公平對待", "男生一定要比女生強", "女生一定要做家事", "只有男生可以念書"], ["法官審理案件時，應該怎麼做？", "公正客觀", "偏袒朋友", "聽老闆的話", "收取好處"], ["意見不同時，民主社會裡應該怎麼做？", "理性溝通尊重他人", "大聲爭吵", "動手打人", "不理別人"], ["對政府政策有意見，可以用什麼方式表達？", "合法陳情或遊行", "破壞公物", "威脅官員", "散布謠言"], ["我國的五權分立是行政、立法、司法、考試和什麼？", "監察", "外交", "國防", "教育"], ["負責執行法律與政策的中央機關是？", "行政院", "立法院", "司法院", "監察院"], ["我國選舉採用什麼投票方式？", "無記名投票", "記名投票", "舉手表決", "口頭表決"], ["我國總統是用什麼方式選出來的？", "人民直接投票", "立法委員決定", "行政院長決定", "法官決定"], ["下列哪一位官員是由人民投票選出來的？", "縣市長", "法官", "警察局長", "校長"], ["看到有人霸凌同學，最適合的做法是？", "告訴老師或大人", "跟著一起欺負", "假裝沒看到", "拍影片上網"], ["在公園玩耍時，下列哪個行為需要遵守？", "不亂丟垃圾", "亂摘花草", "破壞遊樂器材", "大聲吵鬧"]], "H6": [["聯合國的總部位於哪一個城市？", "紐約", "巴黎", "倫敦", "北京"], ["負責促進世界人民健康的國際組織，簡稱是？", "WHO", "NBA", "UFO", "PTT"], ["在戰爭與災難中，以紅十字為標誌救助傷者的組織是？", "紅十字會", "消防隊", "學校", "銀行"], ["「世界人權宣言」強調每個人都有什麼？", "與生俱來的尊嚴與權利", "不同的等級", "種族高低", "財富決定一切"], ["地球日是每年的哪一天？", "4月22日", "1月1日", "6月1日", "12月25日"], ["造成溫室效應的主要氣體是什麼？", "二氧化碳", "氧氣", "氮氣", "氦氣"], ["全球暖化可能造成什麼影響？", "海平面上升", "冰川變厚", "氣溫下降", "沙漠消失"], ["下列哪一種做法可以減少碳排放？", "多搭大眾運輸", "每天開車載一個人", "開冷氣不關門", "浪費食物"], ["在網路上看到不確定的消息，應該怎麼做？", "查證後再分享", "立刻轉傳", "加油添醋", "當作一定是真的"], ["公平貿易的精神是什麼？", "讓生產者獲得合理報酬", "價格越低越好", "只為賺錢", "隱藏產地"], ["每個人依法什麼，國家才有經費建設？", "納稅", "睡覺", "玩樂", "逛街"], ["尊重多元文化是指什麼？", "欣賞並接納不同文化", "只認同自己的文化", "排斥外來文化", "嘲笑不同習俗"], ["遇到消費糾紛，可以怎麼處理？", "保留收據向消保單位申訴", "直接摔東西", "置之不理", "到處罵人"], ["統一發票可以用來做什麼？", "對獎與保障消費權益", "折紙飛機", "當作車票", "沒有用途"], ["民主社會中，媒體的主要責任是什麼？", "提供真實客觀的資訊", "製造假新聞", "只報壞消息", "替人吹捧"], ["志願服務的精神是什麼？", "無償付出關懷社會", "為了薪水", "為了出名", "強迫別人"]]}, "soc": {"L": [["一年有哪四個季節？", "春夏秋冬", "東南西北", "早中晚夜", "金木水火"], ["太陽從哪個方向升起？", "東方", "西方", "南方", "北方"], ["太陽從哪個方向落下？", "西方", "東方", "南方", "北方"], ["面向北方時，右手邊是哪個方向？", "東方", "西方", "南方", "北方"], ["在郵局可以做什麼？", "寄信寄包裹", "看病", "買水果", "借書"], ["在圖書館可以做什麼？", "借書看書", "看病", "買衣服", "寄包裹"], ["生病時要去哪裡看醫生？", "醫院", "學校", "郵局", "公園"], ["誰負責撲滅火災？", "消防員", "老師", "警察", "廚師"], ["誰負責維護交通與社會安全？", "警察", "醫生", "消防員", "農夫"], ["農夫通常在哪裡工作？", "農田", "學校", "醫院", "郵局"], ["想快速到很遠的地方，可以搭什麼？", "飛機", "腳踏車", "滑板車", "獨輪車"], ["在水上行駛的交通工具是？", "船", "火車", "公車", "腳踏車"], ["下雨天出門要帶什麼？", "雨傘", "太陽眼鏡", "風箏", "泳圈"], ["爸爸的爸爸，我們稱為什麼？", "爺爺", "外公", "叔叔", "舅舅"], ["媽媽的媽媽，我們稱為什麼？", "外婆", "奶奶", "阿姨", "姑姑"], ["住在附近、大家一起生活的地方叫什麼？", "社區", "海洋", "沙漠", "太空"], ["火車在哪裡行駛？", "鐵軌", "天空", "海上", "河裡"], ["學校裡有哪些人？", "老師和同學", "只有警察", "只有醫生", "沒有人"]], "M": [["臺灣共有幾個縣市？", "22個", "18個", "25個", "30個"], ["下列哪一個是臺灣的直轄市？", "臺中市", "新竹市", "基隆市", "嘉義市"], ["下列哪一個縣不在臺灣本島，而是離島？", "澎湖縣", "花蓮縣", "苗栗縣", "嘉義縣"], ["地圖上用來表示方位的符號是？", "指北針", "圖例", "比例尺", "標題"], ["地圖上用來說明各種符號意思的是？", "圖例", "指北針", "比例尺", "地標"], ["四周被山環繞、中間低平的地形是？", "盆地", "平原", "高原", "島嶼"], ["地勢平坦、適合種稻的地形是？", "平原", "山地", "峽谷", "海溝"], ["高度很高、坡度很陡的地形是？", "山地", "平原", "盆地", "海灣"], ["水會往哪裡流？", "由高處往低處", "由低處往高處", "往山上", "繞圈圈"], ["臺灣四面環海，屬於哪一種地形？", "島嶼", "沙漠", "高原", "草原"], ["地球上可以飲用的水很有限，所以要怎麼做？", "節約用水", "盡量浪費", "洗車一直開水", "不管它"], ["颱風來時，哪一種做法正確？", "待在室內關緊門窗", "去海邊看浪", "爬山", "到溪邊玩水"], ["學校發生地震時，應該怎麼做？", "躲在桌下保護頭部", "衝到電梯", "靠近窗戶", "大聲尖叫亂跑"], ["農夫、漁夫屬於哪一級產業？", "第一級產業", "第二級產業", "第三級產業", "第四級產業"], ["將原料加工成產品的工廠屬於哪一級產業？", "第二級產業", "第一級產業", "第三級產業", "第四級產業"], ["臺灣最高的山是哪一座？", "玉山", "阿里山", "雪山", "太平山"], ["十二月到二月通常是哪一個季節？", "冬季", "夏季", "春季", "秋季"], ["上學時，哪一種方式比較環保？", "走路或騎腳踏車", "一個人坐一輛車", "搭計程車", "開貨車"]], "H": [["臺灣最高的山是哪一座？", "玉山", "阿里山", "雪山", "合歡山"], ["臺灣最長的河流是？", "濁水溪", "淡水河", "高屏溪", "大甲溪"], ["臺灣最大的天然湖泊是？", "日月潭", "澄清湖", "鯉魚潭", "蘭潭"], ["臺灣最大的平原是？", "嘉南平原", "宜蘭平原", "屏東平原", "臺北盆地"], ["我國的首都是哪裡？", "臺北", "臺中", "高雄", "臺南"], ["臺灣東邊面對哪一個大洋？", "太平洋", "大西洋", "印度洋", "北冰洋"], ["臺灣冬天吹的季風是？", "東北季風", "西南季風", "西北季風", "東南季風"], ["臺灣夏天主要吹的季風是？", "西南季風", "東北季風", "西北季風", "正北風"], ["臺灣最長的山脈是？", "中央山脈", "雪山山脈", "玉山山脈", "海岸山脈"], ["農業、漁業屬於第幾級產業？", "第一級產業", "第二級產業", "第三級產業", "第四級產業"], ["工廠製造產品屬於第幾級產業？", "第二級產業", "第一級產業", "第三級產業", "第四級產業"], ["商店、運輸、觀光屬於第幾級產業？", "第三級產業", "第一級產業", "第二級產業", "第四級產業"], ["住在蘭嶼的原住民族是？", "達悟族", "阿美族", "排灣族", "泰雅族"], ["臺灣原住民族中，人口最多的是？", "阿美族", "泰雅族", "排灣族", "布農族"], ["下列哪一種能源是再生能源？", "太陽能", "煤炭", "石油", "天然氣"], ["風力發電屬於哪一類能源？", "再生能源", "石化燃料", "核燃料", "木炭"], ["下列哪個做法可以節約用水？", "隨手關緊水龍頭", "邊刷牙邊開水", "水一直開著洗碗", "用水沖地板"], ["發生地震時，在室內應該怎麼做？", "躲在桌子下", "搭電梯", "跑到陽台", "站在窗邊"], ["臺灣最大的港口是？", "高雄港", "基隆港", "臺中港", "花蓮港"], ["下列哪一個縣市位於臺灣東部？", "花蓮", "彰化", "嘉義", "苗栗"], ["澎湖是屬於哪一種地形？", "群島", "盆地", "高原", "平原"], ["盆地的地形特色是什麼？", "四周高中間低", "四周低中間高", "一邊高一邊低", "完全平坦"], ["一般地圖的上方，通常代表哪個方向？", "北", "南", "東", "西"], ["比例尺 1：1000，地圖上的 1 公分，代表實際多少公尺？", "10公尺", "1公尺", "100公尺", "1000公尺"], ["臺灣的颱風，主要發生在哪些季節？", "夏季和秋季", "冬季", "春季", "每個季節一樣多"], ["為了防止土石流，山坡地應該怎麼做？", "種樹保持水土", "大量砍伐樹木", "隨意挖土", "蓋大量建築"], ["臺灣位於世界七大洲中的哪一洲？", "亞洲", "歐洲", "非洲", "大洋洲"], ["世界上最大的洋是哪一個？", "太平洋", "大西洋", "印度洋", "北冰洋"], ["世界上面積最大的洲是哪一洲？", "亞洲", "非洲", "北美洲", "歐洲"], ["下列哪一種做法有助於環境保護？", "垃圾分類回收", "隨地亂丟垃圾", "開冷氣不關門", "大量使用塑膠袋"]], "H6": [["日本的首都是哪裡？", "東京", "大阪", "京都", "首爾"], ["美國的首都是哪裡？", "華盛頓", "紐約", "洛杉磯", "芝加哥"], ["英國的首都是哪裡？", "倫敦", "巴黎", "柏林", "羅馬"], ["法國的首都是哪裡？", "巴黎", "倫敦", "羅馬", "柏林"], ["南韓的首都是哪裡？", "首爾", "釜山", "東京", "北京"], ["澳洲的首都是哪裡？", "坎培拉", "雪梨", "墨爾本", "伯斯"], ["世界上最高的山峰是哪一座？", "聖母峰", "玉山", "富士山", "阿爾卑斯山"], ["世界上最大的熱帶沙漠是哪一個？", "撒哈拉沙漠", "戈壁沙漠", "阿拉伯沙漠", "莫哈維沙漠"], ["緯度為 0 度的線稱為什麼？", "赤道", "本初子午線", "南極圈", "北回歸線"], ["本初子午線通過英國的哪個地方？", "格林威治", "倫敦塔", "牛津", "劍橋"], ["北半球是夏天時，南半球是什麼季節？", "冬天", "夏天", "春天", "秋天"], ["世界上面積最小的洲是哪一洲？", "大洋洲", "亞洲", "南極洲", "歐洲"], ["臺灣南方隔著巴士海峽，與哪個國家為鄰？", "菲律賓", "日本", "越南", "印度"], ["埃及的金字塔位於哪一洲？", "非洲", "亞洲", "歐洲", "南美洲"], ["世界上面積最大的國家是哪一國？", "俄羅斯", "中國", "美國", "加拿大"], ["亞馬遜雨林主要位於哪一洲？", "南美洲", "非洲", "亞洲", "澳洲"], ["氣溫終年很低、被冰雪覆蓋的洲是哪一洲？", "南極洲", "非洲", "亞洲", "大洋洲"], ["赤道附近的氣候通常是什麼？", "炎熱", "寒冷", "乾冷", "冰天雪地"]]}, "grm": {"A": [["She ___ a girl.", "is", "am", "are", "be"], ["They ___ my friends.", "are", "is", "am", "be"], ["This is ___ dog.", "a", "an", "are", "is"], ["Hello! ___ name is Amy.", "My", "I", "Me", "Am"], ["The plural of \"dog\" is ___.", "dogs", "dog", "doges", "dogies"], ["What color is the sky? It is ___.", "blue", "red", "black", "pink"], ["Good morning! 是什麼時候說的？", "早上", "晚上", "中午", "半夜"], ["Thank you. 的回答是 ___.", "You're welcome", "Sorry", "Goodbye", "Hello"], ["Goodbye 的意思是？", "再見", "你好", "謝謝", "對不起"], ["Thank you 的意思是？", "謝謝", "對不起", "再見", "請"], ["Sorry 的意思是？", "對不起", "謝謝", "你好", "再見"], ["I ___ a student.", "am", "is", "are", "be"], ["I have ___ orange.", "an", "a", "the", "two"], ["___ is your name? My name is Tom.", "What", "Who", "Where", "When"]], "B": [["She ___ to school every day.", "goes", "go", "going", "gone"], ["They ___ playing basketball now.", "are", "is", "am", "be"], ["There ___ two cats on the sofa.", "are", "is", "am", "be"], ["He ___ breakfast at seven.", "has", "have", "having", "had"], ["How ___ apples do you want?", "many", "much", "long", "old"], ["What ___ is it? It is three o'clock.", "time", "day", "date", "color"], ["___ do you live? I live in Taipei.", "Where", "What", "Who", "When"], ["The opposite of \"hot\" is ___.", "cold", "big", "fast", "happy"], ["The opposite of \"up\" is ___.", "down", "left", "in", "out"], ["Today is Monday. Tomorrow is ___.", "Tuesday", "Sunday", "Wednesday", "Friday"], ["Yesterday was Saturday. Today is ___.", "Sunday", "Friday", "Monday", "Tuesday"], ["How are you? I'm ___, thank you.", "fine", "name", "blue", "Monday"], ["The month after June is ___.", "July", "May", "August", "September"], ["A week has ___ days.", "seven", "five", "six", "eight"], ["A year has ___ months.", "twelve", "ten", "eleven", "thirteen"], ["Forty 的數字是？", "40", "14", "4", "400"], ["Fifteen 的數字是？", "15", "50", "5", "51"], ["Thirty 的數字是？", "30", "13", "3", "300"], ["We ___ in the classroom now.", "are", "is", "am", "was"], ["It is raining. Take an ___.", "umbrella", "apple", "egg", "elephant"]], "C": [["I ___ TV last night.", "watched", "watch", "watches", "watching"], ["How ___ is this cake? It is 50 dollars.", "much", "many", "old", "long"], ["The plural of \"child\" is ___.", "children", "childs", "childrens", "childen"], ["The plural of \"box\" is ___.", "boxes", "boxs", "boxies", "boxen"], ["I can ___ a bike.", "ride", "rides", "riding", "rode"], ["She is my mother. ___ name is Amy.", "Her", "His", "Their", "Its"], ["He ___ playing the piano. He is a good player.", "is", "are", "am", "be"], ["My brother ___ a dog. It is cute.", "has", "have", "having", "haves"], ["Do you like apples? Yes, I ___.", "do", "does", "am", "are"]]}, "voc": {"animals": {"g": 1, "w": [["dog", "狗"], ["cat", "貓"], ["bird", "鳥"], ["fish", "魚"], ["rabbit", "兔子"], ["elephant", "大象"], ["monkey", "猴子"], ["tiger", "老虎"], ["horse", "馬"], ["pig", "豬"], ["cow", "牛"], ["duck", "鴨子"]]}, "colors": {"g": 1, "w": [["red", "紅色"], ["blue", "藍色"], ["green", "綠色"], ["yellow", "黃色"], ["black", "黑色"], ["white", "白色"], ["pink", "粉紅色"], ["purple", "紫色"]]}, "numbers": {"g": 1, "w": [["one", "一"], ["two", "二"], ["three", "三"], ["four", "四"], ["five", "五"], ["six", "六"], ["seven", "七"], ["eight", "八"], ["nine", "九"], ["ten", "十"]]}, "family": {"g": 1, "w": [["father", "爸爸"], ["mother", "媽媽"], ["brother", "哥哥或弟弟"], ["sister", "姊姊或妹妹"], ["grandfather", "爺爺"], ["grandmother", "奶奶"]]}, "body": {"g": 1, "w": [["head", "頭"], ["hand", "手"], ["foot", "腳"], ["eye", "眼睛"], ["ear", "耳朵"], ["nose", "鼻子"], ["mouth", "嘴巴"], ["face", "臉"]]}, "school": {"g": 1, "w": [["pencil", "鉛筆"], ["pen", "原子筆"], ["book", "書"], ["desk", "書桌"], ["chair", "椅子"], ["bag", "書包"], ["ruler", "尺"], ["eraser", "橡皮擦"]]}, "fruit": {"g": 1, "w": [["apple", "蘋果"], ["banana", "香蕉"], ["orange", "柳橙"], ["grape", "葡萄"], ["watermelon", "西瓜"], ["strawberry", "草莓"], ["peach", "桃子"], ["lemon", "檸檬"]]}, "food": {"g": 2, "w": [["breakfast", "早餐"], ["lunch", "午餐"], ["dinner", "晚餐"], ["milk", "牛奶"], ["bread", "麵包"], ["rice", "米飯"], ["noodles", "麵條"], ["egg", "蛋"], ["cake", "蛋糕"], ["juice", "果汁"]]}, "nature": {"g": 2, "w": [["mountain", "山"], ["river", "河流"], ["beach", "海灘"], ["forest", "森林"], ["flower", "花"], ["tree", "樹"], ["sun", "太陽"], ["moon", "月亮"]]}, "feelings": {"g": 3, "w": [["happy", "快樂的"], ["sad", "難過的"], ["angry", "生氣的"], ["tired", "累的"], ["hungry", "餓的"], ["thirsty", "渴的"], ["scared", "害怕的"], ["excited", "興奮的"]]}, "weather": {"g": 3, "w": [["rainy", "下雨的"], ["snowy", "下雪的"], ["windy", "有風的"], ["sunny", "晴朗的"], ["cloudy", "多雲的"], ["hot", "熱的"], ["cold", "冷的"], ["warm", "溫暖的"]]}, "days": {"g": 3, "w": [["Monday", "星期一"], ["Tuesday", "星期二"], ["Wednesday", "星期三"], ["Thursday", "星期四"], ["Friday", "星期五"], ["Saturday", "星期六"], ["Sunday", "星期日"]]}, "months": {"g": 3, "w": [["January", "一月"], ["February", "二月"], ["March", "三月"], ["May", "五月"], ["July", "七月"], ["September", "九月"], ["October", "十月"], ["December", "十二月"]]}, "transport": {"g": 3, "w": [["bus", "公車"], ["train", "火車"], ["bike", "腳踏車"], ["airplane", "飛機"], ["ship", "船"], ["taxi", "計程車"], ["MRT", "捷運"], ["car", "汽車"]]}, "jobs": {"g": 4, "w": [["teacher", "老師"], ["student", "學生"], ["doctor", "醫生"], ["nurse", "護士"], ["farmer", "農夫"], ["police officer", "警察"], ["cook", "廚師"], ["driver", "司機"], ["singer", "歌手"], ["artist", "畫家"]]}, "places": {"g": 4, "w": [["library", "圖書館"], ["hospital", "醫院"], ["school", "學校"], ["park", "公園"], ["market", "市場"], ["bank", "銀行"], ["post office", "郵局"], ["supermarket", "超市"], ["zoo", "動物園"], ["museum", "博物館"]]}}};
+QB.chi={"A": [["「ㄖˋ」是哪一個字？", "日", "月", "目", "田"], ["「ㄩㄝˋ」是哪一個字？", "月", "日", "用", "目"], ["「ㄕㄨㄟˇ」是哪一個字？", "水", "木", "永", "火"], ["「ㄏㄨㄛˇ」是哪一個字？", "火", "水", "大", "小"], ["「ㄕㄢ」是哪一個字？", "山", "出", "川", "凹"], ["「ㄊㄧㄢ」是哪一個字？", "天", "夫", "大", "夭"], ["「ㄖㄣˊ」是哪一個字？", "人", "入", "八", "大"], ["「ㄎㄡˇ」是哪一個字？", "口", "日", "田", "中"], ["「ㄇㄨˋ」是哪一個字？", "木", "未", "本", "水"], ["「ㄊㄨˇ」是哪一個字？", "土", "士", "工", "上"], ["「ㄒㄧㄠˇ」是哪一個字？", "小", "少", "大", "水"], ["「ㄉㄚˋ」是哪一個字？", "大", "太", "犬", "天"], ["「ㄕㄤˋ」是哪一個字？", "上", "下", "止", "工"], ["「ㄒㄧㄚˋ」是哪一個字？", "下", "上", "不", "卜"], ["「ㄕㄡˇ」是哪一個字？", "手", "毛", "牛", "年"], ["「ㄒㄧㄣ」是哪一個字？", "心", "必", "小", "忘"], ["「ㄩˇ」是哪一個字？", "雨", "兩", "面", "雪"], ["「ㄏㄨㄚ」是哪一個字？", "花", "草", "化", "苗"], ["「ㄘㄠˇ」是哪一個字？", "草", "早", "花", "苗"], ["「ㄋㄧㄠˇ」是哪一個字？", "鳥", "烏", "鳴", "島"], ["「ㄩˊ」是哪一個字？", "魚", "魯", "羊", "龜"], ["「ㄋㄧㄡˊ」是哪一個字？", "牛", "午", "手", "羊"], ["「ㄧㄤˊ」是哪一個字？", "羊", "牛", "美", "半"], ["「ㄇㄚˇ」是哪一個字？", "馬", "鳥", "媽", "為"], ["「ㄈㄥ」是哪一個字？", "風", "鳳", "飛", "雨"], ["「ㄩㄣˊ」是哪一個字？", "雲", "雨", "去", "會"], ["「ㄇㄧˇ」是哪一個字？", "米", "木", "來", "半"], ["「ㄗㄨˊ」是哪一個字？", "足", "是", "走", "定"], ["「大」的相反詞是？", "小", "高", "長", "多"], ["「上」的相反詞是？", "下", "左", "前", "外"], ["「長」的相反詞是？", "短", "高", "大", "遠"], ["「高」的相反詞是？", "矮", "小", "短", "胖"], ["「快」的相反詞是？", "慢", "急", "早", "遠"], ["「多」的相反詞是？", "少", "大", "長", "高"], ["「冷」的相反詞是？", "熱", "冰", "雪", "凍"], ["「新」的相反詞是？", "舊", "小", "快", "亮"], ["「黑」的相反詞是？", "白", "紅", "暗", "深"], ["「早」的相反詞是？", "晚", "快", "中", "午"], ["「前」的相反詞是？", "後", "左", "上", "外"], ["「開」的相反詞是？", "關", "放", "走", "來"], ["「胖」的相反詞是？", "瘦", "矮", "小", "高"], ["「遠」的相反詞是？", "近", "長", "慢", "小"], ["「輕」的相反詞是？", "重", "慢", "小", "短"], ["一（　）書，括號要填哪一個量詞？", "本", "張", "隻", "條"], ["一（　）紙，括號要填哪一個量詞？", "張", "本", "隻", "條"], ["一（　）小鳥，括號要填哪一個量詞？", "隻", "條", "本", "張"], ["一（　）魚，括號要填哪一個量詞？", "條", "本", "張", "朵"], ["一（　）花，括號要填哪一個量詞？", "朵", "隻", "本", "張"], ["一（　）汽車，括號要填哪一個量詞？", "輛", "朵", "隻", "件"], ["一（　）樹，括號要填哪一個量詞？", "棵", "隻", "間", "本"], ["一（　）房子，括號要填哪一個量詞？", "間", "棵", "朵", "件"], ["一（　）衣服，括號要填哪一個量詞？", "件", "雙", "條", "本"], ["一（　）雨傘，括號要填哪一個量詞？", "把", "枝", "隻", "件"], ["一（　）鞋子，括號要填哪一個量詞？", "雙", "件", "本", "把"], ["一（　）鉛筆，括號要填哪一個量詞？", "枝", "本", "條", "朵"]], "B": [["「深」的相反詞是？", "淺", "高", "遠", "暗"], ["「粗」的相反詞是？", "細", "大", "重", "硬"], ["「勤勞」的相反詞是？", "懶惰", "忙碌", "快樂", "安靜"], ["「安靜」的相反詞是？", "吵鬧", "安心", "寧靜", "溫柔"], ["「成功」的相反詞是？", "失敗", "努力", "開心", "勝利"], ["「開始」的相反詞是？", "結束", "出發", "開門", "明白"], ["「出口」的相反詞是？", "入口", "門口", "窗口", "路口"], ["「白天」的相反詞是？", "黑夜", "早上", "中午", "下午"], ["「光明」的相反詞是？", "黑暗", "明亮", "晴朗", "燦爛"], ["「勇敢」的相反詞是？", "膽小", "堅強", "聰明", "努力"], ["「進步」的相反詞是？", "退步", "前進", "成長", "改善"], ["「高興」的近義詞是？", "快樂", "難過", "生氣", "害怕"], ["「漂亮」的近義詞是？", "美麗", "醜陋", "普通", "安靜"], ["「寬敞」的近義詞是？", "寬廣", "狹窄", "擁擠", "窄小"], ["「聰明」的近義詞是？", "機靈", "愚笨", "懶惰", "粗心"], ["「害怕」的近義詞是？", "恐懼", "勇敢", "開心", "生氣"], ["「安靜」的近義詞是？", "寧靜", "吵鬧", "熱鬧", "喧嘩"], ["「困難」的近義詞是？", "艱難", "容易", "簡單", "輕鬆"], ["「仔細」的近義詞是？", "認真", "馬虎", "隨便", "粗心"], ["一（　）剪刀，括號要填哪一個量詞？", "把", "本", "張", "隻"], ["「江、河、湖」的部首是？", "水部（氵）", "火部", "木部", "土部"], ["「媽、姐、妹」的部首是？", "女部", "子部", "人部", "口部"], ["「打、拍、推」的部首是？", "手部（扌）", "足部", "口部", "木部"], ["「花、草、菜」的部首是？", "艸部（艹）", "木部", "竹部", "禾部"], ["「吃、喝、唱」的部首是？", "口部", "日部", "目部", "田部"], ["「跑、跳、路」的部首是？", "足部", "手部", "走部", "立部"], ["「飯、餓、餅」的部首是？", "食部", "火部", "米部", "禾部"], ["「想、感、愛」的部首是？", "心部", "口部", "日部", "手部"], ["畫蛇添（　），括號要填哪一個字？", "足", "腳", "尾", "毛"], ["守株待（　），括號要填哪一個字？", "兔", "鳥", "魚", "鹿"], ["掩耳盜（　），括號要填哪一個字？", "鈴", "鐘", "錢", "寶"], ["對牛彈（　），括號要填哪一個字？", "琴", "笛", "歌", "鼓"], ["井底之（　），括號要填哪一個字？", "蛙", "魚", "龜", "鳥"], ["一石二（　），括號要填哪一個字？", "鳥", "魚", "蟲", "獸"], ["自相矛（　），括號要填哪一個字？", "盾", "戈", "槍", "劍"], ["錦上添（　），括號要填哪一個字？", "花", "草", "彩", "色"], ["「ㄒㄩㄝˊ」是哪一個字？", "學", "雪", "血", "穴"], ["「ㄌㄠˇ」是哪一個字？", "老", "考", "孝", "勞"], ["「ㄏㄠˇ」是哪一個字？", "好", "如", "女", "子"], ["「ㄆㄥˊ」是哪一個字？", "朋", "明", "用", "月"], ["「ㄒㄧㄝˋ」是哪一個字？", "謝", "射", "寫", "協"]], "C": [["「守株待兔」比喻什麼？", "不努力卻想不勞而獲", "非常勤勞", "做事很快", "保護動物"], ["「亡羊補牢」的意思是什麼？", "出問題後趕快補救", "把羊關起來", "丟了羊就放棄", "購買羊群"], ["「畫蛇添足」的意思是什麼？", "多此一舉", "畫得很像", "畫得很快", "畫得很大"], ["「井底之蛙」比喻什麼樣的人？", "見識狹小的人", "很會游泳的人", "住在井邊的人", "勇敢的人"], ["「塞翁失馬」告訴我們什麼？", "壞事也可能變成好事", "馬很重要", "要小心走失", "賣馬賺錢"], ["「愚公移山」告訴我們什麼？", "只要有毅力就能成功", "山很高", "不要搬家", "要保護山林"], ["「孔融讓梨」是在稱讚孔融什麼美德？", "謙讓", "勇敢", "節儉", "誠實"], ["「鐵杵磨成針」告訴我們什麼？", "有恆心毅力就能成功", "鐵很硬", "針很細", "李白很有錢"], ["葉公好（　），括號要填哪一個字？", "龍", "虎", "蛇", "鳳"], ["三心二（　），括號要填哪一個字？", "意", "心", "思", "念"], ["揠苗助（　），括號要填哪一個字？", "長", "生", "大", "高"], ["鐵杵磨成（　），括號要填哪一個字？", "針", "棒", "線", "刀"], ["愚公移（　），括號要填哪一個字？", "山", "石", "土", "海"], ["破釜沉（　），括號要填哪一個字？", "舟", "船", "鍋", "水"], ["完璧歸（　），括號要填哪一個字？", "趙", "魏", "楚", "秦"], ["孔融讓（　），括號要填哪一個字？", "梨", "棗", "桃", "蘋"], ["臥薪嘗（　），括號要填哪一個字？", "膽", "草", "血", "苦"], ["四面楚（　），括號要填哪一個字？", "歌", "曲", "樂", "聲"], ["紙上談（　），括號要填哪一個字？", "兵", "話", "論", "戰"], ["按部就（　），括號要填哪一個字？", "班", "位", "序", "座"], ["胸有成（　），括號要填哪一個字？", "竹", "木", "草", "算"], ["有備無（　），括號要填哪一個字？", "患", "憂", "難", "害"], ["迫不及（　），括號要填哪一個字？", "待", "等", "想", "候"], ["全神貫（　），括號要填哪一個字？", "注", "心", "神", "力"], ["「月亮像一個大圓盤掛在天上」使用了什麼修辭？", "譬喻", "擬人", "誇飾", "排比"], ["「風兒輕輕地撫摸著我的臉」使用了什麼修辭？", "擬人", "譬喻", "誇飾", "設問"], ["「他餓得可以吞下一頭牛」使用了什麼修辭？", "誇飾", "譬喻", "擬人", "排比"], ["「你知道什麼是快樂嗎？快樂就是和家人在一起」使用了什麼修辭？", "設問", "譬喻", "擬人", "誇飾"], ["「花兒對我點頭微笑」使用了什麼修辭？", "擬人", "譬喻", "誇飾", "排比"], ["「白髮三千丈」使用了什麼修辭？", "誇飾", "擬人", "譬喻", "設問"], ["「床前明月光，疑是地上霜」的作者是誰？", "李白", "杜甫", "白居易", "王維"], ["「春眠不覺曉，處處聞啼鳥」的作者是誰？", "孟浩然", "李白", "杜甫", "王之渙"], ["「鋤禾日當午，汗滴禾下土」出自哪一首詩？", "憫農", "靜夜思", "春曉", "登鸛雀樓"], ["「白日依山盡，黃河入海流」的作者是誰？", "王之渙", "李白", "杜甫", "孟郊"], ["「慈母手中線，遊子身上衣」出自哪一首詩？", "遊子吟", "靜夜思", "春曉", "登鸛雀樓"], ["〈靜夜思〉表達的是什麼心情？", "思念家鄉", "慶祝節日", "讚美春天", "害怕黑夜"], ["〈春曉〉的作者是誰？", "孟浩然", "李白", "杜甫", "白居易"], ["「欲窮千里目」的下一句是什麼？", "更上一層樓", "黃河入海流", "白日依山盡", "疑是地上霜"], ["「驕傲」的反義詞是？", "謙虛", "自大", "得意", "自豪"], ["「豐富」的反義詞是？", "貧乏", "豐盛", "充足", "富裕"], ["「虛偽」的反義詞是？", "真誠", "狡猾", "冷漠", "謙虛"], ["「讚美」的反義詞是？", "批評", "稱讚", "鼓勵", "誇獎"], ["「團結」的反義詞是？", "分裂", "合作", "友好", "互助"], ["「慷慨」的反義詞是？", "吝嗇", "大方", "熱情", "勇敢"], ["「節儉」的反義詞是？", "浪費", "節約", "儲蓄", "簡單"], ["「龐大」的近義詞是？", "巨大", "微小", "狹窄", "輕盈"], ["「我們明天（　）見」，括號要填哪一個字？", "再", "在", "載", "栽"], ["「他（　）家裡寫功課」，括號要填哪一個字？", "在", "再", "載", "栽"]]};
+const rnd=n=>Math.floor(Math.random()*n),RI=(a,b)=>a+rnd(b-a+1),pk=a=>a[rnd(a.length)];
+const gcd=(x,y)=>y?gcd(y,x%y):x,fmt=n=>String(Math.round(n*100)/100);
+function frac(n,d){const g=gcd(n,d);n/=g;d/=g;return d===1?String(n):n+'/'+d}
+function uniq(a,ex){const o=[];for(const x of a){const s=String(x);if(s!==ex&&!o.includes(s)&&s!=='NaN'&&s!=='undefined'&&s!=='Infinity')o.push(s)}return o}
+function bankQ(arr,key){let it,t=0;do{it=pk(arr);t++}while(recentQ.includes(key+it[0])&&t<40);recentQ.push(key+it[0]);if(recentQ.length>28)recentQ.shift();return it}
+function poolOf(arr){return arr._p||(arr._p=uniq(arr.flatMap(x=>x.slice(1)),''))}
+function numPool(a){const out=[];if(a.indexOf('/')>=0){for(let i=0;i<12;i++)out.push(frac(RI(1,9),RI(2,8)))}else{const x=Number(a),dec=a.indexOf('.')>=0;for(let i=0;i<12;i++){const v=Math.max(1,x*(.4+Math.random()*1.4));out.push(dec?(Math.round(v*10)/10).toFixed(1).replace(/\.0$/,''):Math.round(v))}}return uniq(out,a)}
+function genSqrt(w){const ty=['a'];if(w>=2)ty.push('b');if(w>=3)ty.push('c');if(w>=4)ty.push('d');const k=pk(ty);let a,q;
+ if(k==='a'){const n=RI(2,Math.min(20,11+w*2));a=n;q='√'+n*n}
+ else if(k==='b'){const n=RI(2,Math.min(15,9+w)),m=RI(2,10);a=n+m;q='√'+n*n+' + '+m}
+ else if(k==='c'){const n=RI(2,9),m=RI(2,5);a=n*m;q=m+' × √'+n*n}
+ else{const T=[[3,4,5],[5,12,13],[6,8,10],[8,15,17],[9,12,15],[12,16,20],[15,20,25],[7,24,25]],p=pk(T);a=p[2];q='√('+p[0]*p[0]+' + '+p[1]*p[1]+')'}
+ const d=[a-3,a-2,a-1,a+1,a+2,a+3].filter(x=>x>=2);return{q:q+' = ?',a:String(a),d:uniq(d,String(a))}}
+function genMath(g,w){let q,a,d=[];const F=x=>typeof x==='number'?fmt(x):x;
+ if(g===1){const k=rnd(4);
+  if(k===0){const x=RI(1,12),y=RI(1,20-x);q=x+' + '+y+' = ?';a=x+y;d=[a-1,a+1,a+2,a-2,a+10]}
+  else if(k===1){const x=RI(5,20),y=RI(1,x-1);q=x+' - '+y+' = ?';a=x-y;d=[a-1,a+1,a+2,a-2,x+y]}
+  else if(k===2){const x=RI(1,8)*10,y=RI(1,9-x/10+1)*10;q=x+' + '+y+' = ?';a=x+y;d=[a-10,a+10,a-1,a+1,x]}
+  else{const x=RI(2,9),s=RI(x+1,15);q=x+' + □ = '+s;a=s-x;d=[a-1,a+1,s+x,x,a+2]}}
+ else if(g===2){const k=rnd(4);
+  if(k===0){const x=RI(100,600),y=RI(10,300);q=x+' + '+y+' = ?';a=x+y;d=[a-10,a+10,a-100,a+100,a-1]}
+  else if(k===1){const x=RI(200,900),y=RI(10,x-50);q=x+' - '+y+' = ?';a=x-y;d=[a-10,a+10,a-100,a+100,a+1]}
+  else if(k===2){const x=RI(2,9),y=RI(2,9);q=x+' × '+y+' = ?';a=x*y;d=[a+x,a-x,a+y,a-y,x+y]}
+  else{const x=RI(2,9),y=RI(2,9);q='□ × '+x+' = '+x*y;a=y;d=[y+1,y-1,x,x*y,y+2]}}
+ else if(g===3){const k=rnd(5);
+  if(k===0){const x=RI(11,49),m=RI(2,9);q=x+' × '+m+' = ?';a=x*m;d=[a-10,a+10,a-m,a+m,a+1]}
+  else if(k===1){const m=RI(2,9),y=RI(12,60);q=m*y+' ÷ '+m+' = ?';a=y;d=[y-1,y+1,y+10,y-10,y+2]}
+  else if(k===2){const l=RI(4,15),ww=RI(2,l-1);q='長 '+l+'、寬 '+ww+' 的長方形，周長是？';a=2*(l+ww);d=[l*ww,l+ww,a+2,a-2,a+4]}
+  else if(k===3){const s=RI(3,15);q='邊長 '+s+' 的正方形，周長是？';a=4*s;d=[s*s,2*s,a+4,a-4,3*s]}
+  else{const dd=pk([2,3,4,5]),k2=RI(2,10),whole=dd*k2;q=whole+' 的 1/'+dd+' 是多少？';a=k2;d=[whole-k2,k2+1,k2-1,whole,k2*2]}}
+ else if(g===4){const k=rnd(6);
+  if(k===0){const x=RI(12,60),y=RI(11,30);q=x+' × '+y+' = ?';a=x*y;d=[a-10,a+10,a-y,a+x,a+100]}
+  else if(k===1){const y=RI(11,25),z=RI(5,30);q=y*z+' ÷ '+y+' = ?';a=z;d=[z-1,z+1,z+10,z-10,z+2]}
+  else if(k===2){const dd=RI(4,12),n1=RI(1,dd-2),n2=RI(1,dd-1-n1);q=n1+'/'+dd+' + '+n2+'/'+dd+' = ?';a=frac(n1+n2,dd);d=[frac(n1+n2,dd*2),frac(n1+n2+1,dd),frac(Math.max(1,n1+n2-1),dd),frac(n1*n2,dd),frac(n1+n2,dd+dd)]}
+  else if(k===3){const x=RI(11,90)/10,y=RI(11,90)/10;q=fmt(x)+' + '+fmt(y)+' = ?';a=x+y;d=[a+.1,a-.1,a+1,a-1,a*10]}
+  else if(k===4){const l=RI(5,20),ww=RI(3,l-1);q='長 '+l+'、寬 '+ww+' 的長方形，面積是？';a=l*ww;d=[2*(l+ww),l+ww,a+l,a-ww,a*2]}
+  else{const x=RI(30,80),y=RI(30,80);q='三角形的兩個角是 '+x+'° 和 '+y+'°，第三個角是幾度？';a=180-x-y;if(a<=0){q='三角形的兩個角是 50° 和 60°，第三個角是幾度？';a=70}d=[a+10,a-10,180-x,x+y,a+20]}}
+ else if(g===5){const t=rnd(9);
+  if(t===0){const x=RI(12,26+w*2),y=RI(11,18+w);q=x+' × '+y+' = ?';a=x*y;d=[a-10,a+10,a-y,a+x,a-1,a+1,a+100]}
+  else if(t===1){const c=RI(3,12),k=RI(12,38+w*2);q=c*k+' ÷ '+c+' = ?';a=k;d=[k-1,k+1,k+2,k-2,k+10,k-10]}
+  else if(t===2){const D=[2,3,4,5,6,8],d1=pk(D),d2=pk(D),n1=RI(1,d1-1),n2=RI(1,d2-1),N=n1*d2+n2*d1,Dn=d1*d2;q=n1+'/'+d1+' + '+n2+'/'+d2+' = ?';a=frac(N,Dn);d=[frac(n1+n2,d1+d2),N+'/'+Dn,frac(N+1,Dn),frac(N-1,Dn),frac(N,Dn+1),frac(n1*n2,d1*d2)]}
+  else if(t===3){const dd=pk([2,3,4,5,8,10]),n=RI(1,dd-1),k=RI(2,12),whole=dd*k;q=whole+' 的 '+n+'/'+dd+' 是多少？';a=k*n;d=[k,whole-a,a+k,a-k,whole/dd+n,a+1]}
+  else if(t===4){const gg=RI(2,9);let x=gg*RI(2,7),y=gg*RI(2,7);while(x===y)y=gg*RI(2,7);if(Math.random()<.5){q=x+' 和 '+y+' 的最大公因數是？';a=gcd(x,y);d=[x*y/gcd(x,y),a*2,a+1,x+y,Math.abs(x-y)]}else{const l=x*y/gcd(x,y);q=x+' 和 '+y+' 的最小公倍數是？';a=l;d=[gcd(x,y),x*y,l+x,l-x,x+y,l*2]}}
+  else if(t===5){const k=rnd(4);if(k===0){let b=RI(4,16),h=RI(3,12);if((b*h)%2)b++;q='底 '+b+'、高 '+h+' 的三角形面積是？';a=b*h/2;d=[b*h,b+h,a+b,a-h,2*b*h]}else if(k===1){const b=RI(4,15),h=RI(3,12);q='底 '+b+'、高 '+h+' 的平行四邊形面積是？';a=b*h;d=[b*h/2,b+h,2*(b+h),a+b,a-h]}else if(k===2){const l=RI(5,20),ww=RI(3,l-1);q='長 '+l+'、寬 '+ww+' 的長方形，周長是？';a=2*(l+ww);d=[l*ww,l+ww,a+2,a-2,4*l]}else{const l=RI(2,8),ww=RI(2,6),h=RI(2,6);q='長 '+l+'、寬 '+ww+'、高 '+h+' 的長方體，體積是？';a=l*ww*h;d=[l*ww+h,l+ww+h,2*(l*ww+ww*h+l*h),a+l,a-ww]}}
+  else if(t===6){const k=rnd(3);if(k===0){const x=RI(2,60),y=RI(2,60);q=x/10+' + '+y/10+' = ?';a=(x+y)/10;d=[a+.1,a-.1,a+1,a-1,a*10,a/10]}else if(k===1){const x=RI(3,60),m=RI(2,9);q=x/10+' × '+m+' = ?';a=x*m/10;d=[a*10,a/10,a+.1,a-.1,a+1]}else{const y=RI(11,60),m=pk([2,3,4,5]),x=y*m;q=x/10+' ÷ '+m+' = ?';a=y/10;d=[a*10,a/10,a+.1,a-.1,a+1,a*2]}}
+  else if(t===7){const m=RI(5,40);let n1=m+RI(-6,6),n2=m+RI(-6,6),n3=m+RI(-6,6),n4=4*m-n1-n2-n3;if(n4<1){n4=m;n1=m;n2=m;n3=m}q=n1+'、'+n2+'、'+n3+'、'+n4+' 的平均數是？';a=m;d=[m+1,m-1,m+2,m-2,4*m,n1+n2]}
+  else{const base=pk([40,60,80,100,120,150,200,250,300,400]),p=pk([10,20,25,50]);q=base+' 的 '+p+'% 是多少？';a=base*p/100;d=[base*p/10,a+10,a-10,base-p,a*2,p]}}
+ else{const k=rnd(8);
+  if(k===0){const D=[2,3,4,5,6],d1=pk(D),d2=pk(D),n1=RI(1,d1-1),n2=RI(1,d2-1);q=n1+'/'+d1+' × '+n2+'/'+d2+' = ?';a=frac(n1*n2,d1*d2);d=[frac(n1+n2,d1+d2),frac(n1*n2,d1+d2),frac(n1*d2+n2*d1,d1*d2),frac(n1*d2,n2*d1),frac(n1*n2+1,d1*d2)]}
+  else if(k===1){const D=[2,3,4,5,6,8],d1=pk(D),d2=pk(D),n1=RI(1,d1-1),n2=RI(1,d2-1);q=n1+'/'+d1+' ÷ '+n2+'/'+d2+' = ?';a=frac(n1*d2,d1*n2);d=[frac(n1*n2,d1*d2),frac(d1*n2,n1*d2),frac(n1*d2+1,d1*n2),frac(n1*d2,d1*n2+1),frac(n1+d2,d1+n2)]}
+  else if(k===2){const P=RI(4,40)*10,N=RI(5,9);q='原價 '+P+' 元，打 '+N+' 折是多少元？';a=P*N/10;d=[P*(10-N)/10,P*N/100,P-N,a+10,a-10,P*N]}
+  else if(k===3){const r=RI(2,12);q='直徑 '+r+' 公分的圓，圓周是幾公分？（π＝3.14）';a=3.14*r;d=[3.14*r*r,3.14*r/2,6.28*r,3.14*r+1,3.14*(r+1)]}
+  else if(k===4){const r=RI(2,10);q='半徑 '+r+' 公分的圓，面積是幾平方公分？（π＝3.14）';a=3.14*r*r;d=[6.28*r,3.14*r,3.14*r*r*2,3.14*r*r/2,3.14*(r+1)*(r+1)]}
+  else if(k===5){const v=RI(3,12)*10,h=RI(2,6);q='時速 '+v+' 公里，行駛 '+h+' 小時，共走幾公里？';a=v*h;d=[v+h,v/h,a+v,a-v,a*2]}
+  else if(k===6){const n=RI(2,6),x=RI(2,9),y=RI(2,9);q=x+' : '+y+' = '+x*n+' : □';a=y*n;d=[y+n,x*n,a+y,a-y,a+n,y*n+x]}
+  else{const x=RI(5,30),y=RI(x+5,90);q='x + '+x+' = '+y+'，x 是多少？';a=y-x;d=[y+x,a+1,a-1,a+2,x,y]}}
+ a=F(a);return{q,a,d:uniq(d.map(F),a)}}
+function genEng(g){const cats=Object.keys(QB.voc).filter(c=>QB.voc[c].g<=g),gr=[];
+ if(g>=2)gr.push(...QB.grm.A);if(g>=4)gr.push(...QB.grm.B);if(g>=5)gr.push(...QB.grm.C);
+ if(!gr.length||Math.random()<(g<=3?.75:.55)){const cat=pk(cats),L=QB.voc[cat].w,it=pk(L),dir=rnd(2),a=it[dir?0:1],q=dir?'「'+it[1]+'」的英文是？':it[0]+' 的中文是？',same=uniq(L.map(x=>x[dir?0:1]),a).sort(()=>Math.random()-.5).slice(0,4),all=uniq(cats.flatMap(c=>QB.voc[c].w).map(x=>x[dir?0:1]),a);return{q,a,d:same,pool:all}}
+ gr._p=null;const it=bankQ(gr,'g');return{q:it[0],a:it[1],d:it.slice(2),pool:uniq(gr.flatMap(x=>x.slice(1)),'')}}
+function bandArr(sub){const g=grade,B=QB[sub];if(g<=2)return B.L;if(g<=4)return B.M;if(g===5)return B.H;return B.H6.concat(B.H.slice(0,12))}
+function avail(){return grade>=5?[0,1,2,3,4,5,6]:[1,2,6]}
+function genChi(g){const C=QB.chi,arr=g<=2?C.A:g<=4?C.B:g===5?C.C.concat(C.B):C.C,it=bankQ(arr,'c'+g);return{q:it[0],a:it[1],d:it.slice(2),pool:poolOf(arr)}}
+function genQ(){const al=avail();let s=subj===7?pk(al):subj;if(!al.includes(s))s=pk(al);const w=wave;let g;
+ if(s===0)g=genSqrt(w);else if(s===1)g=genMath(grade,w);else if(s===2)g=genEng(grade);else if(s===6)g=genChi(grade);
+ else{const arr=bandArr(['','','','hist','civ','soc'][s]),it=bankQ(arr,s+'_'+grade);g={q:it[0],a:it[1],d:it.slice(2),pool:poolOf(arr)}}
+ g.a=String(g.a);g.d=uniq(g.d,g.a);if(!g.pool)g.pool=numPool(g.a);g.pool=uniq(g.pool.concat(g.d),g.a);
+ const base=[28,34,26,32,30,30,28][s]+(6-grade)*2;g.t=Math.max(base-12,base-w*.6);g.sub=SUBJ[s];return g}
+function newQ(ok){const g=genQ();ans=g.a;qTxt=g.q;qSub=g.sub;QD=g.d;POOL=g.pool;qT=qT0=g.t;if(ok){qMsg='✔ 正確！';qMsgT=1}for(const z of Z)z.v=z.boss?ans:pickV()}
+function buildGr(){const e=$('gr');e.innerHTML='';[1,2,3,4,5,6].forEach(k=>{const b=document.createElement('button');b.textContent=k+' 年級';b.className=k===grade?'on':'';b.onclick=()=>{grade=k;if(subj!==7&&!avail().includes(subj))subj=7;buildGr()};e.appendChild(b)});buildSj()}
+function buildSj(){const e=$('sj');e.innerHTML='';const al=avail();[6,2,1,3,4,5,0,7].forEach(k=>{if(k!==7&&!al.includes(k))return;const b=document.createElement('button');b.textContent=k===7?'綜合':SUBJ[k];b.className=k===subj?'on':'';b.onclick=()=>{subj=k;buildSj()};e.appendChild(b)})}
+
+function hitZ(z,direct){z.pt=performance.now();
+ if(z.v===ans){if(z.boss){if(performance.now()-(z.bt||0)<250)return false;z.bt=performance.now();if(z.lives===undefined)z.lives=3;z.lives--;z.sp+=14;boom(z.x,z.y,'#ff3a3a',14);if(z.lives<=0)z.hp=0;newQ(true);return true}
+  z.hp=0;ftxt(z.x,z.y-30,'\u2714 '+z.v,'#8fd14f');newQ(true);return true}
+ if(direct&&P.wc<=0){P.wc=.35;const pen=Math.round(P.mh*.08);P.hp-=pen;ftxt(P.x,P.y-28,'-'+pen,'#ff5a4a');blood(z.x,z.y,3);snN(.12,.12,600);{const an=Math.atan2(z.y-P.y,z.x-P.x);z.x+=Math.cos(an)*16;z.y+=Math.sin(an)*16;z.slow=.45}shake=Math.max(shake,8);qMsg='\u2718 \u7b54\u932f\u4e86\uff01\u6263\u8840';qMsgT=1.2;snd(110,.25,'sawtooth',.15);boom(z.x,z.y,'#ff3a3a',6)}
+ return false}
+function rootZ(z,r,direct){return hitZ(z,!!direct)}
+function pickV(){let v,t=0;do{v=(QD.length&&Math.random()<.65)?pk(QD):pk(POOL);t++}while(v===ans&&t<10);return v}
+function dealZ(z,r,direct){rootZ(z,r,direct);if(z.hp<=0&&!z.dead){z.dead=true;P.uc=Math.min(5,P.uc+1);score+=z.big?30:10;boom(z.x,z.y,'#8a1c1c',14);snd(120,.2,'sawtooth',.08);if(Math.random()<.12)I.push({x:z.x,y:z.y,l:8})}}
+function dealC(c,D){c.hp-=D;if(c.hp<=0&&!c.dead){c.dead=true;P.hp=Math.min(P.mh,P.hp+300);P.dmg+=400;P.en++;boom(c.x,c.y,'#5ff0ff',24);snd(1200,.25,'sine',.08)}}
+function quake(){const R=330,D=P.dmg*3*(P.lb>0?2:1);shake=22;P.hit=Math.max(P.hit,1.2);
+ for(const z of Z){const d=Math.hypot(z.x-P.x,z.y-P.y);if(d<R+z.r){const a=Math.atan2(z.y-P.y,z.x-P.x);z.x+=Math.cos(a)*150;z.y+=Math.sin(a)*150;push(z,z.r*.8);boom(z.x,z.y,'#ff7a3a',10);dealZ(z,rb()*3)}}
+ for(const c of CR)if(Math.hypot(c.x-P.x,c.y-P.y)<R)dealC(c,D);
+ for(let i=0;i<70;i++){const a=i/70*6.28;F.push({x:P.x+Math.cos(a)*30,y:P.y+Math.sin(a)*30,vx:Math.cos(a)*560,vy:Math.sin(a)*560,l:.5,c:'#ff7a3a'})}
+ SW={x:P.x,y:P.y,t:.5,d:.5,r:R};snd(50,.7,'sawtooth',.25)}
+function laser(ux,uy){const L=1000,D=P.dmg*6*(P.lb>0?2:1);shake=14;
+ const on=o=>{const rx=o.x-P.x,ry=o.y-P.y,t=rx*ux+ry*uy,pr=Math.abs(rx*uy-ry*ux);return t>0&&t<L&&pr<28+(o.r||16)};
+ for(const z of Z)if(on(z)){boom(z.x,z.y,'#ff9ae0',10);dealZ(z,rb()*6)}
+ for(const c of CR)if(on(c))dealC(c,D);
+ LS={x:P.x,y:P.y,ux,uy,t:.4};snd(200,.5,'sawtooth',.2)}
+function limit(){if(!run||P.lb>0||P.lc<25)return;P.lc=0;P.lb=8;snd(150,.5,'sawtooth',.2);boom(P.x,P.y,'#ff3a3a',30);shake=12}
+function ult(){if(!run||P.jp>0||P.uc<5)return;P.uc=0;const dx=mx-P.x,dy=my-P.y,d=Math.hypot(dx,dy)||1;
+ if(P.u===0){P.vx=dx/d*520;P.vy=dy/d*520;P.jp=.6;snd(300,.3,'sine',.1)}
+ else if(P.u===1)quake();
+ else if(P.u===2){P.bar=3;P.bt=0}
+ else if(P.u===3)laser(dx/d,dy/d);
+ else if(P.u===4)heal();
+ else if(P.u===5)dash(dx/d,dy/d,d);
+ else if(P.u===6)turret();
+ else if(P.u===7)P.sn=3;
+ else if(P.u===8)snipe(dx/d,dy/d);
+ else if(P.u===9)rain();
+ else if(P.u===10)drones();
+ else monk()}
+function slam(){push(P,PLAYER_WALL_RADIUS);const R=190,D=P.dmg*4*(P.lb>0?2:1);shake=18;
+ for(const z of Z){const d=Math.hypot(z.x-P.x,z.y-P.y);if(d<R+z.r){rootZ(z,rb()*4);const a=Math.atan2(z.y-P.y,z.x-P.x);z.x+=Math.cos(a)*60;z.y+=Math.sin(a)*60;push(z,z.r*.8);boom(z.x,z.y,'#ffb04a',10);if(z.hp<=0){z.dead=true;P.uc=Math.min(5,P.uc+1);score+=z.big?30:10;boom(z.x,z.y,'#8a1c1c',14);if(Math.random()<.12)I.push({x:z.x,y:z.y,l:8})}}}
+ for(const c of CR)if(Math.hypot(c.x-P.x,c.y-P.y)<R){c.hp-=D;if(c.hp<=0){c.dead=true;P.hp=Math.min(P.mh,P.hp+300);P.dmg+=400;P.en++;boom(c.x,c.y,'#5ff0ff',24)}}
+ for(let i=0;i<50;i++){const a=i/50*6.28;F.push({x:P.x+Math.cos(a)*30,y:P.y+Math.sin(a)*30,vx:Math.cos(a)*420,vy:Math.sin(a)*420,l:.45,c:'#ffb04a'})}
+ SW={x:P.x,y:P.y,t:.4};snd(60,.5,'sawtooth',.2)}
+function crates(){const W=WW,H=WH;for(let n=0;n<5&&CR.length<12;n++){for(let t=0;t<40;t++){const x=40+Math.random()*(W-80),y=60+Math.random()*(H-100);
+  if(Math.hypot(x-P.x,y-P.y)<70||BL.some(b=>x>b.x-24&&x<b.x+b.w+24&&y>b.y-24&&y<b.y+b.h+24))continue;
+  CR.push({x,y,hp:3000});break}}}
+function nextWave(){wave++;crates();toSpawn=4+wave*3;spawnT=0;$('wv').textContent='第 '+wave+' 波'}
+function spawn(){const s=Math.random()*4|0,m=30;let x,y;
+ const wall=(x,y)=>BL.some(b=>x>b.x-24&&x<b.x+b.w+24&&y>b.y-24&&y<b.y+b.h+24);const R=Math.hypot(W,H)/2+60;x=0;y=0;for(let t=0;t<60;t++){const a=Math.random()*6.28;x=P.x+Math.cos(a)*R;y=P.y+Math.sin(a)*R;if(x>-m&&x<WW+m&&y>-m&&y<WH+m&&!wall(x,y))break}x=Math.max(-m,Math.min(WW+m,x));y=Math.max(-m,Math.min(WH+m,y));
+ if(wall(x,y)){for(let t=0;t<80;t++){x=Math.random()*WW;y=Math.random()*WH;if(!wall(x,y)&&Math.hypot(x-P.x,y-P.y)>R)break}}
+ const big=wave>=3&&Math.random()<0.15;
+ const z={x,y,r:big?20:13,v:pickV(big),hp:1,sp:(big?45:55)+wave*5+Math.random()*25,big};if(placeZombie(z))Z.push(z)}
+function boom(x,y,c,n){for(let i=0;i<n;i++){const a=Math.random()*6.28,v=40+Math.random()*160;F.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:.5,c})}}
+function update(dt){const W=WW,H=WH;mx=msx+camX;my=msy+camY;
+ P.wc-=dt;qMsgT-=dt;P.mf-=dt;
+ for(const c of CP)c.t-=dt;CP=CP.filter(c=>c.t>0);for(const f of FT){f.y-=34*dt;f.t-=dt}FT=FT.filter(f=>f.t>0);for(const l of LF)l.t-=dt;LF=LF.filter(l=>l.t>0);
+ for(const c of SC){c.x+=c.vx*dt;c.y+=c.vy*dt;c.vx*=.92;c.vy*=.92;c.r+=c.vr*dt;c.t-=dt}SC=SC.filter(c=>c.t>0);
+ {let near=false;for(const z of Z)if(!z.dead&&z.v===ans&&Math.hypot(z.x-P.x,z.y-P.y)<800){near=true;break}
+  if(!near){const c=Z.filter(z=>!z.dead&&!z.boss&&Math.hypot(z.x-P.x,z.y-P.y)<800);if(c.length){c[Math.random()*c.length|0].v=ans;near=true}}
+  if(near){if(P.lb<=0)qT-=dt;if(qT<=0){P.hp-=Math.round(P.mh*.05);ftxt(P.x,P.y-28,'-'+Math.round(P.mh*.05),'#ffb04a');qMsg='\u23f0 \u6642\u9593\u5230\uff01\u6263\u8840';qMsgT=1.2;shake=8;snd(110,.25,'sawtooth',.15);newQ(null)}}}
+ let dx=0,dy=0;
+ if(keys.a||keys.arrowleft)dx--;if(keys.d||keys.arrowright)dx++;if(keys.w||keys.arrowup)dy--;if(keys.s||keys.arrowdown)dy++;
+ if(tid!==null){const a=tx-sx,b=ty-sy,d=Math.hypot(a,b);if(d>10){dx=a/d;dy=b/d}}
+ const d=Math.hypot(dx,dy)||1,mv=P.jp>0?0:(P.lb>0?1.3:1)*(P.sn>0?1.4:1)*(P.sb>0?1.5:1)*P.sp/220;movePlayer(dx/d*220*dt*(dx||dy?mv:0),dy/d*220*dt*(dx||dy?mv:0));if(P.jp>0){P.jp-=dt;const m=Math.hypot(dx,dy);if(m){const t=Math.min(1,dt*6);P.vx+=(dx/m*520-P.vx)*t;P.vy+=(dy/m*520-P.vy)*t}movePlayer(P.vx*dt,P.vy*dt);if(P.jp<=0)slam()}P.lb-=dt;
+ if(P.bar>0){P.bt-=dt;if(P.bt<=0){P.bt=.3;P.bar--;const off=(2-P.bar)*.13;for(let i=0;i<24;i++){const a=i/24*6.28+off;B.push({x:P.x,y:P.y,vx:Math.cos(a)*600,vy:Math.sin(a)*600,l:1.1,m:2,auto:true})}snd(500,.15,'square',.08)}}
+ for(const u of TU){u.t-=dt;u.cd-=dt;if(u.f!==undefined){const an=performance.now()/500+u.f;u.x=P.x+Math.cos(an)*55;u.y=P.y+Math.sin(an)*55}let bz=null,bd=520;for(const z of Z){const d=Math.hypot(z.x-u.x,z.y-u.y);if(d<bd&&!z.dead){bd=d;bz=z}}
+  if(bz){u.a=Math.atan2(bz.y-u.y,bz.x-u.x);if(u.cd<=0){u.cd=.35;B.push({x:u.x,y:u.y,vx:Math.cos(u.a)*700,vy:Math.sin(u.a)*700,l:1,m:1,auto:true})}}}
+ TU=TU.filter(u=>u.t>0);
+ if(P.sn>0){P.sn-=dt;P.sc=(P.sc||0)-dt;if(P.sc<=0){P.sc=.2;for(const z of Z)if(!z.dead&&Math.hypot(z.x-P.x,z.y-P.y)<z.r+120){boom(z.x,z.y,'#ff4a4a',6);dealZ(z,rb()*2)}for(const c of CR)if(Math.hypot(c.x-P.x,c.y-P.y)<130)dealC(c,P.dmg*2);snd(250,.08,'sawtooth',.08)}}
+ P.sk-=dt;P.sb-=dt;P.cl-=dt;
+ for(const s of MS){s.t-=dt;if(s.t<=0){s.dead=true;blast(s.x,s.y,110,2,'#8a9bff')}}MS=MS.filter(s=>!s.dead);
+ for(const s of SH){s.t-=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;if(s.t<=0||BL.some(b=>s.x>b.x&&s.x<b.x+b.w&&s.y>b.y&&s.y<b.y+b.h)||Z.some(z=>!z.dead&&Math.hypot(z.x-s.x,z.y-s.y)<z.r+6)){s.dead=true;blast(s.x,s.y,95,2,'#e056a0')}}SH=SH.filter(s=>!s.dead);if(SF){SF.t-=dt;if(SF.t<=0)SF=null}
+ for(const g of GR){g.t-=dt;const q=1-Math.max(0,g.t)/.8;g.x=g.sx+(g.tx-g.sx)*q;g.y=g.sy+(g.ty-g.sy)*q;if(g.t<=0){g.dead=true;blast(g.x,g.y,120,2,'#ffb04a')}}GR=GR.filter(g=>!g.dead);
+ for(const m of MN){if(Z.some(z=>!z.dead&&Math.hypot(z.x-m.x,z.y-m.y)<45+z.r)){m.dead=true;blast(m.x,m.y,130,3,'#ff9ae0')}}MN=MN.filter(m=>!m.dead);
+ for(const u of TR){u.t-=dt;u.cd-=dt;if(u.cd<=0){let h=false;for(const z of Z)if(!z.dead&&Math.hypot(z.x-u.x,z.y-u.y)<55+z.r){h=true;boom(z.x,z.y,'#f0c040',5);dealZ(z,rb())}if(h)u.cd=.7}}TR=TR.filter(u=>u.t>0);
+ if(LS){LS.t-=dt;if(LS.t<=0)LS=null}
+ if(SW){SW.t-=dt;if(SW.t<=0)SW=null}
+ if(P.am<P.ma){P.ar+=dt;if(P.ar>=P.rr){P.ar-=P.rr;P.am++}}else P.ar=0;P.rg-=dt;if(P.rg<=0){P.rg=2;if(P.hp>0)P.hp=Math.min(P.mh,P.hp+485)}P.rv-=dt;P.cd-=dt;P.hit-=dt;P.pw-=dt;shake=Math.max(0,shake-dt*20);
+ if(down&&P.cd<=0&&P.jp<=0&&(P.am>=1||P.pw>0||P.lb>0||P.k===5||P.k===7)){if(P.pw<=0&&P.lb<=0&&P.k!==5&&P.k!==7)P.am--;P.cd=(P.lb>0?.07:P.pw>0?.12:.16)*CDM[P.k];P.rv=.8;fire(Math.atan2(my-P.y,mx-P.x))}
+ for(const b of B){if(b.ho){let bz=null,bd=450;for(const z of Z)if(!z.dead&&z.v===ans){const d=Math.hypot(z.x-b.x,z.y-b.y);if(d<bd){bd=d;bz=z}}if(bz){const sp=Math.hypot(b.vx,b.vy),ca=Math.atan2(bz.y-b.y,bz.x-b.x),cu=Math.atan2(b.vy,b.vx);let da=ca-cu;da=Math.atan2(Math.sin(da),Math.cos(da));const na=cu+da*Math.min(1,dt*6);b.vx=Math.cos(na)*sp;b.vy=Math.sin(na)*sp}}b.x+=b.vx*dt;b.y+=b.vy*dt;b.l-=dt;if(BL.some(r=>b.x>r.x&&b.x<r.x+r.w&&b.y>r.y&&b.y<r.y+r.h)){b.l=0;boom(b.x,b.y,'#ffd54a',3)}
+  for(const c of CR)if(b.l>0&&Math.abs(b.x-c.x)<17&&Math.abs(b.y-c.y)<17){b.l=0;c.hp-=P.dmg*(P.lb>0?2:1);boom(b.x,b.y,'#5ff0ff',4);if(c.hp<=0){c.dead=true;P.hp=Math.min(P.mh,P.hp+300);P.dmg+=400;P.en++;boom(c.x,c.y,'#5ff0ff',24);snd(1200,.25,'sine',.08)}}}
+ B=B.filter(b=>b.l>0);
+ spawnT-=dt;if(spawnT<=0){if(Z.length<6+wave*2&&Z.length<22)spawn();spawnT=Math.max(.5,1.4-wave*.06)}
+ for(const z of Z){if(z.dead)continue;if(z.boss){z.st=(z.st===undefined?4:z.st)-dt;if(z.st<=0){z.st=5;for(let i=0;i<3;i++){const m={x:z.x+(Math.random()-.5)*120,y:z.y+(Math.random()-.5)*120,r:13,big:false,v:pickV(false),hp:1,sp:60+wave*4,a:0};if(placeZombie(m))Z.push(m)}}}if(z.off===undefined)z.off=Math.random()*6.28;let qx=P.x+Math.cos(z.off)*16,qy=P.y+Math.sin(z.off)*16;if(hid()&&Math.hypot(P.x-z.x,P.y-z.y)>45){z.wt=(z.wt||0)-dt;if(z.wt<=0||!z.wx){z.wt=1.5+Math.random()*1.5;z.wx=Math.random()*W;z.wy=Math.random()*H}qx=z.wx;qy=z.wy}const a=Math.atan2(qy-z.y,qx-z.x);const sp2=z.sp*(.7+.6*Math.abs(Math.sin(performance.now()/500+(z.lp||(z.lp=Math.random()*6.28)))))*(z.slow>0?.3:1);if(z.slow>0)z.slow-=dt;let ax=Math.cos(a),ay=Math.sin(a);for(const o of Z){if(o===z||o.dead)continue;const ex=z.x-o.x,ey=z.y-o.y,ed=Math.hypot(ex,ey),lim=z.r+o.r+28;if(ed<lim&&ed>0){const f=(lim-ed)/28*1.6;ax+=ex/ed*f;ay+=ey/ed*f}}{const al=Math.hypot(ax,ay)||1;ax/=al;ay/=al}z.x+=ax*sp2*dt;z.y+=ay*sp2*dt;z.a=a;
+  if(push(z,z.r*.8)){z.sd=z.sd||(Math.random()<.5?-1:1);z.x+=Math.cos(a+1.57*z.sd)*sp2*dt;z.y+=Math.sin(a+1.57*z.sd)*sp2*dt;push(z,z.r*.8)}
+  if(Math.hypot(P.x-z.x,P.y-z.y)<z.r+12&&P.hit<=0&&P.jp<=0&&P.sn<=0){P.hp-=z.boss?2900:z.big?1940:970;if(!z.boss){z.dead=true;z.sui=true}P.hit=.6;shake=10;snd(80,.3,'sawtooth',.12);boom(P.x,P.y,'#e0453a',8)}
+  for(const b of B){if(b.l>0&&Math.hypot(b.x-z.x,b.y-z.y)<z.r+(b.rd||3)&&!(b.h&&b.h.has(z))){if(b.pi){(b.h=b.h||new Set()).add(z)}else b.l=0;if(hitZ(z,!b.auto))P.lc=Math.min(25,P.lc+1);
+   if(b.hl&&z.hp<=0)P.hp=Math.min(P.mh,P.hp+200);
+   if(b.ch){let n=0;for(const zz of Z)if(zz!==z&&!zz.dead&&n<2&&Math.hypot(zz.x-z.x,zz.y-z.y)<170){n++;dealZ(zz,1);for(let i=1;i<6;i++)F.push({x:z.x+(zz.x-z.x)*i/6,y:z.y+(zz.y-z.y)*i/6,vx:0,vy:0,l:.2,c:'#fff3a0'})}}boom(b.x,b.y,'#8a1c1c',4);
+   if(z.hp<=0){z.dead=true;P.uc=Math.min(5,P.uc+1);snd(120,.2,'sawtooth',.08);if(Math.random()<.12)I.push({x:z.x,y:z.y,l:8});score+=z.big?30:10;boom(z.x,z.y,'#8a1c1c',14)}}}}
+ separateZombies();
+for(const z of Z)if(z.dead){CP.push({x:z.x,y:z.y,a:z.a||0,r:z.r,boss:z.boss,big:z.big,t:9});blood(z.x,z.y,z.boss?14:z.sui?3:7);snN(.16,.1,700)}
+ for(const z of Z)if(z.dead&&!z.sui){kills++;if(z.boss){boss=2;I.push({x:z.x,y:z.y,l:12});boom(z.x,z.y,'#ff3a3a',60);shake=24}}
+ {const nw=1+Math.floor(kills/8);if(nw!==wave){wave=nw;crates()}}
+ // 勝利目標為 20 隻，本模式不再生成 Boss。
+ bannerT-=dt;
+ if(run&&kills>=20){run=false;$('t').textContent='你贏了！';$('m').textContent='共擊殺 '+kills+' 隻殭屍，撐到第 '+wave+' 波，分數 '+score;$('go').textContent='再玩一次';$('ov').style.display='flex'}
+ Z=Z.filter(z=>!z.dead);CR=CR.filter(c=>!c.dead);
+ for(const it of I){it.l-=dt;if(Math.hypot(P.x-it.x,P.y-it.y)<24){it.l=0;P.pw=8;snd(900,.2,'sine',.06)}}I=I.filter(it=>it.l>0);
+ for(const f of F){f.x+=f.vx*dt;f.y+=f.vy*dt;f.l-=dt}F=F.filter(f=>f.l>0);
+ if(toSpawn===0&&Z.length===0){gap+=dt;if(gap>1.5){gap=0;P.hp=Math.min(P.mh,P.hp+Math.round(P.mh*.15));nextWave()}}
+ $('hp').style.width=Math.max(0,P.hp)/P.mh*100+'%';$('hn').textContent=Math.max(0,Math.round(P.hp))+' / '+P.mh+'　子彈 '+(P.pw>0?'∞':'●'.repeat(P.am)+'○'.repeat(P.ma-P.am))+'　大招 '+(P.uc>=5?'就緒［空白鍵］':P.uc+' / 5')+'　極限 '+(P.lb>0?Math.ceil(P.lb)+' 秒':P.lc>=25?'就緒［E］':P.lc+' / 25')+'　技能 '+(P.sk>0?Math.ceil(P.sk)+' 秒':'就緒［Q／右鍵］');$('qb').style.display='block';$('qt').textContent=qTxt;$('qs').textContent=qSub;$('qt').style.fontSize=(qTxt.length>22?18:qTxt.length>14?24:34)+'px';$('qfill').style.width=Math.max(0,qT/qT0*100)+'%';$('qmsg').textContent=qMsgT>0?qMsg:'';$('wv').textContent='第 '+wave+' 波　擊殺 '+kills+' / 20';$('ub').style.opacity=P.uc>=5?1:.4;$('lb').style.opacity=P.lc>=25||P.lb>0?1:.4;$('sb').style.opacity=P.sk<=0?1:.4;$('sc').textContent='傷害 '+P.dmg+'　分數 '+score;
+ if(run&&P.hp<=0){run=false;$('t').textContent='你被殭屍吃掉了';$('m').textContent='擊殺 '+kills+' 隻，撐到第 '+wave+' 波，分數 '+score;$('go').textContent='再玩一次';$('ov').style.display='flex'}
+}
+function draw(){
+ ctx.save();if(shake)ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+ ctx.fillStyle='#050809';ctx.fillRect(0,0,W,H);camX=Math.max(0,Math.min(WW-W,P.x-W/2+(msx-W/2)*.22));camY=Math.max(0,Math.min(WH-H,P.y-H/2+(msy-H/2)*.22));ctx.translate(-camX,-camY);
+ ctx.fillStyle='#0b1012';ctx.fillRect(0,0,WW,WH);ctx.strokeStyle='#8fd14f66';ctx.lineWidth=4;ctx.strokeRect(0,0,WW,WH);ctx.lineWidth=1;
+ ctx.strokeStyle='#8fd14f14';for(let x=0;x<=WW;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,WH);ctx.stroke()}for(let y=0;y<=WH;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(WW,y);ctx.stroke()}
+ drawGround();drawCity();drawCrates();
+ ctx.shadowBlur=18;ctx.shadowColor='#ffd54a';ctx.fillStyle='#ffd54a';for(const it of I){if(it.l>2||Math.floor(it.l*8)%2)ctx.fillRect(it.x-7,it.y-7,14,14)}
+ ctx.shadowBlur=10;for(const f of F){ctx.globalAlpha=Math.max(0,f.l*2);ctx.shadowColor=f.c;ctx.fillStyle=f.c;ctx.fillRect(f.x,f.y,4,4)}ctx.globalAlpha=1;ctx.shadowBlur=0;
+ for(const z of Z)drawZ(z);
+ ctx.shadowBlur=16;ctx.shadowColor='#ffd54a';ctx.lineCap='round';for(const b of B){ctx.lineWidth=b.rd?16:3;ctx.strokeStyle=b.rd?'#ffd0a0':b.pi?'#b8ff8a':b.hl?'#8affea':b.ch?'#fff3a0':'#ffe58a';ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-b.vx*(b.pi?.07:.035),b.y-b.vy*(b.pi?.07:.035));ctx.stroke()}ctx.shadowBlur=0;
+ const a=Math.atan2(my-P.y,mx-P.x);
+ const jh=P.jp>0?Math.sin((1-P.jp/.6)*3.14159)*90:0;if(jh>0){ctx.fillStyle='rgba(0,0,0,.45)';ctx.beginPath();ctx.ellipse(P.x,P.y+10,14,6,0,0,6.28);ctx.fill()}ctx.save();ctx.translate(P.x,P.y-jh);ctx.rotate(a);ctx.scale(1+jh/200,1+jh/200);ctx.globalAlpha=P.hit>0&&Math.floor(P.hit*20)%2?.4:(hid()?.35:1);
+ ctx.shadowBlur=18;ctx.shadowColor=P.pw>0?'#ffd54a':P.col;ctx.fillStyle='#555';if(P.k===5){ctx.fillStyle='#d6c8ff';ctx.fillRect(10,-2,20,4)}else if(P.k===7){ctx.fillRect(6,-2,18,4);ctx.fillStyle='#ff6a6a';ctx.fillRect(20,-9,8,18)}else if(P.k===1)ctx.fillRect(8,-5,26,10);else if(P.k===3)ctx.fillRect(8,-6,28,12);else if(P.k===2){ctx.strokeStyle='#8fd14f';ctx.lineWidth=3;ctx.beginPath();ctx.arc(14,0,12,-1.2,1.2);ctx.stroke()}else if(P.k===8)ctx.fillRect(8,-3,40,6);else if(P.k===9){ctx.fillStyle='#8a5a2a';ctx.fillRect(4,-2,30,4);ctx.fillStyle='#6a7bff';ctx.beginPath();ctx.arc(36,0,6,0,6.28);ctx.fill()}else if(P.k===10){ctx.fillRect(8,-9,20,4);ctx.fillRect(8,5,20,4)}else if(P.k===11){}else ctx.fillRect(8,-4,22,8);ctx.fillStyle=P.col;ctx.beginPath();ctx.arc(0,0,13,0,6.28);ctx.fill();
+ if(P.cd>(P.pw>0?.07:.1)*CDM[P.k]){ctx.shadowColor='#fff7b0';ctx.fillStyle='#fff7b0';ctx.beginPath();ctx.arc(34,0,9,0,6.28);ctx.fill()}ctx.restore();
+ if(P.mf>0){ctx.save();ctx.globalCompositeOperation='lighter';const gx=P.x+Math.cos(P.mfa)*26,gy=P.y+Math.sin(P.mfa)*26,rg=ctx.createRadialGradient(gx,gy,2,gx,gy,70);rg.addColorStop(0,'rgba(255,220,140,.9)');rg.addColorStop(1,'rgba(255,160,40,0)');ctx.fillStyle=rg;ctx.beginPath();ctx.arc(gx,gy,70,0,6.28);ctx.fill();ctx.restore()}
+ drawBush();ctx.restore();
+ {const dc=getDark(),d2=dc.getContext('2d');d2.globalCompositeOperation='source-over';d2.clearRect(0,0,W,H);d2.fillStyle='rgba(2,5,9,.6)';d2.fillRect(0,0,W,H);d2.globalCompositeOperation='destination-out';
+  const hole=(x,y,r,a)=>{const gr=d2.createRadialGradient(x,y,r*.1,x,y,r);gr.addColorStop(0,'rgba(0,0,0,'+a+')');gr.addColorStop(1,'rgba(0,0,0,0)');d2.fillStyle=gr;d2.beginPath();d2.arc(x,y,r,0,6.28);d2.fill()};
+  const px=P.x-camX,py=P.y-camY;hole(px,py,240,1);
+  {const aa=Math.atan2(my-P.y,mx-P.x);d2.save();d2.translate(px,py);d2.rotate(aa);const gr=d2.createRadialGradient(0,0,10,0,0,680);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(.65,'rgba(0,0,0,.75)');gr.addColorStop(1,'rgba(0,0,0,0)');d2.fillStyle=gr;d2.beginPath();d2.moveTo(0,0);d2.arc(0,0,680,-.4,.4);d2.closePath();d2.fill();d2.restore()}
+  for(const l of LF)hole(l.x-camX,l.y-camY,l.r,Math.min(1,l.t/l.m*1.2));
+  for(const b of B)hole(b.x-camX,b.y-camY,45,.7);
+  for(const u of TU)hole(u.x-camX,u.y-camY,90,.8);
+  for(const it of I)hole(it.x-camX,it.y-camY,60,.7);for(const c of CR)hole(c.x-camX,c.y-camY,60,.7);
+  if(P.lb>0)hole(px,py,320,.9);
+  ctx.drawImage(dc,0,0)}
+ ctx.save();ctx.translate(-camX,-camY);for(const z of Z)drawV(z);for(const f of FT){ctx.globalAlpha=Math.min(1,f.t*2);ctx.font='bold 18px system-ui,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText(f.tx,f.x,f.y);ctx.fillStyle=f.c;ctx.fillText(f.tx,f.x,f.y)}ctx.restore();ctx.globalAlpha=1;
+ const g=ctx.createRadialGradient(P.x-camX,P.y-camY,140,P.x-camX,P.y-camY,Math.max(W,H)*.75);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.75)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ if(P.hit>.3){ctx.fillStyle='rgba(224,69,58,'+(P.hit-.3)*.5+')';ctx.fillRect(0,0,W,H)}
+ if(P.hp<P.mh*.3){const a=.18+.14*Math.sin(performance.now()/150),rg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.7);rg.addColorStop(0,'rgba(180,0,0,0)');rg.addColorStop(1,'rgba(180,0,0,'+a+')');ctx.fillStyle=rg;ctx.fillRect(0,0,W,H)}
+ if(P.pw>0){ctx.fillStyle='#ffd54a';ctx.font='bold 18px system-ui,sans-serif';ctx.textAlign='center';ctx.fillText('三連發 '+P.pw.toFixed(1)+' 秒',W/2,H-24)}
+ if(bannerT>0){ctx.save();ctx.globalAlpha=Math.min(1,bannerT);ctx.fillStyle='#ff3a3a';ctx.shadowBlur=30;ctx.shadowColor='#ff3a3a';ctx.font='bold 56px system-ui,sans-serif';ctx.textAlign='center';ctx.fillText('BOSS 出現！',W/2,H*.3);ctx.restore()}
+ {const mw=Math.min(150,W*.3),mh=Math.round(mw*WH/WW),ox=W-mw-12,oy=48,s=mw/WW;ctx.save();ctx.fillStyle='rgba(11,16,18,.8)';ctx.fillRect(ox,oy,mw,mh);ctx.strokeStyle='#8fd14f88';ctx.strokeRect(ox,oy,mw,mh);
+ ctx.fillStyle='#4a5a63';for(const b of BL)ctx.fillRect(ox+b.x*s,oy+b.y*s,Math.max(2,b.w*s),Math.max(2,b.h*s));
+ ctx.fillStyle='#2f8a3f';for(const b of BS){ctx.beginPath();ctx.arc(ox+b.x*s,oy+b.y*s,Math.max(2,b.r*s),0,6.28);ctx.fill()}
+ ctx.fillStyle='#5ff0ff';for(const c of CR)ctx.fillRect(ox+c.x*s-1.5,oy+c.y*s-1.5,3,3);
+ ctx.fillStyle='#e0453a';for(const z of Z){const q=z.boss?7:2.5;ctx.fillRect(ox+z.x*s-q/2,oy+z.y*s-q/2,q,q)}
+ ctx.fillStyle=P.col;ctx.beginPath();ctx.arc(ox+P.x*s,oy+P.y*s,3.5,0,6.28);ctx.fill();
+ ctx.strokeStyle='#ffffff66';ctx.strokeRect(ox+camX*s,oy+camY*s,W*s,H*s);ctx.restore()}
+}
+function loop(t){if(!run)return;const dt=Math.min(.05,(t-last)/1000);last=t;update(dt);if(run)draw();requestAnimationFrame(loop)}
+$('ub').addEventListener('pointerdown',e=>{e.preventDefault();ult()});
+$('lb').addEventListener('pointerdown',e=>{e.preventDefault();limit()});
+$('sb').addEventListener('pointerdown',e=>{e.preventDefault();skill()});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+const AV={};
+function shade(h,a){const n=parseInt(h.slice(1),16),f=a<0?0:255,p=Math.abs(a);return '#'+[n>>16&255,n>>8&255,n&255].map(v=>Math.round((f-v)*p+v).toString(16).padStart(2,'0')).join('')}
+function avatar(i,sz){const key=i+'_'+sz;if(AV[key])return AV[key];
+ const c=document.createElement('canvas');c.width=c.height=sz;c.style.width=c.style.height=sz+'px';
+ const g=c.getContext('2d'),H=CH[i],col=H.col,dk=shade(col,-.5),dk2=shade(col,-.78),lt=shade(col,.55),lt2=shade(col,.8),st=H.a,PI=Math.PI,TP=2*PI;
+ const R=k=>{const x=Math.sin((i+1)*12.9898+k*78.233)*43758.5453;return x-Math.floor(x)};
+ const poly=(pts,fill)=>{g.beginPath();pts.forEach((p,k)=>k?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();if(fill)g.fillStyle=fill;g.fill()};
+ const mir=pts=>pts.map(p=>[100-p[0],p[1]]);
+ g.scale(sz/100,sz/100);
+ // ===== background =====
+ const bg=g.createLinearGradient(0,0,100,100);bg.addColorStop(0,dk2);bg.addColorStop(.5,shade(col,-.58));bg.addColorStop(1,'#04070a');g.fillStyle=bg;g.fillRect(0,0,100,100);
+ const mt=Math.floor(R(7)*3);
+ g.save();g.strokeStyle=lt;g.globalAlpha=.1;g.lineWidth=.8;
+ if(mt===0){for(let r=0;r<8;r++)for(let q=0;q<8;q++){const hx=q*15+(r%2?7.5:0),hy=r*13;g.beginPath();for(let k=0;k<6;k++){const a=PI/3*k+PI/6;g.lineTo(hx+8.6*Math.cos(a),hy+8.6*Math.sin(a))}g.closePath();g.stroke()}}
+ else if(mt===1){for(let k=-6;k<16;k++){g.beginPath();g.moveTo(k*9,100);g.lineTo(k*9+60,0);g.stroke()}}
+ else{for(let k=1;k<6;k++){g.beginPath();g.arc(50,42,k*13,0,TP);g.stroke()}g.beginPath();g.moveTo(0,42);g.lineTo(100,42);g.moveTo(50,0);g.lineTo(50,100);g.stroke()}
+ g.restore();
+ g.save();g.translate(50,45);g.globalAlpha=.13;g.fillStyle=lt;for(let k=0;k<16;k++){g.rotate(PI/8);g.beginPath();g.moveTo(0,0);g.lineTo(130,-6);g.lineTo(130,6);g.closePath();g.fill()}g.restore();
+ const up=g.createRadialGradient(50,112,4,50,112,90);up.addColorStop(0,col+'ee');up.addColorStop(.5,col+'55');up.addColorStop(1,col+'00');g.fillStyle=up;g.fillRect(0,0,100,100);
+ const gl=g.createRadialGradient(50,38,2,50,38,46);gl.addColorStop(0,lt+'aa');gl.addColorStop(1,lt+'00');g.fillStyle=gl;g.fillRect(0,0,100,100);
+ g.fillStyle=lt;for(let k=0;k<18;k++){g.globalAlpha=.25+R(20+k)*.55;const x=R(40+k)*96+2,y=R(60+k)*72+2,z=.8+R(80+k)*2.2;poly([[x,y-z],[x+z,y],[x,y+z],[x-z,y]])}g.globalAlpha=1;
+ // ===== back accessory =====
+ const bk=Math.floor(R(1)*3);
+ if(bk===0){poly([[2,100],[12,52],[50,66],[88,52],[98,100]],dk);poly([[12,52],[22,100],[2,100]],dk2);poly([[88,52],[78,100],[98,100]],dk2)}
+ else if(bk===1){for(const s of[-1,1]){poly([[50+s*14,68],[50+s*52,20],[50+s*44,46],[50+s*54,56],[50+s*36,74]],shade(col,-.25));g.strokeStyle=lt;g.lineWidth=1;g.beginPath();g.moveTo(50+s*14,68);g.lineTo(50+s*52,20);g.moveTo(50+s*30,64);g.lineTo(50+s*46,46);g.stroke()}}
+ else{g.strokeStyle=lt;g.lineWidth=2.4;g.beginPath();g.arc(50,42,38,0,TP);g.stroke();g.globalAlpha=.35;g.lineWidth=7;g.stroke();g.globalAlpha=1;g.lineWidth=1;g.beginPath();g.arc(50,42,32,0,TP);g.stroke()}
+ // ===== weapon silhouette =====
+ g.save();g.translate(80,54);g.rotate(-.75);g.fillStyle=shade(col,-.62);g.strokeStyle=lt;g.lineWidth=1.3;
+ const rr=(x,y,w,h)=>{g.fillRect(x,y,w,h);g.strokeRect(x,y,w,h)};
+ if(st===0){rr(-3.5,-40,7,80);rr(-5,6,10,14)}
+ else if(st===1){rr(-6,-34,12,68);rr(-8,0,16,10)}
+ else if(st===2){g.lineWidth=3;g.beginPath();g.arc(-22,0,40,-1.1,1.1);g.stroke();g.lineWidth=1;g.beginPath();g.moveTo(-22+40*Math.cos(-1.1),40*Math.sin(-1.1));g.lineTo(-22+40*Math.cos(1.1),40*Math.sin(1.1));g.stroke()}
+ else if(st===3){rr(-9,-30,18,62);rr(-11,-20,22,5);rr(-11,8,22,5)}
+ else if(st===4){rr(-2,-40,4,80);g.fillStyle='#e8fff4';g.fillRect(-9,-48,18,5);g.fillRect(-3,-54,6,17)}
+ else if(st===5){for(const a of[-.55,.55]){g.save();g.rotate(a);poly([[0,-44],[6,-8],[0,12],[-6,-8]],shade(col,-.3));g.strokeStyle=lt;g.stroke();g.restore()}}
+ else if(st===6){poly([[4,-42],[-10,-6],[0,-6],[-6,38],[12,-12],[2,-12]],lt)}
+ else if(st===7){rr(-2,-42,4,86);poly([[2,-40],[28,-32],[30,-6],[2,-14]],shade(col,-.2));g.stroke()}
+ else if(st===8){rr(-2.5,-52,5,100);rr(-6,-12,12,20)}
+ else if(st===9){rr(-2,-38,4,84);g.fillStyle=lt;g.beginPath();g.arc(0,-44,8,0,TP);g.fill()}
+ else if(st===10){for(const a of[-.7,.7]){g.save();g.rotate(a);rr(-3,-22,6,34);rr(-4,8,8,14);g.restore()}}
+ else{g.fillStyle=lt;g.globalAlpha=.5;g.beginPath();g.arc(-6,0,13,0,TP);g.fill();g.globalAlpha=1;g.strokeStyle=lt;g.beginPath();g.arc(-6,0,19,0,TP);g.stroke()}
+ g.restore();
+ // ===== long hair back =====
+ const hs=Math.floor(R(8)*7),hcs=['#1c120c','#5a3a20','#d9b865','#d0d0d8','#8a2a2a','#12121c','#e8e8f0'];
+ const hc=R(9)<.28?shade(col,.15):hcs[Math.floor(R(3)*7)],hd=shade(hc,-.35),hl=shade(hc,.35);
+ if(hs===2){poly([[28,34],[21,62],[26,90],[35,72],[34,40]],hc);poly(mir([[28,34],[21,62],[26,90],[35,72],[34,40]]),hc)}
+ if(hs===6){poly([[60,22],[84,34],[80,52],[70,34]],hc)}
+ // ===== body armor =====
+ poly([[2,100],[10,72],[34,64],[66,64],[90,72],[98,100]],dk);
+ const bd=g.createLinearGradient(0,62,0,100);bd.addColorStop(0,lt);bd.addColorStop(.45,col);bd.addColorStop(1,dk);g.fillStyle=bd;poly([[22,100],[26,75],[50,67],[74,75],[78,100]]);
+ g.strokeStyle=dk2;g.lineWidth=1.2;g.beginPath();g.moveTo(50,67);g.lineTo(50,100);g.moveTo(30,80);g.lineTo(46,87);g.moveTo(70,80);g.lineTo(54,87);g.moveTo(26,92);g.lineTo(44,96);g.moveTo(74,92);g.lineTo(56,96);g.stroke();
+ for(const s of[-1,1]){const x=50+s*38;poly([[x-s*13,64],[x+s*13,66],[x+s*17,80],[x-s*8,83]],col);g.strokeStyle=lt;g.lineWidth=1.5;g.stroke();for(let k=0;k<3;k++){poly([[x+s*(4+k*5),66+k*2],[x+s*(11+k*6),57+k*4],[x+s*(10+k*5),68+k*3]],lt)}g.fillStyle=dk2;g.beginPath();g.arc(x-s*2,73,1.4,0,TP);g.fill()}
+ // emblem
+ const em=Math.floor(R(10)*5);g.save();g.shadowColor=lt;g.shadowBlur=8;g.fillStyle=lt;g.translate(50,88);
+ if(em===0){g.beginPath();g.arc(0,0,5,0,TP);g.fill()}else if(em===1){poly([[0,-7],[6,5],[-6,5]],lt)}else if(em===2){poly([[0,-7],[2,-2],[7,-2],[3,2],[5,7],[0,4],[-5,7],[-3,2],[-7,-2],[-2,-2]],lt)}else if(em===3){poly([[-6,-6],[6,-6],[6,2],[0,8],[-6,2]],lt)}else{g.fillRect(-1.6,-7,3.2,14);g.fillRect(-7,-1.6,14,3.2)}
+ g.restore();g.strokeStyle=dk2;g.lineWidth=2;g.beginPath();g.arc(50,88,9,0,TP);g.stroke();
+ // collar fins
+ for(const s of[-1,1]){poly([[50+s*10,66],[50+s*20,52],[50+s*24,68]],shade(col,-.2));g.strokeStyle=lt;g.lineWidth=1;g.beginPath();g.moveTo(50+s*10,66);g.lineTo(50+s*20,52);g.stroke()}
+ // ===== neck, ears, head =====
+ const skins=['#f2c9a0','#e8b48a','#c98d65','#a8704a','#f6d8bd','#8a5a3a'],sk=skins[Math.floor(R(2)*6)];
+ g.fillStyle=shade(sk,-.28);g.fillRect(43,56,14,13);
+ poly([[34,67],[43,60],[50,67],[57,60],[66,67],[70,76],[30,76]],shade(col,-.2));g.strokeStyle=lt;g.lineWidth=1;g.stroke();
+ g.fillStyle=shade(sk,-.12);g.beginPath();g.ellipse(30.5,48,3,5.2,0,0,TP);g.ellipse(69.5,48,3,5.2,0,0,TP);g.fill();
+ const HD=[[50,21],[37,25],[31,36],[30,46],[32,55],[38,63],[45,67.5],[50,68.5],[55,67.5],[62,63],[68,55],[70,46],[69,36],[63,25]];
+ const hg=g.createLinearGradient(32,24,66,66);hg.addColorStop(0,shade(sk,.3));hg.addColorStop(.6,sk);hg.addColorStop(1,shade(sk,-.12));poly(HD,hg);
+ g.save();g.globalAlpha=.4;poly([[50,21],[63,25],[69,36],[70,46],[68,55],[62,63],[55,67.5],[50,68.5]],'#0e0e2a');g.restore();
+ g.strokeStyle=lt;g.globalAlpha=.5;g.lineWidth=1;g.beginPath();g.moveTo(31,36);g.lineTo(30,46);g.lineTo(32,55);g.lineTo(38,63);g.stroke();g.globalAlpha=1;
+ g.fillStyle=shade(sk,.2);g.globalAlpha=.35;g.beginPath();g.ellipse(39,52,4,2,-.5,0,TP);g.fill();g.globalAlpha=1;
+ // ===== hair (front) =====
+ const dome=(cl,r,y)=>{g.fillStyle=cl;g.beginPath();g.arc(50,y,r,PI,TP);g.fill()};
+ const bare=[0,1,4,6,8,10].includes(st)&&R(12)<.38;
+ if(bare){
+  if(hs===0)poly([[28,42],[29,26],[40,17],[56,16],[68,23],[72,42],[69,33],[62,28],[48,30],[37,35]],hc);
+  else if(hs===1){dome(hc,21,36);for(const x of[33,41,50,59,67])poly([[x-5,30],[x+(x-50)/8,10+Math.abs(x-50)/5],[x+5,30]],hc)}
+  else if(hs===2)poly([[29,40],[33,24],[50,18],[67,24],[71,40],[62,30],[50,33],[38,30]],hc);
+  else if(hs===3){poly([[44,30],[42,8],[50,2],[58,8],[56,30]],hc);for(const x of[44,50,56])poly([[x-3,14],[x,0],[x+3,14]],hc)}
+  else if(hs===4){poly([[29,42],[30,27],[42,18],[58,18],[70,27],[71,42],[67,30],[50,25],[34,30]],hc);g.strokeStyle=hl;g.lineWidth=1;g.beginPath();g.moveTo(40,22);g.lineTo(52,26);g.moveTo(48,20);g.lineTo(60,26);g.stroke()}
+  else if(hs===5){g.globalAlpha=.75;poly([[31,38],[33,26],[44,20],[56,20],[67,26],[69,38],[64,30],[50,27],[36,30]],hd);g.globalAlpha=1}
+  else{poly([[29,42],[30,27],[42,18],[58,18],[70,27],[71,42],[67,30],[50,25],[34,30]],hc);g.beginPath();g.arc(50,13,6,0,TP);g.fillStyle=hc;g.fill()}
+  g.fillStyle=hl;g.globalAlpha=.25;g.beginPath();g.ellipse(42,24,7,2.5,-.4,0,TP);g.fill();g.globalAlpha=1}
+ // ===== eyes =====
+ const ec=lt2,ang=R(4)*2;
+ for(const s of[-1,1]){const cx=50+s*8.5;
+  g.fillStyle='rgba(0,0,0,.28)';g.beginPath();g.ellipse(cx,46.5,7.2,4.4,s*.12,0,TP);g.fill();
+  g.beginPath();g.moveTo(cx-s*7,46.2);g.quadraticCurveTo(cx-s*1.5,42.2,cx+s*6,44.8);g.quadraticCurveTo(cx,48.8,cx-s*7,46.2);g.closePath();g.fillStyle='#f2f4f8';g.fill();
+  g.save();g.shadowColor=ec;g.shadowBlur=8;g.fillStyle=ec;g.beginPath();g.arc(cx,45.6,2.7,0,TP);g.fill();g.restore();
+  g.fillStyle=col;g.beginPath();g.arc(cx,45.8,1.9,0,TP);g.fill();g.fillStyle='#07070b';g.beginPath();g.arc(cx,45.8,.95,0,TP);g.fill();g.fillStyle='#fff';g.beginPath();g.arc(cx-.8,44.8,.7,0,TP);g.fill();
+  g.strokeStyle='#0a0a10';g.lineWidth=1.5;g.beginPath();g.moveTo(cx-s*7.2,46.4);g.quadraticCurveTo(cx-s*1.5,42,cx+s*6.2,44.6);g.stroke();
+  poly([[cx-s*7.5,39.5+ang],[cx+s*2,43],[cx+s*1,44.6],[cx-s*7.5,41.6+ang]],hd)}
+ g.strokeStyle=shade(sk,-.35);g.lineWidth=1.3;g.beginPath();g.moveTo(50,46);g.lineTo(47.6,54.5);g.lineTo(52.5,55);g.stroke();
+ g.fillStyle=shade(sk,-.3);g.globalAlpha=.4;poly([[51,47],[54,55],[51,55]]);g.globalAlpha=1;
+ const mo=Math.floor(R(5)*3);g.lineWidth=1.8;
+ if(mo===0){g.strokeStyle='#5a1f18';g.beginPath();g.moveTo(43,60);g.lineTo(52,60.6);g.lineTo(57.5,58.4);g.stroke()}
+ else if(mo===1){g.strokeStyle='#5a1f18';g.beginPath();g.moveTo(43.5,60);g.lineTo(56.5,60);g.stroke();g.fillStyle=shade(sk,-.15);g.fillRect(45,61.5,10,1.6)}
+ else{g.fillStyle='#3a0f0f';g.beginPath();g.moveTo(43,59);g.quadraticCurveTo(50,65,57,59);g.quadraticCurveTo(50,61,43,59);g.fill();g.fillStyle='#f4f4f4';g.fillRect(45.5,59.4,9,1.4)}
+ // ===== headgear =====
+ switch(st){
+  case 0:if(bare){g.fillStyle=col;g.fillRect(29,33,42,4);g.fillStyle=lt;g.fillRect(29,33,42,1)}else{dome(dk,22,38);g.fillStyle=col;g.fillRect(28,36,44,5);g.fillStyle=lt;g.fillRect(48,16,4,20);poly([[28,36],[72,36],[68,42],[32,42]],dk2);g.fillStyle=lt;g.fillRect(36,30,6,2)}break;
+  case 1:if(bare){g.fillStyle=dk;g.fillRect(29,33,42,5);g.fillStyle=lt;g.fillRect(47,33,6,5);g.fillRect(27,46,5,14);g.fillRect(68,46,5,14)}else{dome(shade(col,-.2),25,39);g.fillStyle=dk;g.fillRect(25,37,50,6);g.fillRect(27,43,6,18);g.fillRect(67,43,6,18);g.fillStyle=lt;g.fillRect(46,37,8,12);g.fillRect(36,22,28,3)}break;
+  case 2:g.fillStyle=dk;g.beginPath();g.arc(50,45,26,3.3,6.1);g.fill();g.fillRect(24,42,10,28);g.fillRect(66,42,10,28);poly([[68,28],[84,4],[76,34]],lt);break;
+  case 3:g.fillStyle=hc;for(const x of[32,41,50,59,68])poly([[x-6,32],[x,11+Math.abs(x-50)/4],[x+6,32]],hc);g.fillStyle='#202020';g.fillRect(31,26,17,9);g.fillRect(52,26,17,9);g.fillStyle=lt;g.fillRect(33,28,13,5);g.fillRect(54,28,13,5);g.fillStyle=col;g.fillRect(28,36,44,5);break;
+  case 4:if(bare){g.fillStyle='#f4f4f4';g.fillRect(29,33,42,4);g.fillStyle=col;g.fillRect(47,31,6,8);g.fillRect(44,34,12,2)}else{dome('#f4f4f4',22,38);g.fillRect(28,36,44,5);g.fillStyle=col;g.fillRect(47,19,6,16);g.fillRect(42,24,16,6)}break;
+  case 5:g.fillStyle=dk;g.beginPath();g.arc(50,43,26,PI,TP);g.fill();g.fillRect(24,42,10,30);g.fillRect(66,42,10,30);poly([[32,50],[68,50],[64,72],[36,72]],dk2);g.fillStyle=lt;g.fillRect(34,50,32,1.6);break;
+  case 6:if(!bare){dome(col,23,37);g.fillStyle=lt;g.fillRect(26,35,48,6);g.fillRect(44,15,12,9)}g.fillStyle='rgba(150,220,255,.6)';g.beginPath();g.arc(42,46,7,0,TP);g.arc(58,46,7,0,TP);g.fill();g.strokeStyle='#223';g.lineWidth=2;g.stroke();break;
+  case 7:for(const x of[32,41,50,59,68])poly([[x-6,32],[x+((x-50)/6),8+Math.abs(x-50)/3],[x+6,32]],'#c22');dome('#c22',22,36);g.fillRect(28,34,7,20);g.fillRect(65,34,7,20);g.strokeStyle='#ff4a4a';g.lineWidth=2.5;g.beginPath();g.moveTo(34,50);g.lineTo(43,57);g.moveTo(66,50);g.lineTo(57,57);g.stroke();break;
+  case 8:if(!bare){g.fillStyle=dk;g.beginPath();g.ellipse(46,31,26,10,-.2,0,TP);g.fill();g.fillStyle=col;g.beginPath();g.arc(66,29,3.5,0,TP);g.fill()}g.strokeStyle='#bfe8ff';g.lineWidth=1.8;g.beginPath();g.arc(58,46,8,0,TP);g.moveTo(50,46);g.lineTo(70,46);g.moveTo(58,38);g.lineTo(58,54);g.stroke();break;
+  case 9:poly([[21,38],[79,38],[56,0]],col);g.fillStyle=dk;g.fillRect(21,35,58,6);g.fillStyle='#ffd54a';g.beginPath();g.arc(52,21,3.2,0,TP);g.fill();poly([[35,58],[65,58],[50,88]],'#e8e8ee');break;
+  case 10:if(!bare)dome('#8a9098',23,38);g.fillStyle='#8a9098';g.fillRect(25,37,9,19);g.fillRect(66,37,9,19);g.strokeStyle='#ddd';g.lineWidth=2;g.beginPath();g.moveTo(30,54);g.lineTo(41,63);g.stroke();g.fillStyle='rgba(120,220,255,.45)';g.fillRect(32,41,36,11);break;
+  default:g.fillStyle=lt;g.globalAlpha=.35;g.beginPath();g.ellipse(44,31,8,4,-.4,0,TP);g.fill();g.globalAlpha=1;g.fillStyle=col;g.fillRect(29,33,42,6);g.fillStyle='#d33';g.beginPath();g.arc(50,40,2.6,0,TP);g.fill();poly([[26,100],[50,70],[74,100]],dk);
+ }
+ // ===== face extras =====
+ const fx=R(6);
+ if(fx<.12&&st!==5){g.strokeStyle='#c04a4a';g.lineWidth=1.8;g.beginPath();g.moveTo(57,38);g.lineTo(62,57);g.stroke();g.strokeStyle='#f0b0a0';g.lineWidth=.6;g.beginPath();g.moveTo(58,42);g.lineTo(60,50);g.stroke()}
+ else if(fx<.24){g.fillStyle='#14141e';g.beginPath();g.ellipse(58.5,46,6.6,5,0,0,TP);g.fill();g.strokeStyle='#14141e';g.lineWidth=1.5;g.beginPath();g.moveTo(40,38);g.lineTo(66,40);g.stroke()}
+ else if(fx<.37&&st!==9&&st!==5){g.fillStyle=hc;g.globalAlpha=.85;g.beginPath();g.moveTo(37,57);g.quadraticCurveTo(50,74,63,57);g.lineTo(60,59);g.quadraticCurveTo(50,65,40,59);g.closePath();g.fill();g.globalAlpha=1}
+ else if(fx<.5){g.fillStyle=lt;g.beginPath();g.arc(30.5,53.5,1.8,0,TP);g.fill()}
+ else if(fx<.64){g.save();g.shadowColor=lt;g.shadowBlur=6;g.strokeStyle=lt;g.lineWidth=1.3;g.beginPath();g.moveTo(58,49);g.lineTo(63,53);g.lineTo(60,59);g.moveTo(41.5,49);g.lineTo(38,52);g.stroke();g.restore()}
+ // ===== finish =====
+ g.save();g.globalAlpha=.1;poly([[0,60],[40,0],[55,0],[0,80]],'#ffffff');g.restore();
+ const vg=g.createRadialGradient(50,48,32,50,48,76);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.62)');g.fillStyle=vg;g.fillRect(0,0,100,100);
+ g.fillStyle='#04070a';poly([[0,0],[11,0],[0,11]]);poly([[100,0],[89,0],[100,11]]);poly([[0,100],[11,100],[0,89]]);poly([[100,100],[89,100],[100,89]]);
+ const tier=1+Math.floor(R(11)*5),fc=tier>=5?'#ffd54a':col,oct=pad=>[[11,pad],[89,pad],[100-pad,11],[100-pad,89],[89,100-pad],[11,100-pad],[pad,89],[pad,11]];
+ g.strokeStyle=fc;g.lineWidth=3.5;g.beginPath();oct(1.7).forEach((p,k)=>k?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();g.stroke();
+ g.strokeStyle=lt;g.lineWidth=1;g.beginPath();oct(6).forEach((p,k)=>k?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();g.stroke();
+ if(tier>=4){g.fillStyle=fc;for(const[x,y]of[[50,1.7],[50,98.3],[1.7,50],[98.3,50]])poly([[x,y-4],[x+4,y],[x,y+4],[x-4,y]])}
+ g.fillStyle='rgba(0,0,0,.62)';poly([[10,10],[34,10],[30,21],[10,21]]);g.fillStyle='#fff';g.font='bold 9px system-ui,sans-serif';g.textAlign='left';g.fillText(String(i+1).padStart(2,'0'),13,19);
+ for(let k=0;k<tier;k++){const x=88-k*7.5,y=16;g.fillStyle=tier>=5?'#ffd54a':'#fff3b0';poly([[x,y-4],[x+1.3,y-1.3],[x+4,y-1.2],[x+2,y+.8],[x+2.6,y+3.8],[x,y+2.2],[x-2.6,y+3.8],[x-2,y+.8],[x-4,y-1.2],[x-1.3,y-1.3]])}
+ c.style.cursor='pointer';AV[key]=c;return c}
+
+function buildMenu(){const e=$('cur'),c=CH[ci];e.innerHTML='';e.appendChild(avatar(ci,72));const d=document.createElement('div');d.style.textAlign='left';d.innerHTML='<b style="color:'+c.col+';font-size:20px">'+c.n+'</b><br><small style="opacity:.8">'+c.d+'</small>';e.appendChild(d)}
+const GF=[['全部',null],['近戰',[5,7]],['槍械',[0,1,6,8,10]],['遠程特殊',[2,3,9,11]],['輔助',[4]]];let gf=0;
+function buildGrid(){const f=$('hf');f.innerHTML='';
+ GF.forEach((x,k)=>{const b=document.createElement('button');b.textContent=x[0];b.className=k===gf?'on':'';b.onclick=()=>{gf=k;buildGrid()};f.appendChild(b)});
+ const e=$('hg');e.innerHTML='';
+ CH.forEach((c,i)=>{if(GF[gf][1]&&!GF[gf][1].includes(c.a))return;const d=document.createElement('div');d.className='tl'+(i===ci?' on':'');d.style.setProperty('--c',c.col);d.appendChild(avatar(i,64));const n=document.createElement('div');n.textContent=c.n;d.appendChild(n);d.onclick=()=>pick(i);e.appendChild(d)});
+ const h=$('hd'),c=CH[ci],box=document.createElement('div');h.innerHTML='';box.className='hdb';box.appendChild(avatar(ci,96));
+ const t=document.createElement('div');t.className='hdt';t.innerHTML='<b style="color:'+c.col+';font-size:22px">'+c.n+'</b><span>'+(ci+1)+' / '+CH.length+'</span><small>血量 '+c.hp+'　速度 '+c.sp+'　傷害 '+c.dmg+'<br>子彈 '+c.ma+'（每 '+c.rr+' 秒回 1 發）</small><small>攻擊：'+BA[c.a]+'</small><small>技能(Q)：'+SL[c.s]+'</small><small style="color:'+c.col+'">'+UL[c.u]+'</small>';
+ box.appendChild(t);h.appendChild(box)}
+function pick(i){ci=(i+CH.length)%CH.length;buildGrid();buildMenu()}
+$('hb').onclick=()=>{buildGrid();$('hs').style.display='flex'};
+$('hok').onclick=()=>{$('hs').style.display='none';buildMenu()};
+addEventListener('keydown',e=>{if($('hs').style.display!=='flex')return;if(e.key.length===1&&e.key>='1'&&e.key<='9'&&+e.key<=CH.length)pick(+e.key-1);else if(e.key==='ArrowRight')pick(ci+1);else if(e.key==='ArrowLeft')pick(ci-1)});
+buildMenu();buildGr();
+$('go').onclick=()=>{$('ov').style.display='none';init();run=true;last=performance.now();requestAnimationFrame(loop)};
+</script>
+</body>
+</html>

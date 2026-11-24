@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最好玩的柯北大冒險遊戲：神射手常識與數學大作戰</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #090a0f;
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 900px;
+            height: 600px;
+            background: linear-gradient(180deg, #0b132b 0%, #1c2541 60%, #3a506b 100%);
+            border: 4px solid #f77f00;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(247, 127, 0, 0.4);
+            cursor: default;
+        }
+
+        #game-container.shooting-mode {
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'><text x='0' y='28' font-size='28'>🔫</text></svg>") 4 4, crosshair !important;
+        }
+
+        /* 頂部資訊欄 */
+        #top-bar {
+            position: absolute;
+            top: 12px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        #hearts {
+            font-size: 24px;
+            filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8));
+        }
+        #timer-box {
+            font-size: 18px;
+            font-weight: 900;
+            color: #ef4444;
+            background: rgba(0, 0, 0, 0.65);
+            padding: 4px 15px;
+            border-radius: 20px;
+            border: 2px solid #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+        }
+        #score-board {
+            font-size: 20px;
+            font-weight: 900;
+            color: #ffb703;
+            background: rgba(0, 0, 0, 0.65);
+            padding: 4px 18px;
+            border-radius: 25px;
+            border: 2px solid #ffb703;
+            box-shadow: 0 0 15px rgba(255, 183, 3, 0.3);
+        }
+        #player-info {
+            font-size: 14px;
+            color: #48cae4;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 12px;
+            border-radius: 15px;
+            border: 1px solid #48cae4;
+        }
+
+        /* 冒險舞台 */
+        #adventure-stage {
+            position: absolute;
+            top: 50px;
+            width: 100%;
+            height: 250px;
+            background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.06) 0%, transparent 70%);
+        }
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 35px;
+            background: #0b132b;
+            border-top: 4px solid #f77f00;
+        }
+
+        /* 柯北角色 */
+        #kobei-wrapper {
+            position: absolute;
+            bottom: 35px;
+            left: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s;
+            z-index: 5;
+        }
+        .kobei-avatar {
+            width: 85px;
+            height: 85px;
+            background: #00b4d8;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 45px;
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.8);
+            position: relative;
+        }
+        .kobei-gun {
+            position: absolute;
+            right: -15px;
+            bottom: 5px;
+            font-size: 28px;
+            transform: rotate(-10deg);
+        }
+
+        /* 冒險怪物 */
+        #monster-wrapper {
+            position: absolute;
+            bottom: 35px;
+            right: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+            z-index: 15;
+        }
+        .monster-avatar {
+            width: 110px;
+            height: 110px;
+            background: #6a040f;
+            border: 4px solid #d00000;
+            border-radius: 20%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 65px;
+            box-shadow: 0 0 30px rgba(208, 0, 0, 0.8);
+            animation: monsterFloat 1.8s ease-in-out infinite alternate;
+            position: relative;
+        }
+        #target-aim-hint {
+            position: absolute;
+            top: -15px;
+            font-size: 13px;
+            background: #ffb703;
+            color: #000;
+            font-weight: 900;
+            padding: 2px 10px;
+            border-radius: 10px;
+            display: none;
+            animation: pulseHint 0.8s infinite alternate;
+        }
+        @keyframes pulseHint {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); }
+        }
+        @keyframes monsterFloat {
+            0% { transform: translateY(0px) rotate(-3deg); }
+            100% { transform: translateY(-15px) rotate(3deg); }
+        }
+
+        .name-tag {
+            margin-top: 4px;
+            background: rgba(0,0,0,0.8);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #f3f4f6;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* 特效 */
+        #bullet-line {
+            position: absolute;
+            height: 6px;
+            background: linear-gradient(90deg, #ffb703, #d00000, #fff);
+            box-shadow: 0 0 15px #d00000;
+            transform-origin: left center;
+            display: none;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .hit-effect {
+            position: absolute;
+            font-size: 55px;
+            z-index: 25;
+            pointer-events: none;
+            animation: hitPop 0.4s ease-out forwards;
+        }
+        @keyframes hitPop {
+            0% { transform: scale(0.5); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        /* 題目與選項 */
+        #quiz-box {
+            position: absolute;
+            bottom: 50px;
+            width: 100%;
+            padding: 0 30px;
+            text-align: center;
+        }
+        #question-text {
+            font-size: 17px;
+            font-weight: bold;
+            color: #caf0f8;
+            margin-bottom: 8px;
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.65);
+            border-radius: 10px;
+            padding: 6px 18px;
+            border-left: 5px solid #00b4d8;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            line-height: 1.4;
+        }
+        #options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            max-width: 780px;
+            margin: 0 auto;
+        }
+        .opt-btn {
+            background: linear-gradient(135deg, #1c2541, #0b132b);
+            border: 2px solid #3a506b;
+            color: #fff;
+            padding: 9px 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .opt-btn:hover {
+            border-color: #ffb703;
+            background: #00b4d8;
+            transform: translateY(-2px);
+        }
+        .opt-btn.selected-opt {
+            border-color: #ffb703 !important;
+            background: #f77f00 !important;
+            color: #000 !important;
+            font-weight: bold;
+        }
+        .key-badge {
+            background: #f77f00;
+            color: #000;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-right: 10px;
+            font-size: 13px;
+        }
+
+        #key-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 30px;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid #f77f00;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #e5e7eb;
+        }
+
+        /* 彈窗畫面 */
+        .overlay-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 19, 43, 0.97);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 40;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .overlay-screen h1 {
+            font-size: 38px;
+            margin: 0 0 10px 0;
+            color: #ffb703;
+            text-shadow: 0 0 20px #ffb703;
+        }
+        .overlay-screen p {
+            font-size: 15px;
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            text-align: center;
+            max-width: 650px;
+        }
+
+        /* 玩家名稱、年級與難易度選單 */
+        .input-group {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .input-group label {
+            font-size: 15px;
+            color: #48cae4;
+            font-weight: bold;
+        }
+        .game-input {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 2px solid #ffb703;
+            background: #1c2541;
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            width: 240px;
+        }
+        .select-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 2px;
+        }
+        .btn-select {
+            background: #1c2541;
+            border: 2px solid #3a506b;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-select:hover, .btn-select.active {
+            border-color: #ffb703;
+            background: #f77f00;
+            color: #000;
+        }
+
+        .btn-start, .btn-restart {
+            background: linear-gradient(135deg, #f77f00, #d00000);
+            color: #fff;
+            font-weight: 900;
+            border: none;
+            padding: 10px 30px;
+            font-size: 17px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(247, 127, 0, 0.6);
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        .btn-start:hover, .btn-restart:hover {
+            transform: scale(1.06);
+        }
+
+        /* 排行榜完整顯示調整 */
+        .leaderboard-box {
+            width: 100%;
+            max-width: 580px;
+            max-height: 280px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #ffb703;
+            border-radius: 12px;
+            padding: 10px;
+            margin: 5px 0 10px 0;
+            overflow-y: auto;
+        }
+        .leaderboard-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffb703;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .leaderboard-table th {
+            border-bottom: 2px solid #ffb703;
+            color: #48cae4;
+            padding: 5px;
+            position: sticky;
+            top: 0;
+            background: #0b132b;
+        }
+        .leaderboard-table td {
+            padding: 5px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .rank-1 { color: #ffd700; font-weight: bold; }
+        .rank-2 { color: #c0c0c0; font-weight: bold; }
+        .rank-3 { color: #cd7f32; font-weight: bold; }
+        .my-entry { background: rgba(247, 127, 0, 0.3) !important; font-weight: bold; color: #ffb703; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- 頂部資訊欄 -->
+    <div id="top-bar">
+        <div id="hearts">❤️ ❤️ ❤️</div>
+        <div id="timer-box">⏱️ <span id="timer">30</span>s</div>
+        <div id="player-info"><span id="display-name">玩家</span> (<span id="display-grade">中年級</span>·<span id="display-diff">普通</span>) | 題號: <span id="current-stage-num">1</span> / 10</div>
+        <div id="score-board">SCORE: <span id="score">0</span> / 100</div>
+    </div>
+
+    <!-- 冒險舞台 -->
+    <div id="adventure-stage">
+        <div id="kobei-wrapper">
+            <div class="kobei-avatar" id="kobei-icon">
+                🕵️‍♂️
+                <div class="kobei-gun">🔫</div>
+            </div>
+            <div class="name-tag">神槍手 · 柯北</div>
+        </div>
+
+        <div id="bullet-line"></div>
+
+        <div id="monster-wrapper">
+            <div id="target-aim-hint">🎯 快瞄準開槍！</div>
+            <div class="monster-avatar" id="monster-icon">👹</div>
+            <div class="name-tag" id="monster-name">暗黑怪物</div>
+        </div>
+
+        <div class="ground"></div>
+    </div>
+
+    <!-- 題目區 -->
+    <div id="quiz-box">
+        <div id="question-text">題目載入中...</div>
+        <div id="options-container"></div>
+    </div>
+
+    <div id="key-hint">步驟 1：用滑鼠選擇答案選項</div>
+
+    <!-- 開始遊戲選單彈窗 -->
+    <div id="start-screen" class="overlay-screen">
+        <h1>最好玩的柯北大冒險遊戲 🕵️‍♂️🔫</h1>
+        <p>國小電子書風格題庫！依年級出題（低年級含注音、中高年級以基礎數學和生活常識為主），每次10題、每題10分、限時30秒。已出過的題目不會再給其他玩家。</p>
+        
+        <div class="input-group">
+            <label for="player-name-input">🎮 請輸入勇者名字：</label>
+            <input type="text" id="player-name-input" class="game-input" placeholder="例如：小明" maxlength="8" value="柯北冒險家">
+        </div>
+
+        <div class="input-group">
+            <label>🎓 第一步：選擇學習年級</label>
+            <div class="select-buttons">
+                <button class="btn-select" onclick="selectGrade('low', this)">低年級 (1-2)</button>
+                <button class="btn-select active" onclick="selectGrade('mid', this)">中年級 (3-4)</button>
+                <button class="btn-select" onclick="selectGrade('high', this)">高年級 (5-6)</button>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>🔥 第二步：選擇題目難易度</label>
+            <div class="select-buttons">
+                <button class="btn-select" onclick="selectDifficulty('easy', this)">簡單 🟢</button>
+                <button class="btn-select active" onclick="selectDifficulty('normal', this)">普通 🟡</button>
+                <button class="btn-select" onclick="selectDifficulty('hard', this)">困難 🔴</button>
+            </div>
+        </div>
+
+        <button class="btn-start" onclick="startGame()">開始槍擊冒險 🚀</button>
+    </div>
+
+    <!-- 勝利畫面 -->
+    <div id="win-screen" class="overlay-screen hidden">
+        <h1>YOU WIN! 🎉</h1>
+        <p>太神了！成功通關 10 題考驗！得分為 <span id="win-score-text" style="color:#ffb703; font-weight:bold;">100</span> 分！</p>
+        
+        <div class="leaderboard-box">
+            <div class="leaderboard-title">🏆 玩過的人（分數最高前 10 名）</div>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr><th>排名</th><th>玩家暱稱</th><th>年級/難度</th><th>得分</th></tr>
+                </thead>
+                <tbody id="win-leaderboard-body"></tbody>
+            </table>
+        </div>
+
+        <button class="btn-restart" onclick="startGame(true)">再次挑戰（新的題目）🔄</button>
+        <button class="btn-select" style="margin-top:6px;" onclick="showStartScreen()">返回主選單 🏠</button>
+    </div>
+
+    <!-- 失敗畫面 -->
+    <div id="gameover-screen" class="overlay-screen hidden">
+        <h1 style="color: #d00000; text-shadow: 0 0 20px #d00000;">GAME OVER 💀</h1>
+        <p>血量扣光或超時！很遺憾這次無法登上排行榜。這次使用的新題目已記錄，下次挑戰會再換新的題目！</p>
+        
+        <div class="leaderboard-box">
+            <div class="leaderboard-title">🏆 玩過的人（分數最高前 10 名）</div>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr><th>排名</th><th>玩家暱稱</th><th>年級/難度</th><th>得分</th></tr>
+                </thead>
+                <tbody id="fail-leaderboard-body"></tbody>
+            </table>
+        </div>
+
+        <button class="btn-restart" onclick="startGame(true)">再次挑戰（新的題目）🔄</button>
+        <button class="btn-select" style="margin-top:6px;" onclick="showStartScreen()">返回主選單 🏠</button>
+    </div>
+</div>
+
+<script>
+    // Web Audio 音效
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    function getAudioContext() {
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+
+    function playGunshotSound() {
+        try {
+            const ctx = getAudioContext();
+            const bufferSize = ctx.sampleRate * 0.12;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1200, ctx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + 0.12);
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+            noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+            noise.start();
+        } catch(e) {}
+    }
+
+    function playCorrectSound() {
+        try {
+            const ctx = getAudioContext();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.08);
+            osc.frequency.setValueAtTime(783.99, now + 0.16);
+            osc.frequency.setValueAtTime(1046.50, now + 0.24);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(now); osc.stop(now + 0.5);
+        } catch(e) {}
+    }
+
+    function playWrongSound() {
+        try {
+            const ctx = getAudioContext();
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(160, now);
+            osc.frequency.linearRampToValueAtTime(80, now + 0.35);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(now); osc.stop(now + 0.35);
+        } catch(e) {}
+    }
+
+    // 國小電子書風格題庫：題目簡單、分年級、固定且可追蹤，避免不同玩家拿到重複題目
+    const masterQuestionBank = [
+        // 低年級：一年級～二年級，包含大量注音、簡單國語、基礎數學與生活常識
+        { id: 1, grade: 'low', diff: 'easy', q: "【注音】「ㄅ」最接近哪個字的開頭音？", options: ["A. 大", "B. 波", "C. 馬", "D. 牛"], ans: "B" },
+        { id: 2, grade: 'low', diff: 'easy', q: "【注音】「ㄆㄧ」是哪一個字的注音？", options: ["A. 米", "B. 皮", "C. 比", "D. 你"], ans: "B" },
+        { id: 3, grade: 'low', diff: 'easy', q: "【注音】「媽媽」的第一個字「媽」注音是？", options: ["A. ㄇㄚ", "B. ㄋㄚ", "C. ㄇㄛ", "D. ㄇㄟ"], ans: "A" },
+        { id: 4, grade: 'low', diff: 'easy', q: "【注音】「爸爸」的第一個字「爸」注音是？", options: ["A. ㄉㄚ", "B. ㄅㄚ", "C. ㄆㄚ", "D. ㄇㄚ"], ans: "B" },
+        { id: 5, grade: 'low', diff: 'easy', q: "【注音】「花」的注音是？", options: ["A. ㄏㄨㄚ", "B. ㄏㄨㄛ", "C. ㄈㄚ", "D. ㄏㄜ"], ans: "A" },
+        { id: 6, grade: 'low', diff: 'easy', q: "【注音】「狗」的注音是？", options: ["A. ㄍㄡˇ", "B. ㄎㄡˇ", "C. ㄍㄨˇ", "D. ㄍㄠˇ"], ans: "A" },
+        { id: 7, grade: 'low', diff: 'easy', q: "【注音】「書」的注音是？", options: ["A. ㄕㄨ", "B. ㄙㄨ", "C. ㄕㄨㄟ", "D. ㄒㄩ"], ans: "A" },
+        { id: 8, grade: 'low', diff: 'easy', q: "【注音】「魚」的注音是？", options: ["A. ㄩ", "B. ㄨ", "C. ㄧ", "D. ㄨㄟ"], ans: "A" },
+        { id: 9, grade: 'low', diff: 'easy', q: "【注音】「月」的注音是？", options: ["A. ㄩㄝˋ", "B. ㄧㄝˋ", "C. ㄩㄢˊ", "D. ㄨㄛˋ"], ans: "A" },
+        { id: 10, grade: 'low', diff: 'easy', q: "【注音】「山」的注音是？", options: ["A. ㄙㄢ", "B. ㄕㄢ", "C. ㄒㄢ", "D. ㄕㄣ"], ans: "B" },
+        { id: 11, grade: 'low', diff: 'easy', q: "【注音】「火」的注音是？", options: ["A. ㄏㄨㄛˇ", "B. ㄏㄨㄚˇ", "C. ㄈㄛˇ", "D. ㄏㄜˇ"], ans: "A" },
+        { id: 12, grade: 'low', diff: 'easy', q: "【注音】「水」的注音是？", options: ["A. ㄙㄨㄟˇ", "B. ㄕㄨㄟˇ", "C. ㄕㄨˇ", "D. ㄕㄟˇ"], ans: "B" },
+        { id: 13, grade: 'low', diff: 'easy', q: "【數學】3 + 4 = ?", options: ["A. 6", "B. 7", "C. 8", "D. 9"], ans: "B" },
+        { id: 14, grade: 'low', diff: 'easy', q: "【數學】8 - 3 = ?", options: ["A. 4", "B. 5", "C. 6", "D. 7"], ans: "B" },
+        { id: 15, grade: 'low', diff: 'easy', q: "【數學】5 + 5 = ?", options: ["A. 9", "B. 10", "C. 11", "D. 12"], ans: "B" },
+        { id: 16, grade: 'low', diff: 'easy', q: "【數學】12 - 5 = ?", options: ["A. 6", "B. 7", "C. 8", "D. 9"], ans: "B" },
+        { id: 17, grade: 'low', diff: 'easy', q: "【生活】一天有幾個小時？", options: ["A. 12", "B. 18", "C. 24", "D. 30"], ans: "C" },
+        { id: 18, grade: 'low', diff: 'easy', q: "【生活】我們用什麼器官看東西？", options: ["A. 耳朵", "B. 眼睛", "C. 鼻子", "D. 手"], ans: "B" },
+        { id: 19, grade: 'low', diff: 'easy', q: "【生活】天亮後通常會看到哪一個？", options: ["A. 太陽", "B. 星星", "C. 月亮消失", "D. 黑夜"], ans: "A" },
+        { id: 20, grade: 'low', diff: 'easy', q: "【國語】「大」的相反詞是？", options: ["A. 高", "B. 小", "C. 長", "D. 多"], ans: "B" },
+        { id: 21, grade: 'low', diff: 'normal', q: "【注音】「日」的注音是？", options: ["A. ㄖˋ", "B. ㄌㄧˋ", "C. ㄖㄜˋ", "D. ㄗˋ"], ans: "A" },
+        { id: 22, grade: 'low', diff: 'normal', q: "【注音】「雨」的注音是？", options: ["A. ㄩˇ", "B. ㄩㄣˇ", "C. ㄧㄩˇ", "D. ㄨˇ"], ans: "A" },
+        { id: 23, grade: 'low', diff: 'normal', q: "【注音】「牛」的注音是？", options: ["A. ㄋㄧㄡˊ", "B. ㄋㄡˊ", "C. ㄌㄧㄡˊ", "D. ㄋㄧㄡˋ"], ans: "A" },
+        { id: 24, grade: 'low', diff: 'normal', q: "【注音】「鳥」的注音是？", options: ["A. ㄉㄧㄠˇ", "B. ㄋㄧㄠˇ", "C. ㄋㄧㄡˇ", "D. ㄌㄧㄠˇ"], ans: "B" },
+        { id: 25, grade: 'low', diff: 'normal', q: "【數學】6 + 7 = ?", options: ["A. 12", "B. 13", "C. 14", "D. 15"], ans: "B" },
+        { id: 26, grade: 'low', diff: 'normal', q: "【數學】15 - 8 = ?", options: ["A. 6", "B. 7", "C. 8", "D. 9"], ans: "B" },
+        { id: 27, grade: 'low', diff: 'normal', q: "【數學】2 + 9 = ?", options: ["A. 10", "B. 11", "C. 12", "D. 13"], ans: "B" },
+        { id: 28, grade: 'low', diff: 'normal', q: "【數學】14 - 6 = ?", options: ["A. 7", "B. 8", "C. 9", "D. 10"], ans: "B" },
+        { id: 29, grade: 'low', diff: 'normal', q: "【生活】一週有幾天？", options: ["A. 5天", "B. 6天", "C. 7天", "D. 8天"], ans: "C" },
+        { id: 30, grade: 'low', diff: 'normal', q: "【生活】冰塊放在室內變成水，這叫做什麼？", options: ["A. 凝固", "B. 融化", "C. 結冰", "D. 燃燒"], ans: "B" },
+        { id: 31, grade: 'low', diff: 'hard', q: "【數學】4 + 8 + 2 = ?", options: ["A. 12", "B. 13", "C. 14", "D. 15"], ans: "C" },
+        { id: 32, grade: 'low', diff: 'hard', q: "【數學】18 - 9 = ?", options: ["A. 7", "B. 8", "C. 9", "D. 10"], ans: "C" },
+        { id: 33, grade: 'low', diff: 'hard', q: "【國語】「快樂」比較接近哪一個意思？", options: ["A. 高興", "B. 生氣", "C. 害怕", "D. 難過"], ans: "A" },
+        { id: 34, grade: 'low', diff: 'hard', q: "【生活】下雨天出門通常要帶什麼？", options: ["A. 雨傘", "B. 太陽眼鏡", "C. 游泳圈", "D. 溜冰鞋"], ans: "A" },
+        { id: 35, grade: 'low', diff: 'hard', q: "【數學】有10顆糖果，吃掉3顆，剩下幾顆？", options: ["A. 6", "B. 7", "C. 8", "D. 9"], ans: "B" },
+        { id: 36, grade: 'low', diff: 'hard', q: "【數學】一盒彩色筆有5枝，2盒共有幾枝？", options: ["A. 7", "B. 8", "C. 10", "D. 12"], ans: "C" },
+        { id: 37, grade: 'low', diff: 'hard', q: "【生活】哪一個是水果？", options: ["A. 蘋果", "B. 胡蘿蔔", "C. 菠菜", "D. 玉米"], ans: "A" },
+        { id: 38, grade: 'low', diff: 'hard', q: "【生活】植物通常需要哪一樣東西才能生長？", options: ["A. 水", "B. 石頭", "C. 鐵球", "D. 玻璃"], ans: "A" },
+        { id: 39, grade: 'low', diff: 'hard', q: "【數學】9 + 6 = ?", options: ["A. 14", "B. 15", "C. 16", "D. 17"], ans: "B" },
+        { id: 40, grade: 'low', diff: 'hard', q: "【數學】20 - 7 = ?", options: ["A. 11", "B. 12", "C. 13", "D. 14"], ans: "C" },
+
+        // 中年級：三～四年級，乘除法、分數、單位、簡單自然科學
+        { id: 41, grade: 'mid', diff: 'easy', q: "【數學】3 × 4 = ?", options: ["A. 7", "B. 10", "C. 12", "D. 14"], ans: "C" },
+        { id: 42, grade: 'mid', diff: 'easy', q: "【數學】24 ÷ 6 = ?", options: ["A. 3", "B. 4", "C. 5", "D. 6"], ans: "B" },
+        { id: 43, grade: 'mid', diff: 'easy', q: "【數學】7 × 5 = ?", options: ["A. 30", "B. 35", "C. 40", "D. 45"], ans: "B" },
+        { id: 44, grade: 'mid', diff: 'easy', q: "【數學】36 ÷ 4 = ?", options: ["A. 8", "B. 9", "C. 10", "D. 12"], ans: "B" },
+        { id: 45, grade: 'mid', diff: 'easy', q: "【數學】6 × 8 = ?", options: ["A. 42", "B. 46", "C. 48", "D. 54"], ans: "C" },
+        { id: 46, grade: 'mid', diff: 'easy', q: "【數學】45 ÷ 5 = ?", options: ["A. 7", "B. 8", "C. 9", "D. 10"], ans: "C" },
+        { id: 47, grade: 'mid', diff: 'easy', q: "【生活】1 公尺等於幾公分？", options: ["A. 10", "B. 50", "C. 100", "D. 1000"], ans: "C" },
+        { id: 48, grade: 'mid', diff: 'easy', q: "【生活】1 公斤等於幾公克？", options: ["A. 100", "B. 500", "C. 1000", "D. 2000"], ans: "C" },
+        { id: 49, grade: 'mid', diff: 'easy', q: "【自然】我們呼吸時吸入哪一種氣體？", options: ["A. 氧氣", "B. 二氧化碳", "C. 水蒸氣", "D. 氦氣"], ans: "A" },
+        { id: 50, grade: 'mid', diff: 'easy', q: "【自然】水在 0°C 左右會變成什麼？", options: ["A. 水蒸氣", "B. 冰", "C. 雲", "D. 土"], ans: "B" },
+        { id: 51, grade: 'mid', diff: 'normal', q: "【數學】25 + 37 = ?", options: ["A. 52", "B. 60", "C. 62", "D. 72"], ans: "C" },
+        { id: 52, grade: 'mid', diff: 'normal', q: "【數學】80 - 46 = ?", options: ["A. 24", "B. 34", "C. 36", "D. 44"], ans: "B" },
+        { id: 53, grade: 'mid', diff: 'normal', q: "【數學】1/2 和 2/4 哪一個比較大？", options: ["A. 1/2", "B. 2/4", "C. 一樣大", "D. 無法比較"], ans: "C" },
+        { id: 54, grade: 'mid', diff: 'normal', q: "【數學】3/4 代表把一個東西分成幾等份後取幾份？", options: ["A. 3等份取4份", "B. 4等份取3份", "C. 7等份取1份", "D. 4等份取4份"], ans: "B" },
+        { id: 55, grade: 'mid', diff: 'normal', q: "【數學】4 × 25 = ?", options: ["A. 75", "B. 90", "C. 100", "D. 125"], ans: "C" },
+        { id: 56, grade: 'mid', diff: 'normal', q: "【數學】72 ÷ 8 = ?", options: ["A. 7", "B. 8", "C. 9", "D. 10"], ans: "C" },
+        { id: 57, grade: 'mid', diff: 'normal', q: "【數學】長方形長 6 公分、寬 3 公分，面積是多少？", options: ["A. 9 平方公分", "B. 18 平方公分", "C. 21 平方公分", "D. 24 平方公分"], ans: "B" },
+        { id: 58, grade: 'mid', diff: 'normal', q: "【時間】半小時等於幾分鐘？", options: ["A. 15", "B. 20", "C. 30", "D. 60"], ans: "C" },
+        { id: 59, grade: 'mid', diff: 'normal', q: "【自然】太陽是什麼？", options: ["A. 行星", "B. 恆星", "C. 衛星", "D. 小行星"], ans: "B" },
+        { id: 60, grade: 'mid', diff: 'normal', q: "【生活】垃圾應該怎麼做比較環保？", options: ["A. 全部丟路邊", "B. 做分類與回收", "C. 丟到河裡", "D. 燒掉所有垃圾"], ans: "B" },
+        { id: 61, grade: 'mid', diff: 'hard', q: "【數學】125 + 36 = ?", options: ["A. 151", "B. 161", "C. 171", "D. 181"], ans: "B" },
+        { id: 62, grade: 'mid', diff: 'hard', q: "【數學】200 - 75 = ?", options: ["A. 115", "B. 120", "C. 125", "D. 135"], ans: "C" },
+        { id: 63, grade: 'mid', diff: 'hard', q: "【數學】15 × 6 = ?", options: ["A. 80", "B. 90", "C. 100", "D. 110"], ans: "B" },
+        { id: 64, grade: 'mid', diff: 'hard', q: "【數學】96 ÷ 12 = ?", options: ["A. 6", "B. 7", "C. 8", "D. 9"], ans: "C" },
+        { id: 65, grade: 'mid', diff: 'hard', q: "【數學】0.5 等於哪一個分數？", options: ["A. 1/5", "B. 1/4", "C. 1/2", "D. 2/5"], ans: "C" },
+        { id: 66, grade: 'mid', diff: 'hard', q: "【數學】2 公尺 30 公分共有幾公分？", options: ["A. 203", "B. 230", "C. 250", "D. 300"], ans: "B" },
+        { id: 67, grade: 'mid', diff: 'hard', q: "【自然】植物的根主要有什麼作用？", options: ["A. 吸收水分", "B. 製造聲音", "C. 看見東西", "D. 飛行"], ans: "A" },
+        { id: 68, grade: 'mid', diff: 'hard', q: "【自然】磁鐵可以吸引哪一種物品？", options: ["A. 紙張", "B. 木頭", "C. 鐵製品", "D. 玻璃"], ans: "C" },
+        { id: 69, grade: 'mid', diff: 'hard', q: "【生活】紅綠燈的紅燈通常代表什麼？", options: ["A. 前進", "B. 停止", "C. 加速", "D. 轉圈"], ans: "B" },
+        { id: 70, grade: 'mid', diff: 'hard', q: "【生活】吃飯前最重要的習慣之一是？", options: ["A. 洗手", "B. 跑步", "C. 看電視", "D. 睡覺"], ans: "A" },
+
+        // 高年級：五～六年級，仍以簡單四則運算、分數小數、面積周長與基礎知識為主
+        { id: 71, grade: 'high', diff: 'easy', q: "【四則】36 + 24 = ?", options: ["A. 50", "B. 60", "C. 70", "D. 80"], ans: "B" },
+        { id: 72, grade: 'high', diff: 'easy', q: "【四則】90 - 37 = ?", options: ["A. 43", "B. 53", "C. 63", "D. 73"], ans: "B" },
+        { id: 73, grade: 'high', diff: 'easy', q: "【四則】8 × 7 = ?", options: ["A. 54", "B. 56", "C. 58", "D. 64"], ans: "B" },
+        { id: 74, grade: 'high', diff: 'easy', q: "【四則】81 ÷ 9 = ?", options: ["A. 7", "B. 8", "C. 9", "D. 10"], ans: "C" },
+        { id: 75, grade: 'high', diff: 'easy', q: "【四則】20 + 6 × 3 = ?", options: ["A. 26", "B. 38", "C. 60", "D. 78"], ans: "B" },
+        { id: 76, grade: 'high', diff: 'easy', q: "【四則】(20 + 6) ÷ 2 = ?", options: ["A. 11", "B. 12", "C. 13", "D. 14"], ans: "C" },
+        { id: 77, grade: 'high', diff: 'easy', q: "【數學】1/4 + 1/4 = ?", options: ["A. 1/2", "B. 1/3", "C. 2/8", "D. 3/4"], ans: "A" },
+        { id: 78, grade: 'high', diff: 'easy', q: "【數學】0.7 + 0.2 = ?", options: ["A. 0.8", "B. 0.9", "C. 1.0", "D. 1.1"], ans: "B" },
+        { id: 79, grade: 'high', diff: 'easy', q: "【數學】長方形長 10 公分、寬 4 公分，周長是多少？", options: ["A. 14 公分", "B. 20 公分", "C. 28 公分", "D. 40 公分"], ans: "C" },
+        { id: 80, grade: 'high', diff: 'easy', q: "【自然】地球繞著什麼運行？", options: ["A. 太陽", "B. 月亮", "C. 火星", "D. 金星"], ans: "A" },
+        { id: 81, grade: 'high', diff: 'normal', q: "【四則】45 + 38 - 20 = ?", options: ["A. 53", "B. 63", "C. 73", "D. 83"], ans: "C" },
+        { id: 82, grade: 'high', diff: 'normal', q: "【四則】7 × 9 - 8 = ?", options: ["A. 47", "B. 55", "C. 63", "D. 71"], ans: "B" },
+        { id: 83, grade: 'high', diff: 'normal', q: "【四則】120 ÷ 10 + 5 = ?", options: ["A. 12", "B. 15", "C. 17", "D. 20"], ans: "B" },
+        { id: 84, grade: 'high', diff: 'normal', q: "【四則】30 - 4 × 5 = ?", options: ["A. 10", "B. 20", "C. 26", "D. 130"], ans: "A" },
+        { id: 85, grade: 'high', diff: 'normal', q: "【數學】3/5 是小於 1、等於 1，還是大於 1？", options: ["A. 小於 1", "B. 等於 1", "C. 大於 1", "D. 無法判斷"], ans: "A" },
+        { id: 86, grade: 'high', diff: 'normal', q: "【數學】1.5 公尺等於幾公分？", options: ["A. 15", "B. 100", "C. 150", "D. 105"], ans: "C" },
+        { id: 87, grade: 'high', diff: 'normal', q: "【數學】長方形長 8 公分、寬 5 公分，面積是多少？", options: ["A. 13", "B. 26", "C. 40", "D. 64"], ans: "C" },
+        { id: 88, grade: 'high', diff: 'normal', q: "【數學】一件商品 80 元，打 9 折後是多少元？", options: ["A. 70", "B. 72", "C. 74", "D. 78"], ans: "B" },
+        { id: 89, grade: 'high', diff: 'normal', q: "【自然】水蒸氣遇冷後容易變成什麼？", options: ["A. 水", "B. 石頭", "C. 沙子", "D. 木頭"], ans: "A" },
+        { id: 90, grade: 'high', diff: 'normal', q: "【自然】人體中負責把血液送到全身的器官是？", options: ["A. 心臟", "B. 胃", "C. 眼睛", "D. 耳朵"], ans: "A" },
+        { id: 91, grade: 'high', diff: 'hard', q: "【四則】(18 + 6) × 2 = ?", options: ["A. 36", "B. 42", "C. 48", "D. 52"], ans: "C" },
+        { id: 92, grade: 'high', diff: 'hard', q: "【四則】100 - 24 ÷ 6 = ?", options: ["A. 76", "B. 96", "C. 104", "D. 124"], ans: "B" },
+        { id: 93, grade: 'high', diff: 'hard', q: "【數學】2/3 + 1/3 = ?", options: ["A. 1/3", "B. 2/3", "C. 1", "D. 4/3"], ans: "C" },
+        { id: 94, grade: 'high', diff: 'hard', q: "【數學】2.5 + 1.2 = ?", options: ["A. 3.5", "B. 3.7", "C. 3.8", "D. 4.7"], ans: "B" },
+        { id: 95, grade: 'high', diff: 'hard', q: "【數學】一個正方形邊長 6 公分，面積是多少？", options: ["A. 12", "B. 24", "C. 36", "D. 48"], ans: "C" },
+        { id: 96, grade: 'high', diff: 'hard', q: "【數學】小明有 3/4 公升果汁，喝掉 1/4 公升，剩多少？", options: ["A. 1/4 公升", "B. 1/2 公升", "C. 2/3 公升", "D. 1 公升"], ans: "B" },
+        { id: 97, grade: 'high', diff: 'hard', q: "【生活】一天有 24 小時，半天有幾小時？", options: ["A. 6", "B. 8", "C. 12", "D. 14"], ans: "C" },
+        { id: 98, grade: 'high', diff: 'hard', q: "【自然】植物製造養分時主要需要陽光、水和哪一種氣體？", options: ["A. 氧氣", "B. 二氧化碳", "C. 氦氣", "D. 氫氣"], ans: "B" },
+        { id: 99, grade: 'high', diff: 'hard', q: "【地理】台灣四面環海，所以屬於什麼？", options: ["A. 島嶼", "B. 沙漠", "C. 大陸", "D. 平原"], ans: "A" },
+        { id: 100, grade: 'high', diff: 'hard', q: "【生活】過馬路時最安全的做法是？", options: ["A. 低頭跑過去", "B. 看紅綠燈並走行人穿越道", "C. 邊玩手機邊走", "D. 直接穿越馬路"], ans: "B" }
+    ];
+
+    const fullQuestionPool = masterQuestionBank;
+
+    // 已經出過的題目：存在瀏覽器中，換不同玩家、重新整理頁面也不會重複
+    const USED_QUESTION_KEY = 'kobei_used_question_ids_v3';
+    const PLAYERS_KEY = 'kobei_played_players_v3';
+
+    function loadJsonArray(key) {
+        try {
+            const raw = localStorage.getItem(key);
+            const parsed = raw ? JSON.parse(raw) : [];
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    let usedQuestionIds = new Set(loadJsonArray(USED_QUESTION_KEY));
+    let playedPlayers = loadJsonArray(PLAYERS_KEY);
+
+    function saveGameRecords() {
+        try {
+            localStorage.setItem(USED_QUESTION_KEY, JSON.stringify([...usedQuestionIds]));
+            localStorage.setItem(PLAYERS_KEY, JSON.stringify(playedPlayers));
+        } catch (e) {}
+    }
+
+    // 玩家需要重置題庫時，可以在瀏覽器主控台執行 clearKobeiQuestionHistory()
+    function clearKobeiQuestionHistory() {
+        usedQuestionIds.clear();
+        try { localStorage.removeItem(USED_QUESTION_KEY); } catch (e) {}
+    }
+
+    let playerName = "柯北勇者";
+    let selectedGrade = "mid";
+    let selectedDiff = "normal";
+    
+    let gameQuestions = [];
+    let currentStage = 0;
+    let score = 0;
+    let lives = 3;
+    let gameState = "SELECT_ANSWER";
+    let selectedOptionKey = null;
+
+    // 定時器與錯題追蹤
+    let timerInterval = null;
+    let timeLeft = 30;
+    let wrongQuestionIds = new Set(); // 記錄錯題ID
+
+    function selectGrade(grade, btn) {
+        selectedGrade = grade;
+        btn.parentElement.querySelectorAll(".btn-select").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+    }
+
+    function selectDifficulty(diff, btn) {
+        selectedDiff = diff;
+        btn.parentElement.querySelectorAll(".btn-select").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+    }
+
+    function showStartScreen() {
+        clearInterval(timerInterval);
+        document.getElementById("start-screen").classList.remove("hidden");
+        document.getElementById("win-screen").classList.add("hidden");
+        document.getElementById("gameover-screen").classList.add("hidden");
+    }
+
+    function selectFreshQuestions() {
+        // 難易度只決定「最多可以出到哪裡」，但優先使用簡單題。
+        // 這樣五、六年級也能拿到四則運算這類基礎題目。
+        const diffRank = { easy: 1, normal: 2, hard: 3 };
+        const maxRank = diffRank[selectedDiff];
+
+        let pool = fullQuestionPool.filter(q =>
+            q.grade === selectedGrade &&
+            diffRank[q.diff] <= maxRank &&
+            !usedQuestionIds.has(q.id)
+        );
+
+        // 如果目前難度的新題目少於10題，就在同一年級中加入較難一級的題目，
+        // 仍然保持「國小電子書」程度，不跨到別的年級。
+        if (pool.length < 10) {
+            pool = fullQuestionPool.filter(q =>
+                q.grade === selectedGrade &&
+                !usedQuestionIds.has(q.id)
+            );
+        }
+
+        if (pool.length < 10) {
+            alert(`「${selectedGrade === 'low' ? '低年級' : selectedGrade === 'mid' ? '中年級' : '高年級'}」目前沒有足夠的全新題目了，請換一個年級再玩！`);
+            return null;
+        }
+
+        // 洗牌後取10題，並立即記錄，確保同一瀏覽器的其他玩家不會拿到相同題目。
+        pool.sort(() => Math.random() - 0.5);
+        const selectedQ = pool.slice(0, 10);
+        selectedQ.forEach(q => usedQuestionIds.add(q.id));
+        saveGameRecords();
+        return selectedQ;
+    }
+
+    function startGame(isRetry = false) {
+        const inputVal = document.getElementById("player-name-input").value.trim();
+        playerName = inputVal || "無名勇者";
+        
+        let gradeName = selectedGrade === 'low' ? '低年級' : (selectedGrade === 'mid' ? '中年級' : '高年級');
+        let diffName = selectedDiff === 'easy' ? '簡單' : (selectedDiff === 'normal' ? '普通' : '困難');
+        
+        document.getElementById("display-name").innerText = playerName;
+        document.getElementById("display-grade").innerText = gradeName;
+        document.getElementById("display-diff").innerText = diffName;
+
+        // 不論是第一次玩還是「再次挑戰」，都只抽從未出現過的新題目。
+        // 因此不同玩家、同一玩家再次挑戰，都不會遇到上一局的相同題目。
+        const selectedQ = selectFreshQuestions();
+        if (!selectedQ) return;
+
+        wrongQuestionIds.clear();
+        gameQuestions = selectedQ;
+        currentStage = 0;
+        score = 0;
+        lives = 3;
+        gameState = "SELECT_ANSWER";
+        selectedOptionKey = null;
+
+        document.getElementById("start-screen").classList.add("hidden");
+        document.getElementById("win-screen").classList.add("hidden");
+        document.getElementById("gameover-screen").classList.add("hidden");
+
+        renderUI();
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 30;
+        document.getElementById("timer").innerText = timeLeft;
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById("timer").innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                handleTimeout();
+            }
+        }, 1000);
+    }
+
+    function handleTimeout() {
+        playWrongSound();
+        lives--;
+        let qData = gameQuestions[currentStage];
+        wrongQuestionIds.add(qData.id); // 記錄為錯題
+        
+        currentStage++;
+        playDamageAnimation(() => {
+            selectedOptionKey = null;
+            gameState = "SELECT_ANSWER";
+            renderUI();
+        });
+    }
+
+    function renderUI() {
+        clearInterval(timerInterval);
+
+        let heartsHTML = "";
+        for (let i = 0; i < lives; i++) heartsHTML += "❤️ ";
+        document.getElementById("hearts").innerHTML = heartsHTML || "💔";
+
+        document.getElementById("score").innerText = score;
+        document.getElementById("current-stage-num").innerText = currentStage + 1;
+
+        if (currentStage >= 10 || lives <= 0) {
+            if (lives > 0) {
+                updateLeaderboardAndShowWin();
+            } else {
+                showFailScreen();
+            }
+            return;
+        }
+
+        const qData = gameQuestions[currentStage];
+        document.getElementById("question-text").innerText = `【第 ${currentStage + 1} 題】${qData.q}`;
+
+        const container = document.getElementById("game-container");
+        const hintBox = document.getElementById("target-aim-hint");
+        const keyHint = document.getElementById("key-hint");
+
+        if (gameState === "SELECT_ANSWER") {
+            container.classList.remove("shooting-mode");
+            hintBox.style.display = "none";
+            keyHint.innerHTML = "👉 <b>步驟 1：</b>請點擊選擇答案 (限時 30 秒)";
+            startTimer();
+        } else if (gameState === "AIM_AND_SHOOT") {
+            container.classList.add("shooting-mode");
+            hintBox.style.display = "block";
+            keyHint.innerHTML = "🔫 <b>步驟 2：</b>滑鼠已變成槍！<b>瞄準怪物開槍射擊</b>！";
+        }
+
+        const optionsBox = document.getElementById("options-container");
+        optionsBox.innerHTML = "";
+        const keys = ["A", "B", "C", "D"];
+
+        qData.options.forEach((optStr, idx) => {
+            const btn = document.createElement("button");
+            btn.className = "opt-btn";
+            if (selectedOptionKey === keys[idx]) btn.classList.add("selected-opt");
+            btn.innerHTML = `<span class="key-badge">${keys[idx]}</span> ${optStr.substring(3)}`;
+            
+            btn.onclick = () => {
+                if (gameState !== "SELECT_ANSWER") return;
+                getAudioContext();
+                selectedOptionKey = keys[idx];
+                gameState = "AIM_AND_SHOOT";
+                clearInterval(timerInterval);
+                renderUI();
+            };
+
+            optionsBox.appendChild(btn);
+        });
+    }
+
+    document.getElementById("game-container").addEventListener("click", (e) => {
+        if (gameState !== "AIM_AND_SHOOT") return;
+        if (e.target.closest(".opt-btn")) return;
+        executeShot(e.clientX, e.clientY);
+    });
+
+    function executeShot(clickX, clickY) {
+        gameState = "ANIMATING";
+        const container = document.getElementById("game-container");
+        container.classList.remove("shooting-mode");
+        document.getElementById("target-aim-hint").style.display = "none";
+
+        playGunshotSound();
+
+        const bulletLine = document.getElementById("bullet-line");
+        const containerRect = container.getBoundingClientRect();
+
+        const startX = 140;
+        const startY = 180;
+        const endX = clickX - containerRect.left;
+        const endY = clickY - containerRect.top;
+
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+
+        bulletLine.style.width = `${distance}px`;
+        bulletLine.style.left = `${startX}px`;
+        bulletLine.style.top = `${startY}px`;
+        bulletLine.style.transform = `rotate(${angle}deg)`;
+        bulletLine.style.display = "block";
+
+        document.getElementById("kobei-wrapper").style.transform = "translateX(-15px)";
+
+        const hit = document.createElement("div");
+        hit.className = "hit-effect";
+        hit.innerText = "💥";
+        hit.style.left = `${endX - 25}px`;
+        hit.style.top = `${endY - 25}px`;
+        container.appendChild(hit);
+
+        setTimeout(() => {
+            bulletLine.style.display = "none";
+            document.getElementById("kobei-wrapper").style.transform = "translateX(0)";
+            hit.remove();
+
+            const qData = gameQuestions[currentStage];
+            if (selectedOptionKey === qData.ans) {
+                playCorrectSound();
+                score += 10; // 每題 10 分
+                // 答對，從錯題紀錄中移除
+                wrongQuestionIds.delete(qData.id);
+                currentStage++;
+                playMonsterHitAnimation(() => {
+                    selectedOptionKey = null;
+                    gameState = "SELECT_ANSWER";
+                    renderUI();
+                });
+            } else {
+                playWrongSound();
+                lives--;
+                wrongQuestionIds.add(qData.id); // 記錄為錯題
+                currentStage++;
+                playDamageAnimation(() => {
+                    selectedOptionKey = null;
+                    gameState = "SELECT_ANSWER";
+                    renderUI();
+                });
+            }
+        }, 250);
+    }
+
+    function playMonsterHitAnimation(callback) {
+        const monster = document.getElementById("monster-wrapper");
+        monster.style.transform = "scale(0.6) rotate(30deg)";
+        document.getElementById("monster-icon").innerText = "💥";
+        setTimeout(() => {
+            monster.style.transform = "scale(1) rotate(0deg)";
+            callback();
+        }, 400);
+    }
+
+    function playDamageAnimation(callback) {
+        const kobei = document.getElementById("kobei-wrapper");
+        document.getElementById("kobei-icon").innerText = "😵";
+        let count = 0;
+        const timer = setInterval(() => {
+            kobei.style.transform = `translateX(${count % 2 === 0 ? 12 : -12}px)`;
+            count++;
+            if (count > 6) {
+                clearInterval(timer);
+                kobei.style.transform = "translateX(0)";
+                document.getElementById("kobei-icon").innerText = "🕵️‍♂️";
+                callback();
+            }
+        }, 50);
+    }
+
+    function updateLeaderboardAndShowWin() {
+        clearInterval(timerInterval);
+        document.getElementById("win-score-text").innerText = score;
+        let gradeName = selectedGrade === 'low' ? '低年級' : (selectedGrade === 'mid' ? '中年級' : '高年級');
+        let diffName = selectedDiff === 'easy' ? '簡單' : (selectedDiff === 'normal' ? '普通' : '困難');
+        
+        let myEntry = { name: playerName, gradeDiff: `${gradeName}·${diffName}`, score: score, isMe: true };
+        playedPlayers.push(myEntry);
+        saveGameRecords();
+        
+        // 從所有玩過的人中，依分數由高到低選出前10名
+        let top10 = [...playedPlayers].sort((a, b) => b.score - a.score).slice(0, 10);
+        renderLeaderboardTable("win-leaderboard-body", top10);
+
+        document.getElementById("win-screen").classList.remove("hidden");
+    }
+
+    function showFailScreen() {
+        clearInterval(timerInterval);
+        let gradeName = selectedGrade === 'low' ? '低年級' : (selectedGrade === 'mid' ? '中年級' : '高年級');
+        let diffName = selectedDiff === 'easy' ? '簡單' : (selectedDiff === 'normal' ? '普通' : '困難');
+        let myEntry = { name: playerName, gradeDiff: `${gradeName}·${diffName}`, score: score, isMe: true };
+        playedPlayers.push(myEntry);
+        saveGameRecords();
+        
+        // 從所有玩過的人中，依分數由高到低選出前10名
+        let top10 = [...playedPlayers].sort((a, b) => b.score - a.score).slice(0, 10);
+        renderLeaderboardTable("fail-leaderboard-body", top10);
+
+        document.getElementById("gameover-screen").classList.remove("hidden");
+    }
+
+    function renderLeaderboardTable(elementId, list) {
+        const tbody = document.getElementById(elementId);
+        tbody.innerHTML = "";
+        list.forEach((item, index) => {
+            const tr = document.createElement("tr");
+            if (item.isMe) tr.className = "my-entry";
+            
+            let rankClass = index === 0 ? 'rank-1' : (index === 1 ? 'rank-2' : (index === 2 ? 'rank-3' : ''));
+            let rankStr = index === 0 ? '🥇 1' : (index === 1 ? '🥈 2' : (index === 2 ? '🥉 3' : index + 1));
+            
+            tr.innerHTML = `
+                <td class="${rankClass}">${rankStr}</td>
+                <td>${item.name} ${item.isMe ? '(你)' : ''}</td>
+                <td>${item.gradeDiff}</td>
+                <td style="font-weight:bold; color:#ffb703;">${item.score} 分</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // 初始化
+    showStartScreen();
+</script>
+
+</body>
+</html>

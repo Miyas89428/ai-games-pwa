@@ -1,0 +1,3343 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🍔 漢堡寶拼字王 | 兒童趣味英文打字遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       1. 設計系統與色彩變數（活潑美式速食店風）
+       ========================================================================== */
+    :root {
+      --bg-cream: #FFF8E7;
+      --bg-pattern: #FFEAC2;
+      --primary-red: #FF4B4B;
+      --primary-red-dark: #D93030;
+      --bun-gold: #FFB703;
+      --bun-gold-dark: #FB8500;
+      --lettuce-green: #4CAF50;
+      --lettuce-green-dark: #2E7D32;
+      --soda-blue: #2196F3;
+      --soda-blue-dark: #1565C0;
+      --card-bg: #FFFFFF;
+      --text-main: #3E2723;
+      --text-muted: #795548;
+      --shadow-chunky: 0 6px 0 rgba(62, 39, 35, 0.16);
+      --font-family: 'Fredoka', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+      background-color: var(--bg-cream);
+      background-image:
+        radial-gradient(var(--bg-pattern) 2px, transparent 2px),
+        radial-gradient(var(--bg-pattern) 2px, var(--bg-cream) 2px);
+      background-size: 36px 36px;
+      background-position: 0 0, 18px 18px;
+      color: var(--text-main);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* 頂部遮陽棚條紋裝飾 */
+    .awning-bar {
+      width: 100%;
+      height: 16px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--primary-red) 0px,
+        var(--primary-red) 28px,
+        #FFFFFF 28px,
+        #FFFFFF 56px
+      );
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       2. 主容器與頂部狀態列
+       ========================================================================== */
+    .app-container {
+      width: 100%;
+      max-width: 820px;
+      padding: 12px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    /* ==========================================================================
+       2-1. 歡迎首頁畫面
+       ========================================================================== */
+    .home-screen {
+      width: 100%;
+      max-width: 720px;
+      margin: auto;
+      padding: 20px 16px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 18px;
+    }
+
+    .home-hero-card {
+      width: 100%;
+      background: #FFFFFF;
+      border: 4px solid #FFE082;
+      border-radius: 32px;
+      padding: 28px 20px 30px;
+      box-shadow: 0 12px 0 rgba(251, 133, 0, 0.2), 0 18px 34px rgba(62, 39, 35, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .home-hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 14px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--bun-gold) 0px,
+        var(--bun-gold) 24px,
+        var(--primary-red) 24px,
+        var(--primary-red) 48px
+      );
+    }
+
+    .home-mascot-wrap {
+      width: 148px;
+      height: 148px;
+      background: radial-gradient(circle at 50% 45%, #FFF8E1 0%, #FFE082 100%);
+      border: 4px solid #FFB703;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 0 #FB8500;
+      margin-top: 8px;
+      animation: mascotFloat 2.8s ease-in-out infinite;
+    }
+
+    @keyframes mascotFloat {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-7px) rotate(2deg); }
+    }
+
+    .home-title {
+      font-size: clamp(2rem, 6vw, 2.85rem);
+      font-weight: 900;
+      color: var(--primary-red);
+      text-shadow: 3px 3px 0 #FFE082;
+      margin: 4px 0 0;
+      line-height: 1.15;
+    }
+
+    .home-subtitle {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin: 0;
+      max-width: 480px;
+      line-height: 1.5;
+    }
+
+    .home-player-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #FFF8E1;
+      border: 2.5px dashed #FFB703;
+      padding: 10px 18px;
+      border-radius: 999px;
+      margin-top: 2px;
+    }
+
+    /* 年級模式選擇器 */
+    .grade-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      max-width: 520px;
+      margin-top: 2px;
+    }
+
+    .grade-card-btn {
+      font-family: var(--font-family);
+      background: #FFFDF7;
+      border: 3px solid #E0C097;
+      border-radius: 22px;
+      padding: 12px 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 4px 0 #E0C097;
+      transition: transform 0.12s, background 0.15s, border-color 0.15s;
+    }
+
+    .grade-card-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #E0C097;
+    }
+
+    .grade-card-btn.active-junior {
+      background: #E8F5E9;
+      border-color: #4CAF50;
+      box-shadow: 0 5px 0 #2E7D32;
+    }
+
+    .grade-card-btn.active-senior {
+      background: #F3E5F5;
+      border-color: #9C27B0;
+      box-shadow: 0 5px 0 #6A1B9A;
+    }
+
+    .grade-card-title {
+      font-size: 1.08rem;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+
+    .grade-card-desc {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .home-rules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 560px;
+      margin: 4px 0;
+    }
+
+    .home-rule-item {
+      background: #FFFDF7;
+      border: 2.5px solid #FFE0B2;
+      border-radius: 20px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .home-rule-icon {
+      font-size: 1.65rem;
+    }
+
+    .home-rule-title {
+      font-size: 0.9rem;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+
+    .home-rule-desc {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .btn-enter-game {
+      font-family: var(--font-family);
+      font-size: clamp(1.35rem, 4vw, 1.65rem);
+      font-weight: 900;
+      color: #FFFFFF;
+      background: linear-gradient(180deg, #66BB6A 0%, #43A047 100%);
+      border: 4px solid #FFFFFF;
+      border-radius: 999px;
+      padding: 16px 46px;
+      cursor: pointer;
+      box-shadow: 0 8px 0 var(--lettuce-green-dark), 0 12px 24px rgba(46, 125, 50, 0.35);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 6px;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+
+    .btn-enter-game:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 var(--lettuce-green-dark), 0 14px 28px rgba(46, 125, 50, 0.4);
+    }
+
+    .btn-enter-game:active {
+      transform: translateY(5px);
+      box-shadow: 0 3px 0 var(--lettuce-green-dark);
+    }
+
+    .home-secondary-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    @media (max-width: 520px) {
+      .home-rules-grid {
+        grid-template-columns: 1fr;
+      }
+      .home-rule-item {
+        flex-direction: row;
+        justify-content: center;
+        padding: 10px 14px;
+        gap: 10px;
+      }
+      .btn-enter-game {
+        width: 100%;
+        padding: 15px 24px;
+      }
+    }
+
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--card-bg);
+      padding: 10px 14px;
+      border-radius: 24px;
+      border: 3px solid #FFE082;
+      box-shadow: var(--shadow-chunky);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--primary-red);
+      text-shadow: 1px 1px 0 #FFE082;
+    }
+
+    .stats-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      background: #FFF3E0;
+      border: 2px solid #FFB74D;
+      color: var(--text-main);
+    }
+
+    .pill-badge.score-badge {
+      background: #E8F5E9;
+      border-color: #81C784;
+      color: #1B5E20;
+    }
+
+    .pill-badge.streak-badge {
+      background: #FFEBEE;
+      border-color: #E57373;
+      color: #B71C1C;
+    }
+
+    .pill-btn {
+      cursor: pointer;
+      background: #E3F2FD;
+      border-color: #64B5F6;
+      color: #0D47A1;
+      transition: transform 0.1s;
+    }
+
+    .pill-btn:active {
+      transform: translateY(2px);
+    }
+
+    .pill-btn.rank-btn {
+      background: #FFF8E1;
+      border-color: #FFD54F;
+      color: #E65100;
+    }
+
+    .pill-btn.home-btn {
+      background: #FFEBEE;
+      border-color: #EF9A9A;
+      color: #C62828;
+    }
+
+    .pill-btn.grade-toggle-btn {
+      background: #E8F5E9;
+      border-color: #81C784;
+      color: #1B5E20;
+    }
+
+    .pill-btn.grade-toggle-btn.is-senior {
+      background: #F3E5F5;
+      border-color: #CE93D8;
+      color: #6A1B9A;
+    }
+
+    .pill-btn.auth-btn {
+      background: #E8EAF6;
+      border-color: #7986CB;
+      color: #283593;
+    }
+
+    .pill-btn.auth-btn.logged-in {
+      background: #E0F2F1;
+      border-color: #4DB6AC;
+      color: #00695C;
+    }
+
+    /* ==========================================================================
+       2-2. 登入 / 註冊帳號視窗樣式
+       ========================================================================== */
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+      background: #FFF3E0;
+      padding: 6px;
+      border-radius: 18px;
+      border: 2px solid #FFE082;
+    }
+
+    .auth-tab-btn {
+      font-family: var(--font-family);
+      font-size: 1rem;
+      font-weight: 800;
+      padding: 8px 10px;
+      border: none;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .auth-tab-btn.active {
+      background: var(--bun-gold);
+      color: #FFFFFF;
+      box-shadow: 0 3px 0 var(--bun-gold-dark);
+    }
+
+    .auth-field {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    .auth-field label {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-main);
+      padding-left: 6px;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 1.05rem;
+      font-family: var(--font-family);
+      font-weight: 700;
+      color: var(--text-main);
+      background: #FFF8E1;
+      border: 2.5px solid #FF9800;
+      border-radius: 14px;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+      touch-action: auto;
+    }
+
+    .auth-input:focus {
+      border-color: var(--primary-red);
+      background: #FFFFFF;
+    }
+
+    .auth-msg {
+      min-height: 20px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--primary-red);
+      margin: 4px 0 8px;
+    }
+
+    .saved-accounts-box {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 2px dashed #FFE082;
+      text-align: left;
+    }
+
+    .saved-accounts-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .saved-account-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .account-chip {
+      font-family: var(--font-family);
+      font-size: 0.85rem;
+      font-weight: 800;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: #FFF3E0;
+      border: 2px solid #FFB74D;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .account-chip:hover {
+      background: #FFE0B2;
+    }
+
+    .icon-btn {
+      background: #F5F5F5;
+      border: 2px solid #E0E0E0;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* ==========================================================================
+       3. 主題分類選單與難度切換
+       ========================================================================== */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      font-family: var(--font-family);
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 7px 13px;
+      border-radius: 16px;
+      border: 2.5px solid #E0C097;
+      background: #FFFFFF;
+      color: var(--text-muted);
+      cursor: pointer;
+      box-shadow: 0 3px 0 #E0C097;
+      transition: all 0.12s;
+    }
+
+    .tab-btn.active {
+      background: var(--bun-gold);
+      border-color: var(--bun-gold-dark);
+      color: #FFFFFF;
+      box-shadow: 0 3px 0 var(--bun-gold-dark);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .tab-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--bun-gold-dark);
+    }
+
+    .difficulty-select {
+      font-family: var(--font-family);
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 7px 12px;
+      border-radius: 16px;
+      border: 2.5px solid #90CAF9;
+      background: #E3F2FD;
+      color: #1565C0;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* ==========================================================================
+       4. 點餐單展示舞台（圖片 + 10秒倒數 + 中文提示 + 發音按鈕）
+       ========================================================================== */
+    .order-stage {
+      background: var(--card-bg);
+      border-radius: 28px;
+      border: 4px solid #FFD54F;
+      box-shadow: var(--shadow-chunky);
+      padding: 14px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      text-align: center;
+    }
+
+    .order-header-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .order-ticket-tag {
+      background: var(--primary-red);
+      color: #FFFFFF;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 4px 14px;
+      border-radius: 999px;
+      letter-spacing: 1px;
+      box-shadow: 0 3px 0 var(--primary-red-dark);
+      flex-shrink: 0;
+    }
+
+    /* 10 秒倒數計時器與進度條 */
+    .timer-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      max-width: 280px;
+      background: #FFF8E1;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 2px solid #FFE082;
+    }
+
+    .timer-track {
+      flex: 1;
+      height: 10px;
+      background: #ECEFF1;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #4CAF50, #8BC34A);
+      border-radius: 999px;
+      transition: width 0.1s linear, background-color 0.2s;
+    }
+
+    .timer-fill.warning {
+      background: linear-gradient(90deg, #FF9800, #FFC107);
+    }
+
+    .timer-fill.danger {
+      background: linear-gradient(90deg, #F44336, #FF5252);
+    }
+
+    .timer-text {
+      font-size: 0.88rem;
+      font-weight: 900;
+      color: #2E7D32;
+      min-width: 52px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-text.danger {
+      color: #D32F2F;
+      animation: timerPulse 0.45s infinite alternate;
+    }
+
+    @keyframes timerPulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.12); }
+    }
+
+    .illustration-box {
+      width: 142px;
+      height: 142px;
+      background: radial-gradient(circle at 50% 45%, #FFFDF7 0%, #FFF3CD 100%);
+      border-radius: 26px;
+      border: 3px dashed #FFB74D;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2px 0 8px;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .illustration-box:hover {
+      transform: scale(1.04);
+    }
+
+    .illustration-box:active {
+      transform: scale(0.96);
+    }
+
+    .illustration-box svg.main-art {
+      width: 112px;
+      height: 112px;
+      filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.12));
+    }
+
+    /* 可愛笑臉表情貼紙 */
+    .cute-face-overlay {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 40px;
+      height: 40px;
+      background: #FFFFFF;
+      border-radius: 50%;
+      border: 2.5px solid #FFB703;
+      box-shadow: 0 3px 0 rgba(251, 133, 0, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      animation: smileBob 2.2s ease-in-out infinite;
+    }
+
+    .cute-face-overlay svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    @keyframes smileBob {
+      0%, 100% { transform: rotate(-6deg) scale(1); }
+      50% { transform: rotate(6deg) scale(1.07); }
+    }
+
+    .word-prompt-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .zh-word {
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .speak-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--soda-blue);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-family: var(--font-family);
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 0 var(--soda-blue-dark);
+      transition: transform 0.1s;
+    }
+
+    .speak-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 var(--soda-blue-dark);
+    }
+
+    .hint-text {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ==========================================================================
+       5. 拼字餐盤區（目標字母格）
+       ========================================================================== */
+    .tray-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .letter-slots {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 14px;
+      background: #FFE0B2;
+      border-radius: 24px;
+      border: 3px solid #FFCC80;
+      box-shadow: inset 0 4px 8px rgba(139, 69, 19, 0.12);
+      min-height: 76px;
+      width: 100%;
+    }
+
+    .slot-box {
+      width: 50px;
+      height: 58px;
+      border-radius: 15px;
+      background: #FFFDF9;
+      border: 3px dashed #D7A86E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.85rem;
+      font-weight: 900;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .slot-box.filled {
+      background: #FFF9C4;
+      border: 3px solid var(--bun-gold-dark);
+      box-shadow: 0 4px 0 var(--bun-gold-dark);
+      transform: translateY(-2px);
+    }
+
+    .slot-box.hinted {
+      color: #BDBDBD;
+      background: #FAFAFA;
+    }
+
+    .slot-box.correct-pop {
+      background: #C8E6C9;
+      border-color: var(--lettuce-green-dark);
+      box-shadow: 0 4px 0 var(--lettuce-green-dark);
+      color: #1B5E20;
+      animation: bouncePop 0.45s ease;
+    }
+
+    .letter-slots.shake {
+      animation: gentleShake 0.4s ease;
+    }
+
+    /* ==========================================================================
+       6. 字母餅乾鍵盤區（點擊 / 鍵盤打字皆可）
+       ========================================================================== */
+    .tiles-bank {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 9px;
+      padding: 10px 6px;
+    }
+
+    .letter-tile {
+      width: 54px;
+      height: 60px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #FFD54F 0%, #FFB300 100%);
+      border: 3px solid #E65100;
+      box-shadow: 0 5px 0 #BF360C;
+      color: #3E2723;
+      font-family: var(--font-family);
+      font-size: 1.85rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s, opacity 0.15s;
+    }
+
+    .letter-tile:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .letter-tile:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #BF360C;
+    }
+
+    .letter-tile:disabled {
+      opacity: 0.25;
+      cursor: default;
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #BF360C;
+    }
+
+    /* ==========================================================================
+       7. 底部操作按鈕列
+       ========================================================================== */
+    .action-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+
+    .action-btn {
+      font-family: var(--font-family);
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 10px 16px;
+      border-radius: 18px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #FFFFFF;
+      transition: transform 0.1s;
+    }
+
+    .action-btn:active {
+      transform: translateY(3px);
+    }
+
+    .btn-backspace {
+      background: #FF7043;
+      box-shadow: 0 4px 0 #D84315;
+    }
+
+    .btn-hint {
+      background: #AB47BC;
+      box-shadow: 0 4px 0 #6A1B9A;
+    }
+
+    .btn-skip {
+      background: #78909C;
+      box-shadow: 0 4px 0 #455A64;
+    }
+
+    .feedback-banner {
+      min-height: 26px;
+      font-size: 1.02rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--primary-red);
+      transition: all 0.2s;
+    }
+
+    /* ==========================================================================
+       8. 彈窗系統（成功出餐 / 時間到結束 / 改名字 / 排行榜）
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(62, 39, 35, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 16px;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-card {
+      background: #FFFFFF;
+      border-radius: 30px;
+      border: 5px solid var(--bun-gold);
+      padding: 24px 20px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 12px 0 rgba(0, 0, 0, 0.2);
+      animation: popScale 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-card.gameover-card {
+      border-color: var(--primary-red);
+    }
+
+    .modal-emoji {
+      font-size: 3.6rem;
+      margin-bottom: 4px;
+    }
+
+    .modal-title {
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: var(--lettuce-green-dark);
+      margin: 0 0 6px;
+    }
+
+    .modal-title.gameover-title {
+      color: var(--primary-red);
+    }
+
+    .modal-word {
+      font-size: 1.85rem;
+      font-weight: 900;
+      color: var(--primary-red);
+      letter-spacing: 2px;
+      margin: 4px 0 14px;
+    }
+
+    .next-btn {
+      font-family: var(--font-family);
+      font-size: 1.15rem;
+      font-weight: 900;
+      background: var(--lettuce-green);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 999px;
+      padding: 13px 28px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--lettuce-green-dark);
+      width: 100%;
+    }
+
+    .next-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--lettuce-green-dark);
+    }
+
+    .next-btn.restart-btn {
+      background: var(--primary-red);
+      box-shadow: 0 5px 0 var(--primary-red-dark);
+    }
+
+    .next-btn.restart-btn:active {
+      box-shadow: 0 2px 0 var(--primary-red-dark);
+    }
+
+    /* 玩家名字輸入框 */
+    .name-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 1.25rem;
+      font-family: var(--font-family);
+      font-weight: 800;
+      color: var(--text-main);
+      background: #FFF8E1;
+      border: 3px solid #FF9800;
+      border-radius: 18px;
+      text-align: center;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+      touch-action: auto;
+    }
+
+    .name-input:focus {
+      border-color: var(--primary-red);
+      background: #FFFFFF;
+    }
+
+    /* 排行榜列表樣式 */
+    .rank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 270px;
+      overflow-y: auto;
+      margin: 12px 0 16px;
+      padding: 4px;
+    }
+
+    .rank-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: #FFF8E1;
+      border: 2px solid #FFE082;
+      font-weight: 800;
+      font-size: 0.98rem;
+    }
+
+    .rank-row.top-1 {
+      background: linear-gradient(90deg, #FFF9C4, #FFE082);
+      border-color: #FFB300;
+    }
+
+    .rank-row.top-2 {
+      background: #F5F5F5;
+      border-color: #BDBDBD;
+    }
+
+    .rank-row.top-3 {
+      background: #FBE9E7;
+      border-color: #FFAB91;
+    }
+
+    .rank-row.is-me {
+      outline: 3px solid var(--primary-red);
+    }
+
+    .rank-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rank-score {
+      color: var(--lettuce-green-dark);
+      font-weight: 900;
+    }
+
+    /* 彩帶動畫畫布 */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 60;
+    }
+
+    /* 動畫定義 */
+    @keyframes bouncePop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.18) translateY(-6px); }
+      70% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes gentleShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    @keyframes popScale {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* 手機版尺寸微調 */
+    @media (max-width: 520px) {
+      .app-container {
+        padding: 10px 10px 20px;
+        gap: 10px;
+      }
+      .slot-box {
+        width: 40px;
+        height: 48px;
+        font-size: 1.45rem;
+        border-radius: 12px;
+      }
+      .slot-box.compact-slot {
+        width: 31px;
+        height: 42px;
+        font-size: 1.18rem;
+        border-radius: 9px;
+      }
+      .letter-tile {
+        width: 44px;
+        height: 50px;
+        font-size: 1.5rem;
+        border-radius: 13px;
+      }
+      .illustration-box {
+        width: 120px;
+        height: 120px;
+      }
+      .illustration-box svg.main-art {
+        width: 96px;
+        height: 96px;
+      }
+      .cute-face-overlay {
+        width: 34px;
+        height: 34px;
+        bottom: 6px;
+        right: 6px;
+      }
+      .cute-face-overlay svg {
+        width: 26px;
+        height: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 頂部紅白相間速食店遮陽棚 -->
+  <div class="awning-bar"></div>
+
+  <!-- 彩帶慶祝畫布 -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- 歡迎首頁畫面 -->
+  <section class="home-screen" id="home-screen">
+    <div class="home-hero-card">
+      <div class="home-mascot-wrap" aria-hidden="true">
+        <svg width="112" height="112" viewBox="0 0 120 120">
+          <!-- 漢堡寶招牌吉祥物 -->
+          <path d="M24 52 C24 24, 96 24, 96 52 Z" fill="#F4A261" stroke="#3E2723" stroke-width="4.5" stroke-linejoin="round"/>
+          <ellipse cx="45" cy="36" rx="4" ry="2.2" fill="#FFF8E7" transform="rotate(-15 45 36)"/>
+          <ellipse cx="62" cy="32" rx="4" ry="2.2" fill="#FFF8E7"/>
+          <ellipse cx="78" cy="37" rx="4" ry="2.2" fill="#FFF8E7" transform="rotate(15 78 37)"/>
+          <path d="M18 58 Q30 50 42 58 T66 58 T90 58 T102 58" fill="none" stroke="#4CAF50" stroke-width="8" stroke-linecap="round"/>
+          <polygon points="22,64 98,64 62,78" fill="#FFD166" stroke="#3E2723" stroke-width="3.5" stroke-linejoin="round"/>
+          <rect x="20" y="68" width="80" height="15" rx="7.5" fill="#6D4C41" stroke="#3E2723" stroke-width="4"/>
+          <path d="M24 83 L96 83 C96 98, 24 98, 24 83 Z" fill="#F4A261" stroke="#3E2723" stroke-width="4.5" stroke-linejoin="round"/>
+          <!-- 可愛大眼睛與開心笑容 -->
+          <circle cx="48" cy="46" r="4.2" fill="#3E2723"/>
+          <circle cx="49.5" cy="44.5" r="1.5" fill="#FFFFFF"/>
+          <circle cx="72" cy="46" r="4.2" fill="#3E2723"/>
+          <circle cx="73.5" cy="44.5" r="1.5" fill="#FFFFFF"/>
+          <ellipse cx="39" cy="50" rx="4.5" ry="2.5" fill="#FF7043" opacity="0.75"/>
+          <ellipse cx="81" cy="50" rx="4.5" ry="2.5" fill="#FF7043" opacity="0.75"/>
+          <path d="M54 49 Q60 56 66 49" fill="none" stroke="#3E2723" stroke-width="3.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <h1 class="home-title">🍔 漢堡寶拼字王</h1>
+      <p class="home-subtitle">歡迎來到漢堡寶英文速食店！看圖片、聽發音，在 10 秒內拼出美味單字，成為金牌小小店長吧！</p>
+
+      <!-- 年級模式選擇 -->
+      <div class="grade-selector" role="group" aria-label="選擇年級難度">
+        <button type="button" class="grade-card-btn active-junior" id="home-grade-junior">
+          <span class="grade-card-title">🐣 低年級模式</span>
+          <span class="grade-card-desc">基礎單字（3～6 字母）</span>
+        </button>
+        <button type="button" class="grade-card-btn" id="home-grade-senior">
+          <span class="grade-card-title">🦅 高年級模式</span>
+          <span class="grade-card-desc">進階單字（5～8 字母・雙倍挑戰）</span>
+        </button>
+      </div>
+
+      <div class="home-player-row">
+        <span style="font-weight: 800; font-size: 0.98rem;">👨‍🍳 目前店員：<strong id="home-player-name" style="color: var(--primary-red);">漢堡小店長</strong></span>
+        <button type="button" class="pill-badge pill-btn auth-btn" id="home-auth-btn" title="登入或註冊帳號">🔑 登入 / 註冊</button>
+      </div>
+
+      <div class="home-rules-grid">
+        <div class="home-rule-item">
+          <span class="home-rule-icon">⏱️</span>
+          <div>
+            <div class="home-rule-title">10 秒限時出餐</div>
+            <div class="home-rule-desc">每題倒數 10 秒鐘</div>
+          </div>
+        </div>
+        <div class="home-rule-item">
+          <span class="home-rule-icon">🔊</span>
+          <div>
+            <div class="home-rule-title">真人英文發音</div>
+            <div class="home-rule-desc">聽聲音學標準拼法</div>
+          </div>
+        </div>
+        <div class="home-rule-item">
+          <span class="home-rule-icon">🏆</span>
+          <div>
+            <div class="home-rule-title">集點登榮譽榜</div>
+            <div class="home-rule-desc">連勝越高分數越高</div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn-enter-game" id="enter-game-btn">
+        🚀 進入遊戲
+      </button>
+
+      <div class="home-secondary-actions">
+        <button type="button" class="pill-badge pill-btn rank-btn" id="home-rank-btn">🏆 查看排行榜</button>
+        <button type="button" class="pill-badge pill-btn" id="home-sound-btn">🔊 音效：開啟</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 遊戲打字主畫面（預設隱藏，點擊「進入遊戲」後顯示） -->
+  <main class="app-container" id="game-screen" style="display: none;">
+    <!-- 頂部狀態與玩家欄 -->
+    <header class="top-bar">
+      <div class="brand-title">
+        <button type="button" class="pill-badge pill-btn home-btn" id="back-home-btn" title="返回首頁">🏠 首頁</button>
+        <span>🍔 拼字王</span>
+      </div>
+      <div class="stats-group">
+        <button type="button" class="pill-badge pill-btn grade-toggle-btn" id="grade-toggle-btn" title="切換低年級 / 高年級題庫">🐣 低年級</button>
+        <button type="button" class="pill-badge pill-btn auth-btn" id="auth-btn" title="登入或註冊帳號"><span id="player-name-display">小店長</span> 🔑</button>
+        <button type="button" class="pill-badge pill-btn rank-btn" id="rank-btn" title="查看排行榜">🏆 排行榜</button>
+        <div class="pill-badge score-badge" title="累積得分">⭐ <span id="score-val">0</span></div>
+        <div class="pill-badge streak-badge" title="連續答對次數">🔥 <span id="streak-val">0</span></div>
+        <button type="button" class="icon-btn" id="sound-toggle-btn" title="開啟/關閉音效" aria-label="音效開關">🔊</button>
+      </div>
+    </header>
+
+    <!-- 主題分類與難度控制 -->
+    <section class="controls-bar" aria-label="題庫分類與難度設定">
+      <div class="category-tabs" id="category-tabs">
+        <button type="button" class="tab-btn active" data-cat="all">🍽️ 全部菜單</button>
+        <button type="button" class="tab-btn" data-cat="food">🍔 美味速食</button>
+        <button type="button" class="tab-btn" data-cat="animals">🐾 可愛動物</button>
+        <button type="button" class="tab-btn" data-cat="daily">🌞 自然日常</button>
+      </div>
+      <select class="difficulty-select" id="difficulty-select" aria-label="選擇難度">
+        <option value="easy">🌱 新手店員（純字母）</option>
+        <option value="normal">🍟 熟練店員（+2 干擾字）</option>
+        <option value="hard">🚀 王牌店長（+3 干擾字）</option>
+      </select>
+    </section>
+
+    <!-- 點餐單題目展示卡 -->
+    <section class="order-stage" aria-live="polite">
+      <div class="order-header-row">
+        <div class="order-ticket-tag" id="order-number">ORDER #01</div>
+        <!-- 10 秒倒數進度條 -->
+        <div class="timer-wrapper" title="每題作答時間 10 秒">
+          <span>⏱️</span>
+          <div class="timer-track">
+            <div class="timer-fill" id="timer-fill"></div>
+          </div>
+          <span class="timer-text" id="timer-text">10.0s</span>
+        </div>
+      </div>
+
+      <div class="illustration-box" id="illustration-box" title="點我聽英文發音！">
+        <!-- SVG 圖片動態插入 -->
+        <div id="word-svg-container"></div>
+        <!-- 可愛笑臉表情貼紙 -->
+        <div class="cute-face-overlay" aria-hidden="true">
+          <svg viewBox="0 0 40 40">
+            <circle cx="13" cy="16" r="2.6" fill="#3E2723"/>
+            <circle cx="13.8" cy="15.2" r="0.9" fill="#FFFFFF"/>
+            <circle cx="27" cy="16" r="2.6" fill="#3E2723"/>
+            <circle cx="27.8" cy="15.2" r="0.9" fill="#FFFFFF"/>
+            <ellipse cx="8.5" cy="21" rx="3.2" ry="1.8" fill="#FF8A80" opacity="0.85"/>
+            <ellipse cx="31.5" cy="21" rx="3.2" ry="1.8" fill="#FF8A80" opacity="0.85"/>
+            <path d="M14 22 Q20 29 26 22" fill="none" stroke="#3E2723" stroke-width="2.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="word-prompt-row">
+        <h2 class="zh-word" id="zh-word">漢堡</h2>
+        <button type="button" class="speak-btn" id="speak-btn">🔊 聽發音</button>
+      </div>
+      <div class="hint-text" id="hint-text">請在 10 秒內拼出 6 個字母的英文單字！</div>
+    </section>
+
+    <!-- 拼字餐盤區 -->
+    <section class="tray-section">
+      <div class="letter-slots" id="letter-slots" aria-label="單字拼寫格"></div>
+      <div class="feedback-banner" id="feedback-msg"></div>
+    </section>
+
+    <!-- 字母餅乾鍵盤區 -->
+    <section class="tiles-bank" id="tiles-bank" aria-label="可選字母餅乾"></section>
+
+    <!-- 輔助操作按鈕 -->
+    <section class="action-bar">
+      <button type="button" class="action-btn btn-backspace" id="backspace-btn">⌫ 退回一字</button>
+      <button type="button" class="action-btn btn-hint" id="hint-btn">💡 提示字母</button>
+      <button type="button" class="action-btn btn-skip" id="skip-btn">⏭️ 換下一題</button>
+    </section>
+  </main>
+
+  <!-- 出餐成功慶祝彈窗 -->
+  <div class="modal-overlay" id="success-modal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-emoji" id="modal-emoji">🎉🍔</div>
+      <h3 class="modal-title" id="modal-title">出餐成功！太棒了！</h3>
+      <div class="modal-word" id="modal-word">BURGER</div>
+      <p id="modal-sub" style="color: var(--text-muted); font-weight: 700; margin: 0 0 16px;">漢堡 · 獲得 +10 集點！</p>
+      <button type="button" class="next-btn" id="next-word-btn">下一份點餐 ➡️</button>
+    </div>
+  </div>
+
+  <!-- 10 秒時間到遊戲結束彈窗 -->
+  <div class="modal-overlay" id="gameover-modal" role="dialog" aria-modal="true">
+    <div class="modal-card gameover-card">
+      <div class="modal-emoji">⏰🍔</div>
+      <h3 class="modal-title gameover-title">時間到！打烊結束囉！</h3>
+      <p style="color: var(--text-muted); font-weight: 800; margin: 4px 0;">這份點餐的正確拼法是：</p>
+      <div class="modal-word" id="gameover-word">BURGER</div>
+      <div style="background: #FFF8E1; border: 2px solid #FFE082; border-radius: 18px; padding: 12px; margin-bottom: 16px;">
+        <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-muted);">本局最終集點成績</div>
+        <div style="font-size: 2rem; font-weight: 900; color: var(--lettuce-green-dark);">⭐ <span id="gameover-score">0</span> 分</div>
+        <div style="font-size: 0.88rem; font-weight: 700; color: #E65100; margin-top: 2px;">共完成 <span id="gameover-solved">0</span> 道美味點餐</div>
+      </div>
+      <button type="button" class="next-btn restart-btn" id="restart-game-btn">🔄 重新開店挑戰</button>
+    </div>
+  </div>
+
+  <!-- 登入 / 註冊帳號彈窗 -->
+  <div class="modal-overlay" id="auth-modal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-emoji">🔑👨‍🍳</div>
+      <h3 class="modal-title" style="color: #283593;">漢堡寶店員通行證</h3>
+      <p style="color: var(--text-muted); font-size: 0.88rem; font-weight: 700; margin: 0 0 12px;">註冊專屬帳號，系統會自動保存你的最高集點紀錄！</p>
+
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab-btn active" id="tab-login-btn">🔑 店員登入</button>
+        <button type="button" class="auth-tab-btn" id="tab-register-btn">📝 註冊新帳號</button>
+      </div>
+
+      <!-- 登入表單 -->
+      <div id="login-form-box">
+        <div class="auth-field">
+          <label for="login-username">👤 店員帳號</label>
+          <input type="text" id="login-username" class="auth-input" maxlength="16" placeholder="輸入你的帳號" autocomplete="username" />
+        </div>
+        <div class="auth-field">
+          <label for="login-password">🔒 通關密碼</label>
+          <input type="password" id="login-password" class="auth-input" maxlength="16" placeholder="輸入密碼" autocomplete="current-password" />
+        </div>
+      </div>
+
+      <!-- 註冊表單 -->
+      <div id="register-form-box" style="display: none;">
+        <div class="auth-field">
+          <label for="reg-nickname">🏷️ 店員顯示暱稱（會出現在排行榜）</label>
+          <input type="text" id="reg-nickname" class="auth-input" maxlength="10" placeholder="例如：小美店長、無敵漢堡" />
+        </div>
+        <div class="auth-field">
+          <label for="reg-username">👤 設定登入帳號（英文或數字）</label>
+          <input type="text" id="reg-username" class="auth-input" maxlength="16" placeholder="例如：amy123" autocomplete="username" />
+        </div>
+        <div class="auth-field">
+          <label for="reg-password">🔒 設定通關密碼</label>
+          <input type="password" id="reg-password" class="auth-input" maxlength="16" placeholder="至少 3 個字元" autocomplete="new-password" />
+        </div>
+      </div>
+
+      <div class="auth-msg" id="auth-msg"></div>
+
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="next-btn" id="close-auth-btn" style="background: #90A4AE; box-shadow: 0 4px 0 #607D8B;">關閉</button>
+        <button type="button" class="next-btn" id="submit-auth-btn">確認登入 ✅</button>
+      </div>
+
+      <!-- 已註冊帳號快速切換區 -->
+      <div class="saved-accounts-box" id="saved-accounts-box" style="display: none;">
+        <div class="saved-accounts-title">⚡ 點一下快速填入已註冊帳號：</div>
+        <div class="saved-account-chips" id="saved-account-chips"></div>
+      </div>
+
+      <!-- 已登入時顯示登出按鈕 -->
+      <div id="logged-in-footer" style="display: none; margin-top: 12px;">
+        <button type="button" id="logout-btn" style="font-family: var(--font-family); font-size: 0.88rem; font-weight: 800; color: #C62828; background: #FFEBEE; border: 2px solid #EF9A9A; border-radius: 999px; padding: 6px 16px; cursor: pointer;">🚪 登出目前帳號</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 排行榜彈窗 -->
+  <div class="modal-overlay" id="rank-modal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-emoji">🏆👑</div>
+      <h3 class="modal-title" style="color: #E65100;">漢堡寶金牌店員榜</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; font-weight: 700; margin: 0;">拼出越多單字，排名就越高喔！</p>
+      <div class="rank-list" id="rank-list"></div>
+      <button type="button" class="next-btn" id="close-rank-btn">繼續挑戰 💪</button>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. 雙年級題庫與專屬可愛向量插畫庫（低年級基礎 3~6 字母 / 高年級進階 5~8 字母）
+       ========================================================================== */
+    const WORD_BANK = [
+      /* -------------------- 【低年級模式：美味速食 (food)】 -------------------- */
+      {
+        grade: 'junior', word: 'BURGER', zh: '漢堡', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M22 54 C22 24, 98 24, 98 54 Z" fill="#F4A261" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <ellipse cx="45" cy="36" rx="4" ry="2.2" fill="#FFF8E7" transform="rotate(-15 45 36)"/>
+          <ellipse cx="62" cy="32" rx="4" ry="2.2" fill="#FFF8E7"/>
+          <ellipse cx="78" cy="37" rx="4" ry="2.2" fill="#FFF8E7" transform="rotate(15 78 37)"/>
+          <path d="M16 60 Q28 52 40 60 T64 60 T88 60 T104 60" fill="none" stroke="#4CAF50" stroke-width="8" stroke-linecap="round"/>
+          <polygon points="20,66 100,66 62,82" fill="#FFD166" stroke="#3E2723" stroke-width="3.5" stroke-linejoin="round"/>
+          <rect x="18" y="70" width="84" height="16" rx="8" fill="#6D4C41" stroke="#3E2723" stroke-width="4"/>
+          <path d="M22 86 L98 86 C98 102, 22 102, 22 86 Z" fill="#F4A261" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'FRIES', zh: '薯條', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="32" y="22" width="11" height="48" rx="4" fill="#FFD54F" stroke="#3E2723" stroke-width="3.5" transform="rotate(-8 32 22)"/>
+          <rect x="47" y="16" width="11" height="52" rx="4" fill="#FFCA28" stroke="#3E2723" stroke-width="3.5"/>
+          <rect x="62" y="18" width="11" height="50" rx="4" fill="#FFD54F" stroke="#3E2723" stroke-width="3.5" transform="rotate(5 62 18)"/>
+          <rect x="76" y="24" width="11" height="46" rx="4" fill="#FFB300" stroke="#3E2723" stroke-width="3.5" transform="rotate(12 76 24)"/>
+          <path d="M26 52 L94 52 L84 102 C83 106, 37 106, 36 102 Z" fill="#EF5350" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <circle cx="60" cy="78" r="11" fill="#FFD54F" stroke="#3E2723" stroke-width="3"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'PIZZA', zh: '披薩', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M22 30 Q60 14 98 30 L60 104 Z" fill="#FFD54F" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M18 32 Q60 14 102 32" fill="none" stroke="#E67E22" stroke-width="11" stroke-linecap="round"/>
+          <circle cx="52" cy="48" r="7" fill="#E53935" stroke="#3E2723" stroke-width="2.5"/>
+          <circle cx="72" cy="52" r="6.5" fill="#E53935" stroke="#3E2723" stroke-width="2.5"/>
+          <circle cx="60" cy="72" r="6.5" fill="#E53935" stroke="#3E2723" stroke-width="2.5"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'DONUT', zh: '甜甜圈', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="40" fill="#F4A261" stroke="#3E2723" stroke-width="4"/>
+          <path d="M22 56 C22 30, 98 30, 98 56 C94 66, 84 60, 76 66 C68 72, 54 62, 44 68 C34 74, 24 64, 22 56 Z" fill="#FF80AB" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="60" cy="60" r="14" fill="#FFF8E7" stroke="#3E2723" stroke-width="4"/>
+          <rect x="42" y="34" width="8" height="3.5" rx="1.5" fill="#4FC3F7" transform="rotate(25 42 34)"/>
+          <rect x="70" y="33" width="8" height="3.5" rx="1.5" fill="#FFF176" transform="rotate(-20 70 33)"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'APPLE', zh: '蘋果', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M60 36 C42 26, 22 40, 24 66 C26 92, 46 104, 60 98 C74 104, 94 92, 96 66 C98 40, 78 26, 60 36 Z" fill="#FF5252" stroke="#3E2723" stroke-width="4"/>
+          <path d="M60 36 Q62 20 70 16" fill="none" stroke="#5D4037" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M62 26 Q78 16 84 28 Q72 34 62 26 Z" fill="#66BB6A" stroke="#3E2723" stroke-width="3"/>
+          <ellipse cx="40" cy="54" rx="5" ry="10" fill="#FFCDD2" transform="rotate(-20 40 54)"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'MILK', zh: '牛奶', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="38,34 60,18 82,34 82,102 38,102" fill="#FFFFFF" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <rect x="38" y="54" width="44" height="32" fill="#4FC3F7" stroke="#3E2723" stroke-width="3"/>
+          <circle cx="60" cy="70" r="9" fill="#FFFFFF"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'CAKE', zh: '蛋糕', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="24" y="54" width="72" height="44" rx="10" fill="#FFE0B2" stroke="#3E2723" stroke-width="4"/>
+          <path d="M24 62 Q36 74 48 62 T72 62 T96 62 L96 54 L24 54 Z" fill="#FF80AB" stroke="#3E2723" stroke-width="3.5"/>
+          <rect x="56" y="32" width="8" height="22" rx="3" fill="#4FC3F7" stroke="#3E2723" stroke-width="3"/>
+          <path d="M60 16 Q66 24 60 30 Q54 24 60 16 Z" fill="#FFCA28" stroke="#E65100" stroke-width="2"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'EGG', zh: '荷包蛋', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M32 42 C20 56, 22 84, 44 92 C64 100, 94 92, 96 68 C98 44, 78 26, 56 30 C44 32, 38 36, 32 42 Z" fill="#FFFFFF" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="62" cy="64" r="18" fill="#FFB300" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="56" cy="58" r="4" fill="#FFF9C4"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'JUICE', zh: '果汁', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M68 42 L84 16" fill="none" stroke="#FF5252" stroke-width="6" stroke-linecap="round"/>
+          <polygon points="36,42 84,42 78,102 42,102" fill="#FFA726" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <circle cx="82" cy="42" r="14" fill="#FFD54F" stroke="#3E2723" stroke-width="3"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'BREAD', zh: '吐司麵包', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M26 52 C18 36, 36 24, 60 24 C84 24, 102 36, 94 52 L92 96 C92 100, 28 100, 28 96 Z" fill="#D48C46" stroke="#3E2723" stroke-width="4"/>
+          <path d="M34 52 C28 40, 42 32, 60 32 C78 32, 92 40, 86 52 L84 90 L36 90 Z" fill="#FFF3E0" stroke="#3E2723" stroke-width="3"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'CORN', zh: '玉米', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <ellipse cx="60" cy="54" rx="22" ry="36" fill="#FFD54F" stroke="#3E2723" stroke-width="4"/>
+          <path d="M38 56 Q26 78 52 98 Q46 76 48 62 Z" fill="#66BB6A" stroke="#3E2723" stroke-width="3.5"/>
+          <path d="M82 56 Q94 78 68 98 Q74 76 72 62 Z" fill="#4CAF50" stroke="#3E2723" stroke-width="3.5"/>
+          <line x1="48" y1="36" x2="72" y2="36" stroke="#F57F17" stroke-width="2.5"/>
+          <line x1="44" y1="50" x2="76" y2="50" stroke="#F57F17" stroke-width="2.5"/>
+          <line x1="46" y1="64" x2="74" y2="64" stroke="#F57F17" stroke-width="2.5"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'CANDY', zh: '糖果', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="20,44 38,56 20,76" fill="#FF80AB" stroke="#3E2723" stroke-width="3.5" stroke-linejoin="round"/>
+          <polygon points="100,44 82,56 100,76" fill="#FF80AB" stroke="#3E2723" stroke-width="3.5" stroke-linejoin="round"/>
+          <circle cx="60" cy="60" r="24" fill="#FF4081" stroke="#3E2723" stroke-width="4"/>
+          <path d="M46 52 Q60 40 74 52" fill="none" stroke="#FFF176" stroke-width="4" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'GRAPE', zh: '葡萄', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M60 28 Q64 16 74 16" fill="none" stroke="#5D4037" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="46" cy="48" r="13" fill="#AB47BC" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="74" cy="48" r="13" fill="#9C27B0" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="60" cy="44" r="13" fill="#BA68C8" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="52" cy="68" r="13" fill="#9C27B0" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="68" cy="68" r="13" fill="#AB47BC" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="60" cy="88" r="13" fill="#8E24AA" stroke="#3E2723" stroke-width="3.5"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'LEMON', zh: '檸檬', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M22 60 C22 36, 98 36, 98 60 C98 84, 22 84, 22 60 Z" fill="#FFF176" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="18" cy="60" r="6" fill="#FDD835" stroke="#3E2723" stroke-width="3"/>
+          <circle cx="102" cy="60" r="6" fill="#FDD835" stroke="#3E2723" stroke-width="3"/>
+          <ellipse cx="52" cy="50" rx="14" ry="5" fill="#FFFFFF" opacity="0.6"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'TACO', zh: '墨西哥捲餅', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M22 76 C22 34, 98 34, 98 76 Z" fill="#FFD54F" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M26 70 Q42 54 60 66 T94 70" fill="none" stroke="#4CAF50" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="48" cy="62" r="5" fill="#E53935"/>
+          <circle cx="72" cy="62" r="5" fill="#E53935"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'PEAR', zh: '西洋梨', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M60 22 L60 12" stroke="#5D4037" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M60 24 C46 24, 42 44, 34 62 C26 80, 38 100, 60 100 C82 100, 94 80, 86 62 C78 44, 74 24, 60 24 Z" fill="#DCE775" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="46" cy="70" rx="5" ry="10" fill="#F0F4C3" transform="rotate(-15 46 70)"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'SOUP', zh: '熱湯', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M44 34 Q40 24 46 16" fill="none" stroke="#90CAF9" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M60 32 Q56 22 62 14" fill="none" stroke="#90CAF9" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M76 34 Q72 24 78 16" fill="none" stroke="#90CAF9" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M22 54 L98 54 C98 88, 22 88, 22 54 Z" fill="#FF7043" stroke="#3E2723" stroke-width="4"/>
+          <rect x="44" y="86" width="32" height="10" rx="4" fill="#D84315" stroke="#3E2723" stroke-width="3.5"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'ICE', zh: '冰塊', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="28" y="30" width="64" height="64" rx="16" fill="#B3E5FC" stroke="#0277BD" stroke-width="4"/>
+          <path d="M40 44 L58 44 M40 44 L40 62" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="74" cy="74" r="5" fill="#FFFFFF" opacity="0.8"/>
+        </svg>`
+      },
+
+      /* -------------------- 【低年級模式：可愛動物 (animals)】 -------------------- */
+      {
+        grade: 'junior', word: 'CAT', zh: '小貓咪', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="28,50 24,20 50,36" fill="#FFB74D" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <polygon points="92,50 96,20 70,36" fill="#FFB74D" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <ellipse cx="60" cy="66" rx="38" ry="32" fill="#FFCC80" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="46" cy="62" r="4.5" fill="#3E2723"/>
+          <circle cx="74" cy="62" r="4.5" fill="#3E2723"/>
+          <polygon points="55,70 65,70 60,76" fill="#FF8A80"/>
+          <path d="M50 78 Q60 86 70 78" fill="none" stroke="#3E2723" stroke-width="3" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'DOG', zh: '小狗狗', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <ellipse cx="26" cy="62" rx="12" ry="24" fill="#8D6E63" stroke="#3E2723" stroke-width="4" transform="rotate(15 26 62)"/>
+          <ellipse cx="94" cy="62" rx="12" ry="24" fill="#8D6E63" stroke="#3E2723" stroke-width="4" transform="rotate(-15 94 62)"/>
+          <circle cx="60" cy="64" r="34" fill="#D7CCC8" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="48" cy="58" r="4.5" fill="#3E2723"/>
+          <circle cx="72" cy="58" r="4.5" fill="#3E2723"/>
+          <ellipse cx="60" cy="70" rx="7" ry="5" fill="#3E2723"/>
+          <path d="M54 80 Q60 92 66 80" fill="#FF8A80" stroke="#3E2723" stroke-width="2.5"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'PIG', zh: '小豬', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="30,44 24,22 48,32" fill="#F48FB1" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <polygon points="90,44 96,22 72,32" fill="#F48FB1" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <circle cx="60" cy="64" r="36" fill="#F8BBD0" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="60" cy="72" rx="15" ry="11" fill="#F06292" stroke="#3E2723" stroke-width="3"/>
+          <circle cx="55" cy="72" r="2.8" fill="#3E2723"/>
+          <circle cx="65" cy="72" r="2.8" fill="#3E2723"/>
+          <circle cx="44" cy="56" r="4" fill="#3E2723"/>
+          <circle cx="76" cy="56" r="4" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'DUCK', zh: '小鴨子', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="36" fill="#FFF176" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="46" cy="52" r="4.5" fill="#3E2723"/>
+          <circle cx="74" cy="52" r="4.5" fill="#3E2723"/>
+          <ellipse cx="60" cy="68" rx="18" ry="10" fill="#FF9800" stroke="#3E2723" stroke-width="3.5"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'BEAR', zh: '小熊', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="32" cy="34" r="14" fill="#8D6E63" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="88" cy="34" r="14" fill="#8D6E63" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="66" r="36" fill="#A1887F" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="60" cy="74" rx="16" ry="13" fill="#EFEBE9"/>
+          <circle cx="46" cy="56" r="4" fill="#3E2723"/>
+          <circle cx="74" cy="56" r="4" fill="#3E2723"/>
+          <circle cx="60" cy="70" r="5" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'FISH', zh: '小魚', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="84,60 106,38 106,82" fill="#FF7043" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <ellipse cx="54" cy="60" rx="36" ry="26" fill="#29B6F6" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="36" cy="54" r="4.5" fill="#3E2723"/>
+          <path d="M54 44 Q62 60 54 76" fill="none" stroke="#FFF176" stroke-width="4" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'LION', zh: '獅子', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="60" cy="62" r="42" fill="#E65100" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="64" r="28" fill="#FFD54F" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="48" cy="58" r="4" fill="#3E2723"/>
+          <circle cx="72" cy="58" r="4" fill="#3E2723"/>
+          <polygon points="55,66 65,66 60,72" fill="#5D4037"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'FROG', zh: '青蛙', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="40" cy="38" r="14" fill="#66BB6A" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="80" cy="38" r="14" fill="#66BB6A" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="60" cy="68" rx="38" ry="28" fill="#81C784" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="40" cy="38" r="6" fill="#FFFFFF"/>
+          <circle cx="40" cy="38" r="3" fill="#3E2723"/>
+          <circle cx="80" cy="38" r="6" fill="#FFFFFF"/>
+          <circle cx="80" cy="38" r="3" fill="#3E2723"/>
+          <path d="M42 70 Q60 84 78 70" fill="none" stroke="#3E2723" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'TIGER', zh: '老虎', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="32" cy="36" r="13" fill="#FF9800" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="88" cy="36" r="13" fill="#FF9800" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="64" r="36" fill="#FFA726" stroke="#3E2723" stroke-width="4"/>
+          <path d="M52 32 L68 32 M55 40 L65 40" stroke="#3E2723" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="46" cy="58" r="4" fill="#3E2723"/>
+          <circle cx="74" cy="58" r="4" fill="#3E2723"/>
+          <polygon points="55,66 65,66 60,72" fill="#FF7043"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'RABBIT', zh: '小兔子', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <ellipse cx="44" cy="30" rx="9" ry="24" fill="#FFFFFF" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="76" cy="30" rx="9" ry="24" fill="#FFFFFF" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="44" cy="30" rx="4" ry="16" fill="#F8BBD0"/>
+          <ellipse cx="76" cy="30" rx="4" ry="16" fill="#F8BBD0"/>
+          <circle cx="60" cy="70" r="32" fill="#FFFFFF" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="48" cy="64" r="4" fill="#3E2723"/>
+          <circle cx="72" cy="64" r="4" fill="#3E2723"/>
+          <circle cx="60" cy="72" r="4" fill="#FF80AB"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'COW', zh: '乳牛', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <ellipse cx="26" cy="50" rx="12" ry="7" fill="#FFFFFF" stroke="#3E2723" stroke-width="3.5"/>
+          <ellipse cx="94" cy="50" rx="12" ry="7" fill="#FFFFFF" stroke="#3E2723" stroke-width="3.5"/>
+          <rect x="30" y="34" width="60" height="62" rx="26" fill="#FFFFFF" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="44" cy="46" r="9" fill="#3E2723"/>
+          <ellipse cx="60" cy="76" rx="22" ry="14" fill="#FFCDD2" stroke="#3E2723" stroke-width="3"/>
+          <circle cx="46" cy="54" r="4" fill="#3E2723"/>
+          <circle cx="74" cy="54" r="4" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'BEE', zh: '小蜜蜂', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <ellipse cx="46" cy="34" rx="14" ry="10" fill="#E1F5FE" stroke="#3E2723" stroke-width="3.5"/>
+          <ellipse cx="74" cy="34" rx="14" ry="10" fill="#E1F5FE" stroke="#3E2723" stroke-width="3.5"/>
+          <ellipse cx="60" cy="64" rx="32" ry="24" fill="#FFD54F" stroke="#3E2723" stroke-width="4"/>
+          <line x1="52" y1="42" x2="52" y2="86" stroke="#3E2723" stroke-width="6"/>
+          <line x1="68" y1="42" x2="68" y2="86" stroke="#3E2723" stroke-width="6"/>
+          <circle cx="38" cy="60" r="3.5" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'OWL', zh: '貓頭鷹', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <ellipse cx="60" cy="64" rx="34" ry="38" fill="#8D6E63" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="46" cy="54" r="13" fill="#FFF9C4" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="74" cy="54" r="13" fill="#FFF9C4" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="46" cy="54" r="5" fill="#3E2723"/>
+          <circle cx="74" cy="54" r="5" fill="#3E2723"/>
+          <polygon points="55,64 65,64 60,74" fill="#FFB300" stroke="#3E2723" stroke-width="2.5"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'WHALE', zh: '鯨魚', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M52 34 Q46 18 36 22 M56 34 Q62 18 72 22" fill="none" stroke="#4FC3F7" stroke-width="4" stroke-linecap="round"/>
+          <path d="M20 66 C20 40, 82 38, 88 64 L104 48 L100 76 C84 94, 20 92, 20 66 Z" fill="#29B6F6" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <circle cx="38" cy="62" r="4" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'FOX', zh: '小狐狸', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="28,50 24,20 52,36" fill="#FF7043" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <polygon points="92,50 96,20 68,36" fill="#FF7043" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <polygon points="24,54 60,94 96,54 80,34 40,34" fill="#FF7043" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <circle cx="46" cy="56" r="4" fill="#3E2723"/>
+          <circle cx="74" cy="56" r="4" fill="#3E2723"/>
+          <circle cx="60" cy="88" r="5" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'BIRD', zh: '小鳥', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="58" cy="62" r="30" fill="#4FC3F7" stroke="#3E2723" stroke-width="4"/>
+          <polygon points="86,58 104,64 86,70" fill="#FFB300" stroke="#3E2723" stroke-width="3"/>
+          <circle cx="68" cy="54" r="4" fill="#3E2723"/>
+          <path d="M42 62 Q54 52 62 66 Q50 76 42 62 Z" fill="#0288D1" stroke="#3E2723" stroke-width="3"/>
+        </svg>`
+      },
+
+      /* -------------------- 【低年級模式：自然日常 (daily)】 -------------------- */
+      {
+        grade: 'junior', word: 'SUN', zh: '太陽', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="28" fill="#FFD54F" stroke="#3E2723" stroke-width="4"/>
+          <g stroke="#FF9800" stroke-width="6" stroke-linecap="round">
+            <line x1="60" y1="12" x2="60" y2="24"/><line x1="60" y1="96" x2="60" y2="108"/>
+            <line x1="12" y1="60" x2="24" y2="60"/><line x1="96" y1="60" x2="108" y2="60"/>
+            <line x1="26" y1="26" x2="35" y2="35"/><line x1="85" y1="85" x2="94" y2="94"/>
+            <line x1="94" y1="26" x2="85" y2="35"/><line x1="35" y1="85" x2="26" y2="94"/>
+          </g>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'STAR', zh: '星星', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="60,16 73,44 104,48 81,70 87,100 60,85 33,100 39,70 16,48 47,44" fill="#FFD54F" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'MOON', zh: '月亮', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M74 22 C44 24, 26 52, 34 80 C42 102, 72 108, 92 92 C68 92, 52 72, 56 48 C58 36, 66 26, 74 22 Z" fill="#FFF176" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'BOOK', zh: '書本', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="28" y="22" width="64" height="76" rx="8" fill="#42A5F5" stroke="#3E2723" stroke-width="4"/>
+          <rect x="38" y="22" width="8" height="76" fill="#1E88E5"/>
+          <rect x="54" y="38" width="26" height="16" rx="4" fill="#FFF9C4" stroke="#3E2723" stroke-width="2.5"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'CAR', zh: '小汽車', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M32 58 L42 36 L78 36 L88 58 Z" fill="#90CAF9" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <rect x="18" y="56" width="84" height="26" rx="12" fill="#EF5350" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="38" cy="84" r="11" fill="#424242" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="82" cy="84" r="11" fill="#424242" stroke="#3E2723" stroke-width="3.5"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'TREE', zh: '大樹', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="50" y="68" width="20" height="34" rx="4" fill="#8D6E63" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="44" r="26" fill="#66BB6A" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="40" cy="56" r="18" fill="#81C784" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="80" cy="56" r="18" fill="#81C784" stroke="#3E2723" stroke-width="4"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'BALL', zh: '皮球', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="38" fill="#FF7043" stroke="#3E2723" stroke-width="4"/>
+          <path d="M30 42 Q60 60 90 42" fill="none" stroke="#FFF176" stroke-width="6"/>
+          <path d="M30 78 Q60 60 90 78" fill="none" stroke="#4FC3F7" stroke-width="6"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'CLOUD', zh: '白雲', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M34 82 C20 82, 16 64, 28 56 C30 38, 52 30, 66 42 C80 34, 98 44, 96 60 C106 66, 102 82, 88 82 Z" fill="#FFFFFF" stroke="#0288D1" stroke-width="4" stroke-linejoin="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'HOUSE', zh: '房子', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="18,56 60,22 102,56" fill="#EF5350" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <rect x="30" y="56" width="60" height="44" rx="4" fill="#FFF9C4" stroke="#3E2723" stroke-width="4"/>
+          <rect x="52" y="72" width="16" height="28" fill="#8D6E63" stroke="#3E2723" stroke-width="3"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'TRAIN', zh: '火車', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="26" y="34" width="68" height="48" rx="10" fill="#42A5F5" stroke="#3E2723" stroke-width="4"/>
+          <rect x="38" y="44" width="44" height="20" rx="5" fill="#E1F5FE" stroke="#3E2723" stroke-width="3"/>
+          <circle cx="42" cy="88" r="10" fill="#424242" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="78" cy="88" r="10" fill="#424242" stroke="#3E2723" stroke-width="3.5"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'CLOCK', zh: '時鐘', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="38" fill="#FFFFFF" stroke="#FF7043" stroke-width="6"/>
+          <circle cx="60" cy="60" r="38" fill="none" stroke="#3E2723" stroke-width="3.5"/>
+          <line x1="60" y1="60" x2="60" y2="36" stroke="#3E2723" stroke-width="4.5" stroke-linecap="round"/>
+          <line x1="60" y1="60" x2="78" y2="60" stroke="#EF5350" stroke-width="4" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'HEART', zh: '愛心', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M60 96 C24 72, 18 42, 38 30 C50 24, 60 36, 60 42 C60 36, 70 24, 82 30 C102 42, 96 72, 60 96 Z" fill="#FF4081" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'BOAT', zh: '小船', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="60,22 60,68 30,68" fill="#FFF176" stroke="#3E2723" stroke-width="3.5" stroke-linejoin="round"/>
+          <polygon points="64,30 64,68 90,68" fill="#FF80AB" stroke="#3E2723" stroke-width="3.5" stroke-linejoin="round"/>
+          <polygon points="20,74 100,74 86,96 34,96" fill="#42A5F5" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'HAT', zh: '帽子', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M34 72 C34 40, 86 40, 86 72 Z" fill="#FFB300" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="60" cy="74" rx="44" ry="12" fill="#FFD54F" stroke="#3E2723" stroke-width="4"/>
+          <rect x="35" y="62" width="50" height="8" fill="#EF5350"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'KEY', zh: '鑰匙', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="42" cy="60" r="18" fill="#FFD54F" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="42" cy="60" r="6" fill="#FFF8E7" stroke="#3E2723" stroke-width="3"/>
+          <rect x="58" y="55" width="42" height="10" rx="4" fill="#FFD54F" stroke="#3E2723" stroke-width="3.5"/>
+          <rect x="82" y="65" width="7" height="12" fill="#FFD54F" stroke="#3E2723" stroke-width="3"/>
+          <rect x="93" y="65" width="7" height="10" fill="#FFD54F" stroke="#3E2723" stroke-width="3"/>
+        </svg>`
+      },
+      {
+        grade: 'junior', word: 'RAIN', zh: '下雨', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M32 62 C20 62, 18 46, 28 40 C30 24, 50 18, 62 28 C74 22, 90 30, 88 44 C98 48, 94 62, 82 62 Z" fill="#90CAF9" stroke="#3E2723" stroke-width="4"/>
+          <line x1="40" y1="72" x2="34" y2="92" stroke="#29B6F6" stroke-width="5" stroke-linecap="round"/>
+          <line x1="60" y1="72" x2="54" y2="92" stroke="#29B6F6" stroke-width="5" stroke-linecap="round"/>
+          <line x1="80" y1="72" x2="74" y2="92" stroke="#29B6F6" stroke-width="5" stroke-linecap="round"/>
+        </svg>`
+      },
+
+      /* ========================================================================
+         【高年級模式：進階美味速食 (food)】 - 精選 5~8 字母常用單字
+         ======================================================================== */
+      {
+        grade: 'senior', word: 'CHEESE', zh: '起司片', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="20,48 86,28 100,48 100,88 20,88" fill="#FFD54F" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <circle cx="44" cy="68" r="8" fill="#FFA000"/>
+          <circle cx="72" cy="62" r="6" fill="#FFA000"/>
+          <circle cx="82" cy="76" r="5" fill="#FFA000"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'CHICKEN', zh: '炸雞腿', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="64" y="64" width="32" height="12" rx="6" fill="#FFF8E7" stroke="#3E2723" stroke-width="3.5" transform="rotate(35 64 64)"/>
+          <circle cx="92" cy="84" r="7" fill="#FFF8E7" stroke="#3E2723" stroke-width="3"/>
+          <ellipse cx="48" cy="48" rx="30" ry="22" fill="#D87A28" stroke="#3E2723" stroke-width="4" transform="rotate(35 48 48)"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'COOKIE', zh: '巧克力餅乾', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="38" fill="#D48C46" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="44" cy="46" r="5" fill="#4E342E"/>
+          <circle cx="72" cy="44" r="4.5" fill="#4E342E"/>
+          <circle cx="58" cy="64" r="5.5" fill="#4E342E"/>
+          <circle cx="42" cy="74" r="4" fill="#4E342E"/>
+          <circle cx="76" cy="72" r="5" fill="#4E342E"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'WAFFLE', zh: '格子鬆餅', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="24" y="24" width="72" height="72" rx="14" fill="#F4A261" stroke="#3E2723" stroke-width="4"/>
+          <line x1="48" y1="26" x2="48" y2="94" stroke="#3E2723" stroke-width="3.5"/>
+          <line x1="72" y1="26" x2="72" y2="94" stroke="#3E2723" stroke-width="3.5"/>
+          <line x1="26" y1="48" x2="94" y2="48" stroke="#3E2723" stroke-width="3.5"/>
+          <line x1="26" y1="72" x2="94" y2="72" stroke="#3E2723" stroke-width="3.5"/>
+          <rect x="50" y="50" width="20" height="20" rx="4" fill="#FFF176" stroke="#3E2723" stroke-width="2.5"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'NOODLE', zh: '拉麵', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <line x1="36" y1="28" x2="96" y2="20" stroke="#8D6E63" stroke-width="4" stroke-linecap="round"/>
+          <line x1="36" y1="36" x2="96" y2="30" stroke="#8D6E63" stroke-width="4" stroke-linecap="round"/>
+          <path d="M44 26 L44 60 M54 24 L54 60 M64 23 L64 60" stroke="#FFD54F" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M22 58 L98 58 C96 92, 24 92, 22 58 Z" fill="#EF5350" stroke="#3E2723" stroke-width="4"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'BANANA', zh: '香蕉', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M28 84 C52 94, 88 76, 94 32 L84 28 C76 62, 52 74, 24 72 Z" fill="#FFD54F" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <circle cx="90" cy="28" r="4" fill="#5D4037"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'TOMATO', zh: '番茄', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="60" cy="64" r="34" fill="#E53935" stroke="#3E2723" stroke-width="4"/>
+          <polygon points="60,22 52,36 38,34 50,44 46,56 60,48 74,56 70,44 82,34 68,36" fill="#43A047" stroke="#3E2723" stroke-width="2.5"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'CARROT', zh: '紅蘿蔔', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M76 34 Q90 16 98 26 M76 34 Q98 32 94 44" fill="none" stroke="#43A047" stroke-width="5" stroke-linecap="round"/>
+          <path d="M68 28 C82 36, 86 48, 76 58 L28 94 C22 98, 22 92, 26 86 L62 38 C64 32, 66 28, 68 28 Z" fill="#FF7043" stroke="#3E2723" stroke-width="4"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'HONEY', zh: '蜂蜜罐', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="34" y="38" width="52" height="58" rx="18" fill="#FFB300" stroke="#3E2723" stroke-width="4"/>
+          <rect x="40" y="26" width="40" height="14" rx="6" fill="#8D6E63" stroke="#3E2723" stroke-width="3.5"/>
+          <path d="M36 44 Q48 56 60 44 T84 44" fill="none" stroke="#FFF176" stroke-width="5" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'POPCORN', zh: '爆米花', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="42" cy="42" r="13" fill="#FFF9C4" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="60" cy="36" r="14" fill="#FFFFFF" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="78" cy="42" r="13" fill="#FFF9C4" stroke="#3E2723" stroke-width="3.5"/>
+          <polygon points="30,48 90,48 80,100 40,100" fill="#EF5350" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <line x1="50" y1="48" x2="53" y2="100" stroke="#FFFFFF" stroke-width="6"/>
+          <line x1="70" y1="48" x2="67" y2="100" stroke="#FFFFFF" stroke-width="6"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'PUDDING', zh: '焦糖布丁', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M34 42 L86 42 L96 88 L24 88 Z" fill="#FFF176" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M34 42 L86 42 L89 56 Q74 62 60 54 T31 56 Z" fill="#6D4C41" stroke="#3E2723" stroke-width="3.5"/>
+          <ellipse cx="60" cy="90" rx="44" ry="8" fill="#E0E0E0" stroke="#3E2723" stroke-width="3.5"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'SANDWICH', zh: '三明治', category: 'food',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="20,66 64,26 102,66" fill="#F4A261" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <line x1="20" y1="74" x2="102" y2="74" stroke="#4CAF50" stroke-width="7" stroke-linecap="round"/>
+          <line x1="22" y1="82" x2="100" y2="82" stroke="#FFD54F" stroke-width="6" stroke-linecap="round"/>
+          <polygon points="20,88 102,88 96,98 26,98" fill="#E67E22" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+        </svg>`
+      },
+
+      /* ========================================================================
+         【高年級模式：進階可愛動物 (animals)】 - 精選 5~8 字母常用單字
+         ======================================================================== */
+      {
+        grade: 'senior', word: 'MONKEY', zh: '小猴子', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="24" cy="60" r="13" fill="#8D6E63" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="96" cy="60" r="13" fill="#8D6E63" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="62" r="34" fill="#6D4C41" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="60" cy="70" rx="22" ry="18" fill="#FFE0B2"/>
+          <circle cx="48" cy="54" r="4" fill="#3E2723"/>
+          <circle cx="72" cy="54" r="4" fill="#3E2723"/>
+          <path d="M50 74 Q60 82 70 74" fill="none" stroke="#3E2723" stroke-width="3" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'TURTLE', zh: '小烏龜', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="96" cy="68" r="12" fill="#81C784" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="100" cy="65" r="2.5" fill="#3E2723"/>
+          <path d="M24 76 C24 42, 86 42, 86 76 Z" fill="#43A047" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <rect x="34" y="76" width="12" height="14" rx="5" fill="#81C784" stroke="#3E2723" stroke-width="3"/>
+          <rect x="66" y="76" width="12" height="14" rx="5" fill="#81C784" stroke="#3E2723" stroke-width="3"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'PANDA', zh: '大熊貓', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="32" cy="34" r="13" fill="#3E2723"/>
+          <circle cx="88" cy="34" r="13" fill="#3E2723"/>
+          <circle cx="60" cy="64" r="36" fill="#FFFFFF" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="45" cy="58" rx="9" ry="7" fill="#3E2723" transform="rotate(-20 45 58)"/>
+          <ellipse cx="75" cy="58" rx="9" ry="7" fill="#3E2723" transform="rotate(20 75 58)"/>
+          <circle cx="46" cy="58" r="3" fill="#FFFFFF"/>
+          <circle cx="74" cy="58" r="3" fill="#FFFFFF"/>
+          <ellipse cx="60" cy="70" rx="5" ry="3.5" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'ZEBRA', zh: '斑馬', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="34,42 30,18 48,32" fill="#FFFFFF" stroke="#3E2723" stroke-width="3.5"/>
+          <polygon points="86,42 90,18 72,32" fill="#FFFFFF" stroke="#3E2723" stroke-width="3.5"/>
+          <rect x="34" y="32" width="52" height="64" rx="24" fill="#FFFFFF" stroke="#3E2723" stroke-width="4"/>
+          <line x1="36" y1="48" x2="50" y2="48" stroke="#3E2723" stroke-width="4"/>
+          <line x1="70" y1="48" x2="84" y2="48" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="46" cy="58" r="4" fill="#3E2723"/>
+          <circle cx="74" cy="58" r="4" fill="#3E2723"/>
+          <ellipse cx="60" cy="78" rx="16" ry="11" fill="#BDBDBD" stroke="#3E2723" stroke-width="3"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'SHARK', zh: '大鯊魚', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="56,38 72,16 74,40" fill="#546E7A" stroke="#3E2723" stroke-width="3.5" stroke-linejoin="round"/>
+          <path d="M18 64 C30 40, 82 38, 94 60 L108 46 L104 76 L94 68 C80 86, 30 84, 18 64 Z" fill="#78909C" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <circle cx="38" cy="58" r="3.5" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'KOALA', zh: '無尾熊', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="28" cy="48" r="16" fill="#90A4AE" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="92" cy="48" r="16" fill="#90A4AE" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="64" r="32" fill="#B0BEC5" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="60" cy="68" rx="8" ry="12" fill="#37474F"/>
+          <circle cx="45" cy="58" r="3.5" fill="#3E2723"/>
+          <circle cx="75" cy="58" r="3.5" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'PENGUIN', zh: '企鵝', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <ellipse cx="60" cy="64" rx="32" ry="38" fill="#37474F" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="60" cy="70" rx="22" ry="28" fill="#FFFFFF"/>
+          <circle cx="48" cy="48" r="4" fill="#3E2723"/>
+          <circle cx="72" cy="48" r="4" fill="#3E2723"/>
+          <polygon points="54,56 66,56 60,64" fill="#FFB300" stroke="#3E2723" stroke-width="2.5"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'DOLPHIN', zh: '海豚', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M24 72 C34 36, 82 32, 96 64 C104 66, 108 72, 98 76 C84 74, 72 64, 54 68 C42 72, 34 84, 24 72 Z" fill="#29B6F6" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <polygon points="56,42 66,24 72,42" fill="#0288D1" stroke="#3E2723" stroke-width="3.5"/>
+          <circle cx="84" cy="58" r="3.5" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'GIRAFFE', zh: '長頸鹿', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <line x1="46" y1="22" x2="46" y2="36" stroke="#3E2723" stroke-width="4"/>
+          <line x1="74" y1="22" x2="74" y2="36" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="46" cy="20" r="4" fill="#8D6E63"/>
+          <circle cx="74" cy="20" r="4" fill="#8D6E63"/>
+          <rect x="36" y="34" width="48" height="62" rx="22" fill="#FFD54F" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="44" cy="46" r="5" fill="#8D6E63"/>
+          <circle cx="76" cy="46" r="5" fill="#8D6E63"/>
+          <circle cx="48" cy="58" r="3.5" fill="#3E2723"/>
+          <circle cx="72" cy="58" r="3.5" fill="#3E2723"/>
+          <ellipse cx="60" cy="78" rx="16" ry="11" fill="#FFE0B2" stroke="#3E2723" stroke-width="3"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'OCTOPUS', zh: '章魚', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M32 62 C26 32, 94 32, 88 62 C88 74, 32 74, 32 62 Z" fill="#FF7043" stroke="#3E2723" stroke-width="4"/>
+          <path d="M36 70 Q26 92 38 96 M50 72 Q46 96 54 98 M70 72 Q74 96 66 98 M84 70 Q94 92 82 96" fill="none" stroke="#FF7043" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="48" cy="54" r="4" fill="#3E2723"/>
+          <circle cx="72" cy="54" r="4" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'ELEPHANT', zh: '大象', category: 'animals',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="28" cy="58" r="18" fill="#90CAF9" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="92" cy="58" r="18" fill="#90CAF9" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="58" r="28" fill="#64B5F6" stroke="#3E2723" stroke-width="4"/>
+          <path d="M54 66 L54 94 C54 102, 68 102, 68 92" fill="none" stroke="#64B5F6" stroke-width="12" stroke-linecap="round"/>
+          <circle cx="48" cy="52" r="3.5" fill="#3E2723"/>
+          <circle cx="72" cy="52" r="3.5" fill="#3E2723"/>
+        </svg>`
+      },
+
+      /* ========================================================================
+         【高年級模式：進階自然日常 (daily)】 - 精選 5~8 字母常用單字
+         ======================================================================== */
+      {
+        grade: 'senior', word: 'PLANET', zh: '土星星球', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="28" fill="#FFB74D" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="60" cy="62" rx="48" ry="12" fill="none" stroke="#4FC3F7" stroke-width="6" transform="rotate(-18 60 62)"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'ROCKET', zh: '太空火箭', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="34,76 22,92 42,88" fill="#EF5350" stroke="#3E2723" stroke-width="3.5"/>
+          <polygon points="86,76 98,92 78,88" fill="#EF5350" stroke="#3E2723" stroke-width="3.5"/>
+          <path d="M60 16 C80 38, 82 68, 76 88 L44 88 C38 68, 40 38, 60 16 Z" fill="#ECEFF1" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="54" r="10" fill="#4FC3F7" stroke="#3E2723" stroke-width="3"/>
+          <polygon points="50,88 70,88 60,106" fill="#FF9800"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'CAMERA', zh: '照相機', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="44" y="28" width="32" height="12" rx="4" fill="#78909C" stroke="#3E2723" stroke-width="3.5"/>
+          <rect x="22" y="38" width="76" height="54" rx="12" fill="#42A5F5" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="65" r="18" fill="#ECEFF1" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="65" r="10" fill="#263238"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'CASTLE', zh: '童話城堡', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <rect x="30" y="48" width="60" height="50" fill="#FFE0B2" stroke="#3E2723" stroke-width="4"/>
+          <polygon points="26,48 40,24 54,48" fill="#EF5350" stroke="#3E2723" stroke-width="3.5"/>
+          <polygon points="66,48 80,24 94,48" fill="#EF5350" stroke="#3E2723" stroke-width="3.5"/>
+          <path d="M50 98 L50 74 C50 66, 70 66, 70 74 L70 98 Z" fill="#8D6E63" stroke="#3E2723" stroke-width="3.5"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'GUITAR', zh: '吉他', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <line x1="60" y1="18" x2="60" y2="66" stroke="#8D6E63" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="60" cy="76" r="24" fill="#FFB74D" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="56" r="16" fill="#FFB74D" stroke="#3E2723" stroke-width="4"/>
+          <circle cx="60" cy="72" r="8" fill="#3E2723"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'ISLAND', zh: '椰子小島', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M22 86 C34 66, 86 66, 98 86 Z" fill="#FFD54F" stroke="#3E2723" stroke-width="4"/>
+          <path d="M60 72 Q54 48 64 34" fill="none" stroke="#8D6E63" stroke-width="6" stroke-linecap="round"/>
+          <path d="M64 34 Q42 26 36 42 M64 34 Q86 26 92 42 M64 34 Q52 16 74 18" fill="none" stroke="#43A047" stroke-width="5" stroke-linecap="round"/>
+          <rect x="14" y="86" width="92" height="12" rx="6" fill="#29B6F6"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'BALLOON', zh: '氣球', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M60 76 Q54 90 64 104" fill="none" stroke="#3E2723" stroke-width="3" stroke-linecap="round"/>
+          <ellipse cx="60" cy="46" rx="28" ry="32" fill="#FF5252" stroke="#3E2723" stroke-width="4"/>
+          <ellipse cx="48" cy="36" rx="5" ry="10" fill="#FFCDD2" transform="rotate(-20 48 36)"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'RAINBOW', zh: '彩虹', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <path d="M20 84 A40 40 0 0 1 100 84" fill="none" stroke="#EF5350" stroke-width="8" stroke-linecap="round"/>
+          <path d="M28 84 A32 32 0 0 1 92 84" fill="none" stroke="#FFD54F" stroke-width="8" stroke-linecap="round"/>
+          <path d="M36 84 A24 24 0 0 1 84 84" fill="none" stroke="#66BB6A" stroke-width="8" stroke-linecap="round"/>
+          <path d="M44 84 A16 16 0 0 1 76 84" fill="none" stroke="#42A5F5" stroke-width="8" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'BICYCLE', zh: '腳踏車', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <circle cx="34" cy="76" r="18" fill="none" stroke="#3E2723" stroke-width="4.5"/>
+          <circle cx="86" cy="76" r="18" fill="none" stroke="#3E2723" stroke-width="4.5"/>
+          <polyline points="34,76 54,50 82,50 60,76 34,76" fill="none" stroke="#EF5350" stroke-width="4.5" stroke-linejoin="round"/>
+          <line x1="82" y1="50" x2="86" y2="76" stroke="#EF5350" stroke-width="4.5"/>
+          <line x1="76" y1="42" x2="88" y2="42" stroke="#3E2723" stroke-width="4" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'AIRPLANE', zh: '飛機', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="54,22 72,56 54,56" fill="#42A5F5" stroke="#3E2723" stroke-width="3.5" stroke-linejoin="round"/>
+          <polygon points="54,98 72,64 54,64" fill="#42A5F5" stroke="#3E2723" stroke-width="3.5" stroke-linejoin="round"/>
+          <path d="M22 60 C22 50, 96 50, 102 60 C96 70, 22 70, 22 60 Z" fill="#FFFFFF" stroke="#3E2723" stroke-width="4"/>
+          <polygon points="22,60 14,42 30,54" fill="#EF5350" stroke="#3E2723" stroke-width="3.5"/>
+        </svg>`
+      },
+      {
+        grade: 'senior', word: 'MOUNTAIN', zh: '高山', category: 'daily',
+        svg: `<svg class="main-art" viewBox="0 0 120 120">
+          <polygon points="16,92 52,32 88,92" fill="#66BB6A" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <polygon points="48,92 78,44 106,92" fill="#43A047" stroke="#3E2723" stroke-width="4" stroke-linejoin="round"/>
+          <polygon points="52,32 42,48 52,44 62,48" fill="#FFFFFF"/>
+        </svg>`
+      }
+    ];
+
+    /* ==========================================================================
+       2. Web Audio API 歡樂廚房音效引擎（零外部音檔依賴）
+       ========================================================================== */
+    class KitchenSoundFX {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type, duration, startTimeOffset = 0, volume = 0.16) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime + startTimeOffset;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      playPop() {
+        this.playTone(520, 'sine', 0.11, 0, 0.18);
+        this.playTone(760, 'triangle', 0.08, 0.03, 0.12);
+      }
+
+      playBackspace() {
+        this.playTone(340, 'triangle', 0.12, 0, 0.14);
+      }
+
+      playTick() {
+        this.playTone(880, 'sine', 0.06, 0, 0.1);
+      }
+
+      playWrong() {
+        this.playTone(220, 'sawtooth', 0.18, 0, 0.1);
+        this.playTone(185, 'sawtooth', 0.22, 0.12, 0.1);
+      }
+
+      playSuccess() {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((n, i) => {
+          this.playTone(n, 'triangle', 0.22, i * 0.08, 0.18);
+        });
+      }
+
+      playGameOver() {
+        const notes = [440, 392, 349.23, 293.66];
+        notes.forEach((n, i) => {
+          this.playTone(n, 'triangle', 0.25, i * 0.14, 0.16);
+        });
+      }
+    }
+
+    const sfx = new KitchenSoundFX();
+
+    /* ==========================================================================
+       3. 真人英文發音（Web Speech API）
+       ========================================================================== */
+    function speakWord(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text.toLowerCase());
+      utter.lang = 'en-US';
+      utter.rate = 0.85;
+      utter.pitch = 1.15;
+      window.speechSynthesis.speak(utter);
+    }
+
+    /* ==========================================================================
+       4. 帳號登入 / 註冊與本機排行榜系統
+       ========================================================================== */
+    const STORAGE_ACCOUNTS_KEY = 'burger_spelling_accounts_v1';
+    const STORAGE_CURRENT_USER_KEY = 'burger_spelling_current_user_v1';
+    const STORAGE_SCORES_KEY = 'burger_spelling_leaderboard_v1';
+
+    const DEFAULT_LEADERS = [
+      { id: 'bot-1', name: '無敵漢堡王', score: 150 },
+      { id: 'bot-2', name: '薯條小精靈', score: 110 },
+      { id: 'bot-3', name: '草莓甜甜圈', score: 80 },
+      { id: 'bot-4', name: '起司小廚師', score: 50 }
+    ];
+
+    function getAllAccounts() {
+      try {
+        const raw = localStorage.getItem(STORAGE_ACCOUNTS_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveAllAccounts(accounts) {
+      try {
+        localStorage.setItem(STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts));
+      } catch (e) {}
+    }
+
+    function getCurrentLoggedUser() {
+      try {
+        const username = localStorage.getItem(STORAGE_CURRENT_USER_KEY);
+        if (!username) return null;
+        const accounts = getAllAccounts();
+        return accounts[username] || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setCurrentLoggedUser(username) {
+      try {
+        if (username) {
+          localStorage.setItem(STORAGE_CURRENT_USER_KEY, username);
+        } else {
+          localStorage.removeItem(STORAGE_CURRENT_USER_KEY);
+        }
+      } catch (e) {}
+    }
+
+    function updateAccountProgress(newScore, newSolved) {
+      if (!state.currentUsername) return;
+      const accounts = getAllAccounts();
+      const acc = accounts[state.currentUsername];
+      if (!acc) return;
+      acc.totalScore = Math.max(acc.totalScore || 0, newScore);
+      acc.solvedCount = Math.max(acc.solvedCount || 0, newSolved);
+      saveAllAccounts(accounts);
+    }
+
+    function getLeaderboardData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_SCORES_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+      return [...DEFAULT_LEADERS];
+    }
+
+    function savePlayerScoreToBoard(name, score) {
+      if (score <= 0) return;
+      const board = getLeaderboardData();
+      const playerId = state.currentUsername ? `user-${state.currentUsername}` : 'local-player';
+      const existingIdx = board.findIndex(item => item.id === playerId);
+
+      if (existingIdx !== -1) {
+        board[existingIdx].name = name;
+        if (score > board[existingIdx].score) {
+          board[existingIdx].score = score;
+        }
+      } else {
+        board.push({ id: playerId, name: name, score: score });
+      }
+
+      board.sort((a, b) => b.score - a.score);
+      const top10 = board.slice(0, 10);
+
+      try {
+        localStorage.setItem(STORAGE_SCORES_KEY, JSON.stringify(top10));
+      } catch (e) {}
+    }
+
+    /* ==========================================================================
+       5. 遊戲核心狀態與 10 秒倒數計時器
+       ========================================================================== */
+    const TIME_LIMIT_SEC = 10.0;
+
+    const state = {
+      isPlaying: false,
+      grade: 'junior', // 'junior' (低年級) | 'senior' (高年級)
+      category: 'all',
+      difficulty: 'easy',
+      orderCount: 1,
+      solvedCount: 0,
+      score: 0,
+      streak: 0,
+      currentUsername: null,
+      playerName: '漢堡小店長',
+      currentItem: null,
+      slots: [],
+      bankTiles: [],
+      locked: false,
+      timeLeft: TIME_LIMIT_SEC,
+      timerInterval: null,
+      lastTickSec: 10,
+      queue: []
+    };
+
+    const elHomeScreen = document.getElementById('home-screen');
+    const elGameScreen = document.getElementById('game-screen');
+    const elHomePlayerName = document.getElementById('home-player-name');
+    const elHomeSoundBtn = document.getElementById('home-sound-btn');
+    const elHomeGradeJunior = document.getElementById('home-grade-junior');
+    const elHomeGradeSenior = document.getElementById('home-grade-senior');
+    const elGradeToggleBtn = document.getElementById('grade-toggle-btn');
+
+    const elScore = document.getElementById('score-val');
+    const elStreak = document.getElementById('streak-val');
+    const elPlayerName = document.getElementById('player-name-display');
+    const elOrderNum = document.getElementById('order-number');
+    const elTimerFill = document.getElementById('timer-fill');
+    const elTimerText = document.getElementById('timer-text');
+    const elSvgBox = document.getElementById('word-svg-container');
+    const elCuteFace = document.querySelector('.cute-face-overlay');
+    const elZhWord = document.getElementById('zh-word');
+    const elHintText = document.getElementById('hint-text');
+    const elSlots = document.getElementById('letter-slots');
+    const elBank = document.getElementById('tiles-bank');
+    const elFeedback = document.getElementById('feedback-msg');
+
+    const elSuccessModal = document.getElementById('success-modal');
+    const elGameOverModal = document.getElementById('gameover-modal');
+    const elAuthOverlay = document.getElementById('auth-modal');
+    const elRankOverlay = document.getElementById('rank-modal');
+
+    function startQuestionTimer() {
+      stopQuestionTimer();
+      state.timeLeft = TIME_LIMIT_SEC;
+      state.lastTickSec = Math.ceil(TIME_LIMIT_SEC);
+      updateTimerUI();
+
+      state.timerInterval = setInterval(() => {
+        if (!state.isPlaying || state.locked) return;
+        if (elAuthOverlay.classList.contains('show') || elRankOverlay.classList.contains('show')) {
+          return;
+        }
+
+        state.timeLeft = Math.max(0, state.timeLeft - 0.1);
+        updateTimerUI();
+
+        const currentWholeSec = Math.ceil(state.timeLeft);
+        if (currentWholeSec <= 3 && currentWholeSec > 0 && currentWholeSec < state.lastTickSec) {
+          sfx.playTick();
+        }
+        state.lastTickSec = currentWholeSec;
+
+        if (state.timeLeft <= 0) {
+          handleTimeOutGameOver();
+        }
+      }, 100);
+    }
+
+    function stopQuestionTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+    }
+
+    function updateTimerUI() {
+      const pct = Math.max(0, (state.timeLeft / TIME_LIMIT_SEC) * 100);
+      elTimerFill.style.width = `${pct}%`;
+      elTimerText.textContent = `${state.timeLeft.toFixed(1)}s`;
+
+      elTimerFill.classList.remove('warning', 'danger');
+      elTimerText.classList.remove('danger');
+
+      if (state.timeLeft <= 3.0) {
+        elTimerFill.classList.add('danger');
+        elTimerText.classList.add('danger');
+      } else if (state.timeLeft <= 5.5) {
+        elTimerFill.classList.add('warning');
+      }
+    }
+
+    function handleTimeOutGameOver() {
+      stopQuestionTimer();
+      state.locked = true;
+      sfx.playGameOver();
+
+      savePlayerScoreToBoard(state.playerName, state.score);
+      updateAccountProgress(state.score, state.solvedCount);
+
+      document.getElementById('gameover-word').textContent = state.currentItem.word;
+      document.getElementById('gameover-score').textContent = state.score;
+      document.getElementById('gameover-solved').textContent = state.solvedCount;
+
+      elGameOverModal.classList.add('show');
+    }
+
+    function restartFullGame() {
+      elGameOverModal.classList.remove('show');
+      state.score = 0;
+      state.streak = 0;
+      state.solvedCount = 0;
+      state.orderCount = 1;
+      elScore.textContent = '0';
+      elStreak.textContent = '0';
+      refillQueue();
+      loadNextWord();
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function refillQueue() {
+      const pool = WORD_BANK.filter(item => {
+        const matchGrade = item.grade === state.grade;
+        const matchCat = state.category === 'all' || item.category === state.category;
+        return matchGrade && matchCat;
+      });
+      state.queue = shuffleArray(pool.length > 0 ? pool : WORD_BANK);
+    }
+
+    function setGradeMode(newGrade) {
+      state.grade = newGrade;
+      const isSenior = newGrade === 'senior';
+
+      elHomeGradeJunior.classList.toggle('active-junior', !isSenior);
+      elHomeGradeSenior.classList.toggle('active-senior', isSenior);
+
+      if (isSenior) {
+        elGradeToggleBtn.textContent = '🦅 高年級';
+        elGradeToggleBtn.classList.add('is-senior');
+      } else {
+        elGradeToggleBtn.textContent = '🐣 低年級';
+        elGradeToggleBtn.classList.remove('is-senior');
+      }
+
+      refillQueue();
+      if (state.isPlaying) {
+        loadNextWord();
+      }
+    }
+
+    function generateDistractors(targetWord, count) {
+      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const excluded = new Set(targetWord.split(''));
+      const candidates = alphabet.split('').filter(ch => !excluded.has(ch));
+      return shuffleArray(candidates).slice(0, count);
+    }
+
+    function loadNextWord() {
+      if (state.queue.length === 0) refillQueue();
+      const item = state.queue.pop();
+
+      state.currentItem = item;
+      state.locked = false;
+      state.slots = new Array(item.word.length).fill(null);
+
+      let extraCount = state.grade === 'senior' ? 1 : 0;
+      if (state.difficulty === 'normal') extraCount += 2;
+      if (state.difficulty === 'hard') extraCount += 3;
+
+      const letters = [...item.word.split(''), ...generateDistractors(item.word, extraCount)];
+      const shuffledLetters = shuffleArray(letters);
+
+      state.bankTiles = shuffledLetters.map((char, idx) => ({
+        id: idx,
+        char,
+        used: false
+      }));
+
+      elOrderNum.textContent = `ORDER #${String(state.orderCount).padStart(2, '0')}`;
+      elSvgBox.innerHTML = item.svg;
+      if (elCuteFace) {
+        elCuteFace.style.display = item.category === 'animals' ? 'none' : 'flex';
+      }
+      elZhWord.textContent = item.zh;
+      const gradeBadgeText = state.grade === 'senior' ? '【高年級進階】' : '【低年級基礎】';
+      elHintText.textContent = `${gradeBadgeText}請在 10 秒內拼出 ${item.word.length} 個字母的英文單字！`;
+      elFeedback.textContent = '';
+
+      renderBoard();
+      startQuestionTimer();
+
+      setTimeout(() => speakWord(item.word), 260);
+    }
+
+    function renderBoard() {
+      elSlots.innerHTML = '';
+      const isLongWord = state.slots.length >= 8;
+      state.slots.forEach((tileObj, slotIdx) => {
+        const slotEl = document.createElement('button');
+        slotEl.type = 'button';
+        slotEl.className = 'slot-box' + (isLongWord ? ' compact-slot' : '');
+        if (tileObj) {
+          slotEl.textContent = tileObj.char;
+          slotEl.classList.add('filled');
+          slotEl.setAttribute('aria-label', `第 ${slotIdx + 1} 格字母 ${tileObj.char}，點擊可退回`);
+          slotEl.addEventListener('click', () => removeLetterFromSlot(slotIdx));
+        } else {
+          const isNextTarget = state.slots.indexOf(null) === slotIdx;
+          if (isNextTarget) {
+            slotEl.classList.add('hinted');
+            slotEl.textContent = '_';
+          }
+        }
+        elSlots.appendChild(slotEl);
+      });
+
+      elBank.innerHTML = '';
+      state.bankTiles.forEach(tile => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'letter-tile';
+        btn.textContent = tile.char;
+        btn.disabled = tile.used || state.locked;
+        btn.setAttribute('aria-label', `選擇字母 ${tile.char}`);
+        btn.addEventListener('click', () => selectBankTile(tile.id));
+        elBank.appendChild(btn);
+      });
+    }
+
+    function selectBankTile(tileId) {
+      if (state.locked) return;
+      const emptyIdx = state.slots.indexOf(null);
+      if (emptyIdx === -1) return;
+
+      const tile = state.bankTiles.find(t => t.id === tileId);
+      if (!tile || tile.used) return;
+
+      sfx.playPop();
+      tile.used = true;
+      state.slots[emptyIdx] = tile;
+      elFeedback.textContent = '';
+
+      renderBoard();
+      checkAnswerIfFull();
+    }
+
+    function removeLetterFromSlot(slotIdx) {
+      if (state.locked) return;
+      const tile = state.slots[slotIdx];
+      if (!tile) return;
+
+      sfx.playBackspace();
+      tile.used = false;
+      state.slots[slotIdx] = null;
+      elFeedback.textContent = '';
+      renderBoard();
+    }
+
+    function handleBackspace() {
+      if (state.locked) return;
+      for (let i = state.slots.length - 1; i >= 0; i--) {
+        if (state.slots[i] !== null) {
+          removeLetterFromSlot(i);
+          return;
+        }
+      }
+    }
+
+    function handleHint() {
+      if (state.locked) return;
+      const targetWord = state.currentItem.word;
+
+      let targetIdx = -1;
+      for (let i = 0; i < targetWord.length; i++) {
+        if (!state.slots[i] || state.slots[i].char !== targetWord[i]) {
+          targetIdx = i;
+          break;
+        }
+      }
+      if (targetIdx === -1) return;
+
+      if (state.slots[targetIdx]) {
+        state.slots[targetIdx].used = false;
+        state.slots[targetIdx] = null;
+      }
+
+      const neededChar = targetWord[targetIdx];
+      let chosenTile = state.bankTiles.find(t => !t.used && t.char === neededChar);
+
+      if (!chosenTile) {
+        const wrongSlotIdx = state.slots.findIndex((s, idx) => s && s.char === neededChar && targetWord[idx] !== neededChar);
+        if (wrongSlotIdx !== -1) {
+          chosenTile = state.slots[wrongSlotIdx];
+          state.slots[wrongSlotIdx] = null;
+          chosenTile.used = false;
+        }
+      }
+
+      if (chosenTile) {
+        sfx.playPop();
+        chosenTile.used = true;
+        state.slots[targetIdx] = chosenTile;
+        elFeedback.textContent = `💡 小幫手已幫你放好第 ${targetIdx + 1} 個字母「${neededChar}」囉！`;
+        elFeedback.style.color = '#6A1B9A';
+        renderBoard();
+        checkAnswerIfFull();
+      }
+    }
+
+    function checkAnswerIfFull() {
+      if (state.slots.includes(null)) return;
+
+      const playerGuess = state.slots.map(t => t.char).join('');
+      const targetWord = state.currentItem.word;
+
+      if (playerGuess === targetWord) {
+        stopQuestionTimer();
+        state.locked = true;
+        state.streak += 1;
+        state.solvedCount += 1;
+        const basePoints = state.grade === 'senior' ? 15 : 10;
+        const earned = basePoints + Math.min(state.streak * 2, 10);
+        state.score += earned;
+
+        elScore.textContent = state.score;
+        elStreak.textContent = state.streak;
+
+        savePlayerScoreToBoard(state.playerName, state.score);
+        updateAccountProgress(state.score, state.solvedCount);
+
+        document.querySelectorAll('.slot-box').forEach(el => el.classList.add('correct-pop'));
+
+        sfx.playSuccess();
+        speakWord(targetWord);
+        launchConfetti();
+
+        setTimeout(() => {
+          document.getElementById('modal-word').textContent = targetWord;
+          document.getElementById('modal-sub').textContent = `${state.currentItem.zh} · 獲得 +${earned} 集點！`;
+          elSuccessModal.classList.add('show');
+        }, 550);
+      } else {
+        sfx.playWrong();
+        state.streak = 0;
+        elStreak.textContent = '0';
+        elFeedback.textContent = '再檢查一下字母順序，點一下上面的格子可以拿下來重排喔！';
+        elFeedback.style.color = '#D32F2F';
+        elSlots.classList.remove('shake');
+        void elSlots.offsetWidth;
+        elSlots.classList.add('shake');
+      }
+    }
+
+    function updatePlayerUI() {
+      elPlayerName.textContent = state.playerName;
+      elHomePlayerName.textContent = state.playerName;
+
+      const homeAuthBtn = document.getElementById('home-auth-btn');
+      const topAuthBtn = document.getElementById('auth-btn');
+      if (state.currentUsername) {
+        homeAuthBtn.textContent = `👤 ${state.playerName}（切換/登出）`;
+        homeAuthBtn.classList.add('logged-in');
+        topAuthBtn.classList.add('logged-in');
+      } else {
+        homeAuthBtn.textContent = '🔑 登入 / 註冊';
+        homeAuthBtn.classList.remove('logged-in');
+        topAuthBtn.classList.remove('logged-in');
+      }
+    }
+
+    function initPlayerAuth() {
+      const user = getCurrentLoggedUser();
+      if (user) {
+        state.currentUsername = user.username;
+        state.playerName = user.nickname;
+        state.score = user.totalScore || 0;
+        state.solvedCount = user.solvedCount || 0;
+      } else {
+        state.currentUsername = null;
+        state.playerName = '漢堡小店長';
+      }
+      elScore.textContent = state.score;
+      updatePlayerUI();
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderLeaderboardModal() {
+      savePlayerScoreToBoard(state.playerName, state.score);
+      const list = getLeaderboardData();
+      const rankListEl = document.getElementById('rank-list');
+      rankListEl.innerHTML = '';
+
+      const myId = state.currentUsername ? `user-${state.currentUsername}` : 'local-player';
+
+      list.forEach((entry, idx) => {
+        const row = document.createElement('div');
+        row.className = 'rank-row';
+        if (idx === 0) row.classList.add('top-1');
+        else if (idx === 1) row.classList.add('top-2');
+        else if (idx === 2) row.classList.add('top-3');
+        if (entry.id === myId) row.classList.add('is-me');
+
+        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+        const safeName = escapeHtml(entry.name);
+        row.innerHTML = `
+          <div class="rank-left">
+            <span>${medal}</span>
+            <span>${safeName}${entry.id === myId ? '（你）' : ''}</span>
+          </div>
+          <span class="rank-score">⭐ ${entry.score} 分</span>
+        `;
+        rankListEl.appendChild(row);
+      });
+    }
+
+    /* ==========================================================================
+       6. 彩帶慶祝粒子特效
+       ========================================================================== */
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+    let confettiParticles = [];
+    let confettiAnimId = null;
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function launchConfetti() {
+      const colors = ['#FF4B4B', '#FFB703', '#4CAF50', '#2196F3', '#FF80AB', '#AB47BC'];
+      confettiParticles = [];
+      for (let i = 0; i < 65; i++) {
+        confettiParticles.push({
+          x: confettiCanvas.width * 0.5 + (Math.random() - 0.5) * 180,
+          y: confettiCanvas.height * 0.45,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 1.2) * 14,
+          size: 7 + Math.random() * 7,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rot: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 12
+        });
+      }
+      if (!confettiAnimId) animateConfetti();
+    }
+
+    function animateConfetti() {
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiParticles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.42;
+        p.rot += p.vRot;
+
+        cCtx.save();
+        cCtx.translate(p.x, p.y);
+        cCtx.rotate((p.rot * Math.PI) / 180);
+        cCtx.fillStyle = p.color;
+        cCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+        cCtx.restore();
+      });
+
+      confettiParticles = confettiParticles.filter(p => p.y < confettiCanvas.height + 30);
+      if (confettiParticles.length > 0) {
+        confettiAnimId = requestAnimationFrame(animateConfetti);
+      } else {
+        confettiAnimId = null;
+      }
+    }
+
+    /* ==========================================================================
+       7. 事件綁定與遊戲啟動
+       ========================================================================== */
+    // 手機與平板遊玩時，強制取消非輸入框元素的焦點，避免系統誤判彈出虛擬小鍵盤
+    document.addEventListener('touchstart', (e) => {
+      if (e.target && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+      }
+    }, { passive: true });
+
+    // 首頁與遊戲畫面切換控制
+    function enterGameScreen() {
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
+      sfx.init();
+      sfx.playSuccess();
+      state.isPlaying = true;
+      elHomeScreen.style.display = 'none';
+      elGameScreen.style.display = 'flex';
+      refillQueue();
+      loadNextWord();
+    }
+
+    function returnHomeScreen() {
+      stopQuestionTimer();
+      state.isPlaying = false;
+      elSuccessModal.classList.remove('show');
+      elGameOverModal.classList.remove('show');
+      elGameScreen.style.display = 'none';
+      elHomeScreen.style.display = 'flex';
+    }
+
+    document.getElementById('enter-game-btn').addEventListener('click', enterGameScreen);
+    document.getElementById('back-home-btn').addEventListener('click', returnHomeScreen);
+
+    // 首頁與遊戲頂部的低年級 / 高年級切換
+    elHomeGradeJunior.addEventListener('click', () => {
+      sfx.playPop();
+      setGradeMode('junior');
+    });
+    elHomeGradeSenior.addEventListener('click', () => {
+      sfx.playPop();
+      setGradeMode('senior');
+    });
+    elGradeToggleBtn.addEventListener('click', () => {
+      sfx.playPop();
+      setGradeMode(state.grade === 'junior' ? 'senior' : 'junior');
+    });
+
+    // 首頁與遊戲內的音效同步切換
+    function toggleSoundState() {
+      sfx.enabled = !sfx.enabled;
+      const topBtn = document.getElementById('sound-toggle-btn');
+      topBtn.textContent = sfx.enabled ? '🔊' : '🔇';
+      elHomeSoundBtn.textContent = sfx.enabled ? '🔊 音效：開啟' : '🔇 音效：關閉';
+      if (sfx.enabled) sfx.playPop();
+    }
+
+    document.getElementById('sound-toggle-btn').addEventListener('click', toggleSoundState);
+    elHomeSoundBtn.addEventListener('click', toggleSoundState);
+
+    // 分類按鈕切換
+    document.getElementById('category-tabs').addEventListener('click', e => {
+      const btn = e.target.closest('.tab-btn');
+      if (!btn) return;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.category = btn.dataset.cat;
+      sfx.playPop();
+      refillQueue();
+      loadNextWord();
+    });
+
+    // 難度下拉切換
+    document.getElementById('difficulty-select').addEventListener('change', e => {
+      state.difficulty = e.target.value;
+      sfx.playPop();
+      loadNextWord();
+    });
+
+    // 發音按鈕與圖片點擊
+    document.getElementById('speak-btn').addEventListener('click', () => {
+      sfx.playPop();
+      speakWord(state.currentItem.word);
+    });
+    document.getElementById('illustration-box').addEventListener('click', () => {
+      sfx.playPop();
+      speakWord(state.currentItem.word);
+    });
+
+    // 底部輔助按鈕
+    document.getElementById('backspace-btn').addEventListener('click', handleBackspace);
+    document.getElementById('hint-btn').addEventListener('click', handleHint);
+    document.getElementById('skip-btn').addEventListener('click', () => {
+      if (state.locked) return;
+      sfx.playBackspace();
+      state.orderCount += 1;
+      loadNextWord();
+    });
+
+    // 出餐成功「下一份點餐」
+    document.getElementById('next-word-btn').addEventListener('click', () => {
+      elSuccessModal.classList.remove('show');
+      state.orderCount += 1;
+      loadNextWord();
+    });
+
+    // 10 秒時間到「重新開店挑戰」
+    document.getElementById('restart-game-btn').addEventListener('click', restartFullGame);
+
+    // 登入 / 註冊帳號視窗控制
+    let currentAuthTab = 'login';
+    const elTabLoginBtn = document.getElementById('tab-login-btn');
+    const elTabRegisterBtn = document.getElementById('tab-register-btn');
+    const elLoginFormBox = document.getElementById('login-form-box');
+    const elRegisterFormBox = document.getElementById('register-form-box');
+    const elAuthMsg = document.getElementById('auth-msg');
+    const elSubmitAuthBtn = document.getElementById('submit-auth-btn');
+
+    function switchAuthTab(tab) {
+      currentAuthTab = tab;
+      elAuthMsg.textContent = '';
+      if (tab === 'login') {
+        elTabLoginBtn.classList.add('active');
+        elTabRegisterBtn.classList.remove('active');
+        elLoginFormBox.style.display = 'block';
+        elRegisterFormBox.style.display = 'none';
+        elSubmitAuthBtn.textContent = '確認登入 ✅';
+      } else {
+        elTabRegisterBtn.classList.add('active');
+        elTabLoginBtn.classList.remove('active');
+        elRegisterFormBox.style.display = 'block';
+        elLoginFormBox.style.display = 'none';
+        elSubmitAuthBtn.textContent = '完成註冊 🎉';
+      }
+    }
+
+    function renderSavedAccountsChips() {
+      const accounts = getAllAccounts();
+      const keys = Object.keys(accounts);
+      const box = document.getElementById('saved-accounts-box');
+      const chipsWrap = document.getElementById('saved-account-chips');
+      chipsWrap.innerHTML = '';
+
+      if (keys.length === 0) {
+        box.style.display = 'none';
+        return;
+      }
+
+      box.style.display = 'block';
+      keys.forEach(uname => {
+        const acc = accounts[uname];
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'account-chip';
+        chip.textContent = `👨‍🍳 ${acc.nickname} (${acc.username})`;
+        chip.addEventListener('click', () => {
+          switchAuthTab('login');
+          document.getElementById('login-username').value = acc.username;
+          document.getElementById('login-password').value = acc.password;
+          elAuthMsg.style.color = '#2E7D32';
+          elAuthMsg.textContent = `已填入「${acc.nickname}」的帳號，按「確認登入」即可！`;
+        });
+        chipsWrap.appendChild(chip);
+      });
+    }
+
+    function openAuthModal() {
+      sfx.playPop();
+      elAuthMsg.textContent = '';
+      switchAuthTab('login');
+      renderSavedAccountsChips();
+
+      const loggedFooter = document.getElementById('logged-in-footer');
+      loggedFooter.style.display = state.currentUsername ? 'block' : 'none';
+
+      elAuthOverlay.classList.add('show');
+    }
+
+    function handleAuthSubmit() {
+      const accounts = getAllAccounts();
+
+      if (currentAuthTab === 'register') {
+        const nickname = document.getElementById('reg-nickname').value.trim();
+        const username = document.getElementById('reg-username').value.trim().toLowerCase();
+        const password = document.getElementById('reg-password').value.trim();
+
+        if (!nickname || !username || !password) {
+          elAuthMsg.style.color = '#D32F2F';
+          elAuthMsg.textContent = '⚠️ 請把暱稱、帳號與密碼都填寫完整喔！';
+          return;
+        }
+        if (password.length < 3) {
+          elAuthMsg.style.color = '#D32F2F';
+          elAuthMsg.textContent = '⚠️ 密碼請設定至少 3 個字元！';
+          return;
+        }
+        if (accounts[username]) {
+          elAuthMsg.style.color = '#D32F2F';
+          elAuthMsg.textContent = '⚠️ 這個帳號已經有人註冊過囉，請換一個！';
+          return;
+        }
+
+        accounts[username] = {
+          username,
+          nickname,
+          password,
+          totalScore: state.score,
+          solvedCount: state.solvedCount
+        };
+        saveAllAccounts(accounts);
+        setCurrentLoggedUser(username);
+
+        state.currentUsername = username;
+        state.playerName = nickname;
+        updatePlayerUI();
+        savePlayerScoreToBoard(state.playerName, state.score);
+
+        sfx.playSuccess();
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+        elAuthOverlay.classList.remove('show');
+        elFeedbackMsg.textContent = `🎉 註冊成功！歡迎「${nickname}」加入漢堡寶團隊！`;
+        elFeedbackMsg.style.color = '#2E7D32';
+      } else {
+        const username = document.getElementById('login-username').value.trim().toLowerCase();
+        const password = document.getElementById('login-password').value.trim();
+
+        if (!username || !password) {
+          elAuthMsg.style.color = '#D32F2F';
+          elAuthMsg.textContent = '⚠️ 請輸入帳號和密碼！';
+          return;
+        }
+
+        const userRecord = accounts[username];
+        if (!userRecord || userRecord.password !== password) {
+          elAuthMsg.style.color = '#D32F2F';
+          elAuthMsg.textContent = '❌ 帳號或密碼不正確，請再檢查一下！';
+          return;
+        }
+
+        setCurrentLoggedUser(username);
+        state.currentUsername = userRecord.username;
+        state.playerName = userRecord.nickname;
+        state.score = Math.max(state.score, userRecord.totalScore || 0);
+        state.solvedCount = Math.max(state.solvedCount, userRecord.solvedCount || 0);
+
+        elScore.textContent = state.score;
+        updatePlayerUI();
+
+        sfx.playSuccess();
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+        elAuthOverlay.classList.remove('show');
+        elFeedbackMsg.textContent = `🔑 歡迎回來「${userRecord.nickname}」！已載入累計 ${state.score} 分！`;
+        elFeedbackMsg.style.color = '#2E7D32';
+      }
+    }
+
+    document.getElementById('auth-btn').addEventListener('click', openAuthModal);
+    document.getElementById('home-auth-btn').addEventListener('click', openAuthModal);
+    elTabLoginBtn.addEventListener('click', () => switchAuthTab('login'));
+    elTabRegisterBtn.addEventListener('click', () => switchAuthTab('register'));
+    elSubmitAuthBtn.addEventListener('click', handleAuthSubmit);
+    document.getElementById('close-auth-btn').addEventListener('click', () => {
+      elAuthOverlay.classList.remove('show');
+    });
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      setCurrentLoggedUser(null);
+      state.currentUsername = null;
+      state.playerName = '漢堡小店長';
+      state.score = 0;
+      state.solvedCount = 0;
+      elScore.textContent = '0';
+      updatePlayerUI();
+      sfx.playBackspace();
+      elAuthOverlay.classList.remove('show');
+    });
+
+    // 排行榜彈窗控制
+    function openLeaderboard() {
+      sfx.playPop();
+      renderLeaderboardModal();
+      elRankOverlay.classList.add('show');
+    }
+
+    document.getElementById('rank-btn').addEventListener('click', openLeaderboard);
+    document.getElementById('home-rank-btn').addEventListener('click', openLeaderboard);
+    document.getElementById('close-rank-btn').addEventListener('click', () => {
+      elRankOverlay.classList.remove('show');
+    });
+
+    // 實體鍵盤支援
+    window.addEventListener('keydown', e => {
+      if (elAuthOverlay.classList.contains('show')) {
+        if (e.key === 'Enter') handleAuthSubmit();
+        return;
+      }
+      if (elRankOverlay.classList.contains('show')) {
+        if (e.key === 'Escape' || e.key === 'Enter') elRankOverlay.classList.remove('show');
+        return;
+      }
+      if (elGameOverModal.classList.contains('show')) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          restartFullGame();
+        }
+        return;
+      }
+      if (elSuccessModal.classList.contains('show')) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          elSuccessModal.classList.remove('show');
+          state.orderCount += 1;
+          loadNextWord();
+        }
+        return;
+      }
+
+      if (!state.isPlaying) {
+        if (e.key === 'Enter') enterGameScreen();
+        return;
+      }
+
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        handleBackspace();
+        return;
+      }
+
+      const key = e.key.toUpperCase();
+      if (/^[A-Z]$/.test(key)) {
+        const availableTile = state.bankTiles.find(t => !t.used && t.char === key);
+        if (availableTile) {
+          selectBankTile(availableTile.id);
+        }
+      }
+    });
+
+    // 初始化首頁與玩家狀態（等待玩家點擊「進入遊戲」才開始計時）
+    initPlayerAuth();
+    setGradeMode('junior');
+  </script>
+</body>
+</html>

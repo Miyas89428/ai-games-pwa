@@ -1,0 +1,2877 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成語與俗諺森林劇場｜看動畫猜謎大冒險（離線版）</title>
+<style>
+  :root {
+    --bg-forest: #eef5e9;
+    --card-bg: #fffdf7;
+    --primary: #2d6a4f;
+    --primary-light: #40916c;
+    --primary-dark: #1b4332;
+    --accent: #e76f51;
+    --gold: #f4a261;
+    --wood: #7f5539;
+    --text-main: #2b2d42;
+    --text-muted: #5c677d;
+    --border-soft: #d8e2dc;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+    user-select: none;
+  }
+
+  body {
+    background: radial-gradient(circle at top, #d8f3dc 0%, #b7e4c7 45%, #95d5b2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--text-main);
+    padding: 12px;
+  }
+
+  /* Top Bar */
+  .top-bar {
+    width: 100%;
+    max-width: 960px;
+    background: var(--card-bg);
+    border: 3px solid var(--primary);
+    border-radius: 18px;
+    padding: 10px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 6px 0 rgba(27, 67, 50, 0.2);
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .brand-title {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hud-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .hud-badge {
+    background: #f1faee;
+    border: 2px solid var(--primary-light);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--primary-dark);
+  }
+
+  .btn-small {
+    background: var(--gold);
+    color: #3d2516;
+    border: 2px solid #bc6c25;
+    border-radius: 12px;
+    padding: 6px 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 0.9rem;
+    box-shadow: 0 3px 0 #bc6c25;
+    transition: transform 0.1s;
+  }
+  .btn-small:active { transform: translateY(2px); box-shadow: 0 1px 0 #bc6c25; }
+
+  /* Main Container */
+  .container {
+    width: 100%;
+    max-width: 960px;
+    background: var(--card-bg);
+    border: 4px solid var(--primary);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 10px 0 rgba(27, 67, 50, 0.22);
+    position: relative;
+  }
+
+  .screen { display: none; animation: fadeIn 0.35s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Start Screen (Minimalist Name + Grade) */
+  .hero-banner {
+    text-align: center;
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    color: white;
+    padding: 24px 18px;
+    border-radius: 18px;
+    margin-bottom: 22px;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15);
+  }
+  .hero-banner h1 { font-size: 1.9rem; margin-bottom: 6px; letter-spacing: 1px; }
+  .hero-banner p { font-size: 1rem; opacity: 0.95; }
+
+  .form-box {
+    max-width: 560px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .form-label {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--primary-dark);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .input-name {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1.1rem;
+    border: 3px solid var(--primary-light);
+    border-radius: 14px;
+    outline: none;
+    background: #fff;
+    font-weight: 700;
+  }
+  .input-name:focus { border-color: var(--accent); }
+
+  .grade-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .select-card {
+    border: 3px solid var(--border-soft);
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .select-card:hover { border-color: var(--primary-light); transform: translateY(-2px); }
+  .select-card.selected {
+    border-color: var(--primary);
+    background: #d8f3dc;
+    box-shadow: 0 4px 0 var(--primary);
+  }
+  .select-card .g-title { font-weight: 900; font-size: 1.1rem; color: var(--primary-dark); }
+  .select-card .g-sub { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+
+  .mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(180deg, #e76f51 0%, #d65a3c 100%);
+    color: white;
+    border: 3px solid #9e3820;
+    border-radius: 16px;
+    padding: 14px 24px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #9e3820;
+    transition: transform 0.1s;
+    width: 100%;
+    margin-top: 6px;
+  }
+  .btn-primary:active { transform: translateY(3px); box-shadow: 0 2px 0 #9e3820; }
+
+  /* Map Screen */
+  .map-header {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .map-header h2 { color: var(--primary-dark); font-size: 1.5rem; }
+  .map-header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
+
+  .zones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .zone-card {
+    background: #f4f9f4;
+    border: 3px solid var(--primary-light);
+    border-radius: 18px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.18s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .zone-card:hover:not(.done) {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 0 var(--primary);
+    background: #e9f5db;
+  }
+  .zone-card.done {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    opacity: 0.85;
+    cursor: default;
+  }
+  .zone-icon { font-size: 2.2rem; margin-bottom: 6px; }
+  .zone-title { font-size: 1.15rem; font-weight: 900; color: var(--primary-dark); }
+  .zone-desc { font-size: 0.88rem; color: var(--text-muted); margin: 6px 0 10px; line-height: 1.4; }
+  .zone-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    background: var(--primary);
+    color: white;
+    align-self: flex-start;
+  }
+  .zone-card.done .zone-status { background: #6c757d; }
+
+  /* Cinema Quiz Screen */
+  .cinema-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .zone-pill {
+    background: var(--primary);
+    color: white;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.92rem;
+  }
+
+  .stage-wrapper {
+    background: #1d3557;
+    border: 4px solid #7f5539;
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+    margin-bottom: 16px;
+  }
+
+  .stage-top-bar {
+    background: #432818;
+    color: #ffe6a7;
+    padding: 6px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+    font-weight: 800;
+  }
+
+  .stage-controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-stage {
+    background: #99582a;
+    color: #fff;
+    border: 1px solid #ffe6a7;
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .btn-stage:hover { background: #bb9457; color: #2b1d0e; }
+
+  #cinemaSvg {
+    width: 100%;
+    height: 230px;
+    display: block;
+    background: linear-gradient(180deg, #a8dadc 0%, #f1faee 70%, #95d5b2 70%, #52b788 100%);
+  }
+
+  .subtitle-bar {
+    background: rgba(20, 33, 61, 0.94);
+    color: #ffd166;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 800;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 2px solid #7f5539;
+  }
+
+  /* Question Panel (Revealed after animation) */
+  .question-panel {
+    display: none;
+    animation: popUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .question-panel.revealed { display: block; }
+
+  @keyframes popUp {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .q-prompt {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--primary-dark);
+    margin-bottom: 12px;
+    background: #e9f5db;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border-left: 6px solid var(--primary);
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
+
+  .opt-btn {
+    background: #fff;
+    border: 3px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 13px 16px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.12s;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: #f1faee;
+    transform: translateY(-2px);
+  }
+  .opt-btn.correct {
+    background: #d8f3dc;
+    border-color: #2d6a4f;
+    color: #1b4332;
+  }
+  .opt-btn.wrong {
+    background: #ffccd5;
+    border-color: #c9184a;
+    color: #800f2f;
+  }
+
+  .feedback-box {
+    display: none;
+    margin-top: 14px;
+    background: #fff8e7;
+    border: 3px solid var(--gold);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  .feedback-box.show { display: block; animation: fadeIn 0.25s ease; }
+  .fb-title { font-weight: 900; font-size: 1.1rem; margin-bottom: 6px; }
+  .fb-wiki { font-size: 0.95rem; line-height: 1.55; color: #3d2516; }
+
+  /* Result & Leaderboard */
+  .result-card {
+    text-align: center;
+    padding: 12px;
+  }
+  .rank-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #f4a261, #e76f51);
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 900;
+    padding: 10px 26px;
+    border-radius: 999px;
+    margin: 10px 0 16px;
+    box-shadow: 0 4px 0 #9e3820;
+  }
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .stat-pill {
+    background: #f1faee;
+    border: 2px solid var(--primary);
+    border-radius: 14px;
+    padding: 10px 18px;
+    min-width: 120px;
+  }
+  .stat-pill .val { font-size: 1.4rem; font-weight: 900; color: var(--primary-dark); }
+  .stat-pill .lbl { font-size: 0.85rem; color: var(--text-muted); }
+
+  /* Modal Leaderboard */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--card-bg);
+    border: 4px solid var(--primary);
+    border-radius: 22px;
+    width: 100%;
+    max-width: 620px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .lb-tabs {
+    display: flex;
+    gap: 6px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+  .lb-tab {
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 2px solid var(--primary-light);
+    background: #fff;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .lb-tab.active { background: var(--primary); color: #fff; }
+  .lb-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
+  .lb-table th, .lb-table td {
+    padding: 9px 8px;
+    border-bottom: 1px solid #dee2e6;
+    text-align: center;
+    font-size: 0.92rem;
+  }
+  .lb-table th { background: #e9f5db; color: var(--primary-dark); }
+
+  /* SVG Animation Keyframes */
+  @keyframes sway { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+  @keyframes bounceY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes runRight { 0% { transform: translateX(-80px); } 100% { transform: translateX(140px); } }
+  @keyframes pulseScale { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+  @keyframes floatUp { 0% { opacity: 0; transform: translateY(10px); } 50% { opacity: 1; } 100% { opacity: 0; transform: translateY(-22px); } }
+  .anim-sway { animation: sway 1.2s ease-in-out infinite; transform-origin: center; }
+  .anim-bounce { animation: bounceY 0.9s ease-in-out infinite; }
+  .anim-run { animation: runRight 3.2s linear forwards; }
+  .anim-pulse { animation: pulseScale 1.1s ease-in-out infinite; transform-origin: center; }
+  .anim-float { animation: floatUp 1.8s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+  <!-- Top Navigation & HUD -->
+  <div class="top-bar">
+    <div class="brand-title">🎬 成語與俗諺森林劇場</div>
+    <div class="hud-group">
+      <span class="hud-badge" id="hudPlayer">👤 尚未登入</span>
+      <span class="hud-badge" id="hudScore">⭐ 0 分</span>
+      <span class="hud-badge" id="hudStreak">🔥 連勝 0</span>
+      <button class="btn-small" onclick="openLeaderboard()">🏆 班級排行榜</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- SCREEN 1: Minimalist Start Screen -->
+    <div id="screenStart" class="screen active">
+      <div class="hero-banner">
+        <h1>🌲 成語與俗諺森林劇場 🎭</h1>
+        <p>先看一段連續劇情動畫，再猜猜演的是哪個成語或俗諺！</p>
+      </div>
+
+      <div class="form-box">
+        <div>
+          <label class="form-label" for="playerName">1. 請輸入你的姓名或座號：</label>
+          <input type="text" id="playerName" class="input-name" placeholder="例如：3年2班 王小明" maxlength="16">
+        </div>
+
+        <div>
+          <span class="form-label">2. 選擇年級難度（專屬題庫）：</span>
+          <div class="grade-grid" id="gradeSelector">
+            <div class="select-card selected" data-grade="low" onclick="selectGrade('low', this)">
+              <div class="g-title">🌱 低年級</div>
+              <div class="g-sub">國小 1～2 年級</div>
+            </div>
+            <div class="select-card" data-grade="mid" onclick="selectGrade('mid', this)">
+              <div class="g-title">🌿 中年級</div>
+              <div class="g-sub">國小 3～4 年級</div>
+            </div>
+            <div class="select-card" data-grade="high" onclick="selectGrade('high', this)">
+              <div class="g-title">🌳 高年級</div>
+              <div class="g-sub">國小 5～6 年級</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <span class="form-label">3. 選擇冒險模式：</span>
+          <div class="mode-grid" id="modeSelector">
+            <div class="select-card selected" data-mode="standard" onclick="selectMode('standard', this)">
+              <div class="g-title">🎲 標準劇場（15題）</div>
+              <div class="g-sub">5大區域各隨機抽 3 題</div>
+            </div>
+            <div class="select-card" data-mode="master" onclick="selectMode('master', this)">
+              <div class="g-title">👑 大師全挑戰（25題）</div>
+              <div class="g-sub">5大區域每區 5 題全破</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="startGame()">🚀 進入森林劇場開始冒險！</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: Forest Map -->
+    <div id="screenMap" class="screen">
+      <div class="map-header">
+        <h2>🗺️ 選擇要探索的森林劇場區域</h2>
+        <p id="mapSubtitle">請點擊任意區域觀看劇情動畫並破解謎題！</p>
+      </div>
+      <div class="zones-grid" id="zonesContainer"></div>
+      <div style="text-align:center;">
+        <button class="btn-small" onclick="resetToHome()">🏠 結束並返回首頁</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: Cinema Quiz Stage -->
+    <div id="screenQuiz" class="screen">
+      <div class="cinema-header">
+        <span class="zone-pill" id="quizZoneTitle">區域名稱</span>
+        <span class="hud-badge" id="quizProgress">本區第 1/3 題</span>
+      </div>
+
+      <!-- Animated Cinema Stage -->
+      <div class="stage-wrapper">
+        <div class="stage-top-bar">
+          <span id="stageStatusText">🎬 劇情上映中...請仔細觀察畫面動作！</span>
+          <div class="stage-controls">
+            <button class="btn-stage" onclick="replayAnimation()">🔄 重看一次劇情</button>
+            <button class="btn-stage" id="btnSkipAnim" onclick="revealQuestion()">⏩ 直接作答</button>
+          </div>
+        </div>
+        <svg id="cinemaSvg" viewBox="0 0 600 230" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="subtitle-bar" id="cinemaSubtitle">旁白準備中...</div>
+      </div>
+
+      <!-- Question Panel (Hidden until story finishes) -->
+      <div class="question-panel" id="questionPanel">
+        <div class="q-prompt" id="questionText">請問剛才這段動畫演的是下列哪一個成語或俗諺？</div>
+        <div class="options-grid" id="optionsContainer"></div>
+
+        <div class="feedback-box" id="feedbackBox">
+          <div class="fb-title" id="fbTitle"></div>
+          <div class="fb-wiki" id="fbWiki"></div>
+          <div style="margin-top:12px; text-align:right;">
+            <button class="btn-primary" style="width:auto; padding:10px 22px; font-size:1rem;" id="btnNextQ" onclick="nextQuestion()">下一題 ➡️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: Result Summary -->
+    <div id="screenResult" class="screen">
+      <div class="result-card">
+        <h2>🎉 森林劇場全部通關！</h2>
+        <p id="resPlayerInfo" style="font-size:1.1rem; margin-top:6px; font-weight:700;"></p>
+        <div class="rank-badge" id="resRankTitle">👑 成語小博士</div>
+
+        <div class="stats-row">
+          <div class="stat-pill">
+            <div class="val" id="resScore">0</div>
+            <div class="lbl">總積分</div>
+          </div>
+          <div class="stat-pill">
+            <div class="val" id="resCorrect">0 / 0</div>
+            <div class="lbl">答對題數</div>
+          </div>
+          <div class="stat-pill">
+            <div class="val" id="resMaxStreak">0</div>
+            <div class="lbl">最高連勝</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn-primary" style="width:auto;" onclick="openLeaderboard()">🏆 查看班級排行榜</button>
+          <button class="btn-small" style="font-size:1.05rem; padding:12px 20px;" onclick="resetToHome()">🔄 換下一位同學挑戰</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div class="modal-overlay" id="lbModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="color:var(--primary-dark); font-size:1.35rem;">🏆 森林劇場班級排行榜</h3>
+        <button class="btn-small" onclick="closeLeaderboard()">✖ 關閉</button>
+      </div>
+      <div class="lb-tabs" id="lbTabs">
+        <button class="lb-tab active" onclick="renderLeaderboard('all', this)">全部年級</button>
+        <button class="lb-tab" onclick="renderLeaderboard('low', this)">🌱 低年級</button>
+        <button class="lb-tab" onclick="renderLeaderboard('mid', this)">🌿 中年級</button>
+        <button class="lb-tab" onclick="renderLeaderboard('high', this)">🌳 高年級</button>
+      </div>
+      <table class="lb-table">
+        <thead>
+          <tr>
+            <th>名次</th>
+            <th>姓名</th>
+            <th>年級組</th>
+            <th>模式</th>
+            <th>積分</th>
+          </tr>
+        </thead>
+        <tbody id="lbBody"></tbody>
+      </table>
+      <div style="margin-top:14px; text-align:right;">
+        <button class="btn-small" style="background:#ffccd5; border-color:#c9184a; color:#800f2f;" onclick="clearLeaderboard()">🗑️ 清除本機紀錄（換班用）</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ================= SOUND EFFECTS (Offline Web Audio) ================= */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function playTone(freq, type = 'sine', duration = 0.15, delay = 0) {
+  try {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+    gain.gain.setValueAtTime(0.12, audioCtx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + delay);
+    osc.stop(audioCtx.currentTime + delay + duration);
+  } catch (e) {}
+}
+function sfxCorrect() { playTone(523.25, 'triangle', 0.12, 0); playTone(659.25, 'triangle', 0.12, 0.1); playTone(783.99, 'triangle', 0.25, 0.2); }
+function sfxWrong() { playTone(260, 'sawtooth', 0.18, 0); playTone(210, 'sawtooth', 0.25, 0.16); }
+function sfxPop() { playTone(440, 'sine', 0.08, 0); }
+
+/* ================= 5 ZONES METADATA ================= */
+const ZONES = [
+  { id: 'animal', icon: '🦊', name: '動物成語谷', desc: '觀察動物們的趣味行為與寓言，猜出對應的動物成語！' },
+  { id: 'fable', icon: '📜', name: '寓言與歷史洞穴', desc: '古人的聰明智慧與經典歷史故事，看看發生了什麼事！' },
+  { id: 'nature', icon: '🌈', name: '數字與自然迷宮', desc: '四季變化、自然現象與誇張的數字描寫劇場！' },
+  { id: 'proverb', icon: '🏡', name: '民間俗諺與節氣樹屋', desc: '台灣與華人世代相傳的生活智慧與俗諺故事！' },
+  { id: 'xiehou', icon: '🗼', name: '歇後語與接龍高塔', desc: '幽默風趣的雙關歇後語，看畫面猜出後半句！' }
+];
+
+/* ================= 75 STORY-ANIMATION QUESTIONS (3 Grades x 5 Zones x 5 Qs) ================= */
+const QUESTION_BANK = {
+  low: {
+    animal: [
+      {
+        scene: 'snake_feet',
+        steps: [
+          '第一幕：畫師最快畫完一條大長蛇，得意地吹著口哨...',
+          '第二幕：他覺得時間還很多、太閒了，又拿起毛筆替蛇畫了四隻腳！',
+          '第三幕：結果裁判說「蛇本來沒有腳」，旁邊的獎品酒壺飛走了！'
+        ],
+        prompt: '請問剛才畫師「太閒又替蛇多畫了腳」，演的是哪一個成語？',
+        options: ['畫蛇添足', '對牛彈琴', '井底之蛙', '守株待兔'],
+        answer: 0,
+        wiki: '【畫蛇添足】比喻做了多餘的事，反而把事情弄糟。故事裡楚國人比賽畫蛇，先畫好的人因為太閒多畫了蛇腳，結果輸掉了比賽。'
+      },
+      {
+        scene: 'fox_tiger',
+        steps: [
+          '第一幕：一隻小狐狸大搖大擺走在森林最前面...',
+          '第二幕：其實牠身後緊跟著一隻大老虎！',
+          '第三幕：小兔子看到老虎嚇得拔腿就跑，狐狸還以為大家都在怕牠！'
+        ],
+        prompt: '狐狸「借著老虎的威風嚇跑小動物」，這段動畫演的是哪個成語？',
+        options: ['狐假虎威', '亡羊補牢', '虎頭蛇尾', '騎虎難下'],
+        answer: 0,
+        wiki: '【狐假虎威】「假」是借的意思。比喻仰仗有權勢者的威風來欺壓別人。'
+      },
+      {
+        scene: 'well_frog',
+        steps: [
+          '第一幕：一隻小青蛙天天坐在深深的古井底部...',
+          '第二幕：牠抬頭看著圓圓的井口，以為天空只有井口那麼大！',
+          '第三幕：海龜經過告訴牠大海無邊無際，小青蛙嚇了一大跳。'
+        ],
+        prompt: '小青蛙「坐在井底以為天空只有一點點大」，演的是哪個成語？',
+        options: ['井底之蛙', '如魚得水', '魚目混珠', '畫龍點睛'],
+        answer: 0,
+        wiki: '【井底之蛙】比喻見識狹小、眼界不開闊的人。我們要多閱讀、多觀察世界，才不會變成井底之蛙喔！'
+      },
+      {
+        scene: 'play_lute_cow',
+        steps: [
+          '第一幕：音樂家對著一頭大黃牛彈奏非常優美的古琴音樂...',
+          '第二幕：音樂家彈得滿頭大汗、非常陶醉！',
+          '第三幕：可是大黃牛完全聽不懂，只顧著低頭「哞～哞～」吃青草！'
+        ],
+        prompt: '對著聽不懂音樂的牛彈琴，這段動畫演的是哪個成語？',
+        options: ['對牛彈琴', '牛刀小試', '九牛一毛', '目無全牛'],
+        answer: 0,
+        wiki: '【對牛彈琴】比喻對不懂道理的人講深奧的道理，或說話不看對象，白費力氣。'
+      },
+      {
+        scene: 'bird_bow',
+        steps: [
+          '第一幕：一隻受過箭傷的大雁正在天空中慢慢飛行...',
+          '第二幕：地面獵人只是拉了一下空弓發出「嘣」的一聲（沒有射箭）！',
+          '第三幕：大雁聽到弦聲嚇得驚慌失措，立刻從空中掉了下來！'
+        ],
+        prompt: '大雁一聽到弓弦聲就嚇得掉下來，演的是哪個成語？',
+        options: ['驚弓之鳥', '鳥語花香', '一石二鳥', '笨鳥先飛'],
+        answer: 0,
+        wiki: '【驚弓之鳥】比喻受過驚嚇的人，遇到一點動靜就非常害怕不安。'
+      }
+    ],
+    fable: [
+      {
+        scene: 'pull_seedling',
+        steps: [
+          '第一幕：農夫看著田裡的小禾苗，嫌它們長得太慢了...',
+          '第二幕：他決定自己動手幫忙，把每一株禾苗都用力往上拔高一截！',
+          '第三幕：隔天太陽一曬，被拔高的小禾苗全都枯萎倒下了！'
+        ],
+        prompt: '農夫「急著讓禾苗長高卻把它們拔起來」，演的是哪個成語？',
+        options: ['拔苗助長', '自相矛盾', '刻舟求劍', '守株待兔'],
+        answer: 0,
+        wiki: '【拔苗助長】比喻違反事物發展的規律，急於求成，反而把事情弄壞。'
+      },
+      {
+        scene: 'wait_rabbit',
+        steps: [
+          '第一幕：一隻野兔跑太快，「咚！」一聲撞上田邊的大樹暈倒了...',
+          '第二幕：農夫不費吹灰之力就撿到一隻兔子，開心極了！',
+          '第三幕：從此農夫丟下鋤頭，天天抱著樹幹傻等下一隻兔子自己撞上來！'
+        ],
+        prompt: '農夫「不種田卻天天守在樹旁等兔子撞上來」，演的是哪個成語？',
+        options: ['守株待兔', '龜兔賽跑', '狡兔三窟', '動如脫兔'],
+        answer: 0,
+        wiki: '【守株待兔】「株」是露出地面的樹根。比喻死守狹隘的經驗，不知變通，或妄想不勞而獲。'
+      },
+      {
+        scene: 'turtle_rabbit',
+        steps: [
+          '第一幕：森林賽跑開始，兔子跑得飛快，把烏龜遠遠甩在後面...',
+          '第二幕：兔子覺得自己贏定了，竟然在半路的大樹下呼呼大睡！',
+          '第三幕：烏龜一步一步堅持不懈地往前爬，最後率先衝過終點線！'
+        ],
+        prompt: '兔子偷懶睡覺、烏龜堅持到底贏得比賽，這是哪個成語故事？',
+        options: ['龜兔賽跑', '馬到成功', '龍馬精神', '鶴立雞群'],
+        answer: 0,
+        wiki: '【龜兔賽跑】告訴我們「驕傲使人落後，堅持與努力才能獲得最後的勝利」。'
+      },
+      {
+        scene: 'spear_shield',
+        steps: [
+          '第一幕：市集商人舉起長矛喊：「我的矛天下最鋒利，什麼盾都刺得穿！」',
+          '第二幕：接著他又舉起盾牌喊：「我的盾天下最堅固，什麼矛都刺不穿！」',
+          '第三幕：路人問：「那用你的矛刺你的盾會怎樣？」商人答不出來臉紅了！'
+        ],
+        prompt: '商人說的話「前後互相抵觸、說不通」，演的是哪個成語？',
+        options: ['自相矛盾', '畫餅充飢', '掩耳盜鈴', '亡羊補牢'],
+        answer: 0,
+        wiki: '【自相矛盾】比喻一個人的言語或行為前後互相抵觸、無法自圓其說。'
+      },
+      {
+        scene: 'mend_sheep',
+        steps: [
+          '第一幕：羊圈破了一個大洞，半夜有大野狼跑進來叼走了一隻羊...',
+          '第二幕：牧羊人發現後沒有灰心，立刻拿木板和槌子把破洞釘好補牢！',
+          '第三幕：隔天大野狼再來，因為羊圈已經修好了，一隻羊也沒少！'
+        ],
+        prompt: '羊丟了以後「趕快把破洞修補好」，演的是哪個成語？',
+        options: ['亡羊補牢', '順手牽羊', '羊入虎口', '歧路亡羊'],
+        answer: 0,
+        wiki: '【亡羊補牢】比喻出了問題以後想辦法補救，可以防止繼續受損失（為時未晚）。'
+      }
+    ],
+    nature: [
+      {
+        scene: 'heart_seven_eight',
+        steps: [
+          '第一幕：小朋友準備上台演講，心臟「撲通、撲通」跳得超級快...',
+          '第二幕：他的心一會兒往上飛到「七」、一會兒往下掉到「八」...',
+          '第三幕：緊張得雙手發抖、額頭直冒冷汗！'
+        ],
+        prompt: '形容「心裡非常緊張、忐忑不安」，演的是哪個數字成語？',
+        options: ['七上八下', '一心一意', '十全十美', '五顏六色'],
+        answer: 0,
+        wiki: '【七上八下】形容心情慌亂、緊張不安，好像心在上下跳動一樣。'
+      },
+      {
+        scene: 'three_hearts_two',
+        steps: [
+          '第一幕：小貓咪坐在河邊釣魚，魚竿剛放下...',
+          '第二幕：飛來一隻蝴蝶，牠丟下魚竿去追蝴蝶；又飛來一隻蜻蜓，牠又去追蜻蜓！',
+          '第三幕：結果太陽下山了，小貓咪一條魚也沒釣到！'
+        ],
+        prompt: '小貓咪「做事不專心、一下子想做這個一下子想做那個」，是哪個成語？',
+        options: ['三心二意', '一心一意', '三頭六臂', '一舉兩得'],
+        answer: 0,
+        wiki: '【三心二意】形容做事猶豫不決、不專心，最後往往一無所獲。'
+      },
+      {
+        scene: 'spring_flowers',
+        steps: [
+          '第一幕：冬天的白雪融化了，溫暖的春風輕輕吹過大地...',
+          '第二幕：草地變綠了，紅花、黃花、粉紅花一朵接著一朵綻放！',
+          '第三幕：蝴蝶在花叢中快樂飛舞，到處充滿春天的氣息！'
+        ],
+        prompt: '形容「春天溫暖、百花盛開的美麗景象」，是哪個成語？',
+        options: ['春暖花開', '冰天雪地', '秋高氣爽', '烈日當空'],
+        answer: 0,
+        wiki: '【春暖花開】指春天氣候溫暖，百花盛開，景色非常美麗。'
+      },
+      {
+        scene: 'colorful_rainbow',
+        steps: [
+          '第一幕：夏日午後下了一場太陽雨，雨滴慢慢停了...',
+          '第二幕：天空中出現了一道彎彎的大彩虹，紅橙黃綠藍靛紫好耀眼！',
+          '第三幕：花園裡的花朵和氣球也跟著閃耀出各種繽紛色彩！'
+        ],
+        prompt: '形容「色彩非常豐富、鮮豔美麗」，是哪個數字成語？',
+        options: ['五顏六色', '一乾二淨', '黑白分明', '三言兩語'],
+        answer: 0,
+        wiki: '【五顏六色】形容色彩繁多而鮮豔美麗。'
+      },
+      {
+        scene: 'water_drop_stone',
+        steps: [
+          '第一幕：屋簷上的小水滴「滴答、滴答」地滴在下面一塊硬石頭上...',
+          '第二幕：一天、一年、十年過去了，小水滴從來沒有停止過...',
+          '第三幕：最後堅硬的石頭竟然被小水滴穿出了一個小圓洞！'
+        ],
+        prompt: '小水滴「每天堅持滴在同一個地方，終於把石頭滴穿」，演的是哪個成語？',
+        options: ['水滴石穿', '山明水秀', '風平浪靜', '如魚得水'],
+        answer: 0,
+        wiki: '【水滴石穿】比喻只要有恆心、不斷努力，再困難的事情也能成功。'
+      }
+    ],
+    proverb: [
+      {
+        scene: 'early_bird',
+        steps: [
+          '第一幕：太陽公公剛升起，天剛亮，勤勞的小鳥就起床飛出鳥巢...',
+          '第二幕：草地上剛爬出來一條肥美的小蟲，被早起的小鳥一口抓到了！',
+          '第三幕：另一隻睡懶覺的鳥中午才起床，什麼蟲子也沒剩下！'
+        ],
+        prompt: '這段動畫演的是哪一句鼓勵大家早起勤勞的俗諺？',
+        options: ['早起的鳥兒有蟲吃', '飯前洗手，病菌不走', '一寸光陰一寸金', '天下無難事'],
+        answer: 0,
+        wiki: '【早起的鳥兒有蟲吃】比喻做事勤快、比別人早一步準備的人，往往能獲得更好的機會與收穫。'
+      },
+      {
+        scene: 'wash_hands',
+        steps: [
+          '第一幕：小朋友剛玩完玩具準備吃午餐，手上沾滿了調皮的小細菌...',
+          '第二幕：他打開水龍頭，用肥皂搓出滿滿的泡泡認真洗手！',
+          '第三幕：小細菌被泡泡沖得「哇哇大叫」全部逃跑，小朋友安心吃飯！'
+        ],
+        prompt: '這段動畫演的是哪一句衛生好習慣俗諺？',
+        options: ['飯前洗手，病菌不走', '人要衣裝，佛要金裝', '病從口入，禍從口出', '三個臭皮匠勝過諸葛亮'],
+        answer: 0,
+        wiki: '【飯前洗手，病菌不走】提醒大家吃東西前一定要用肥皂把雙手洗乾淨，才不會把病菌吃進肚子裡。'
+      },
+      {
+        scene: 'three_cobblers',
+        steps: [
+          '第一幕：河水太深過不去，一個人想破頭也想不出辦法...',
+          '第二幕：這時三位平凡的皮匠聚在一起你一言、我一語地討論點子...',
+          '第三幕：三人合心搭出一座堅固的小木橋，輕鬆過河了！'
+        ],
+        prompt: '三個人一起集思廣益想出好辦法，演的是哪句俗諺？',
+        options: ['三個臭皮匠，勝過一個諸葛亮', '一人做事一人當', '家和萬事興', '遠親不如近鄰'],
+        answer: 0,
+        wiki: '【三個臭皮匠，勝過一個諸葛亮】比喻人多智慧廣，只要大家團結合作、集思廣益，就能想出比聰明人更好的辦法。'
+      },
+      {
+        scene: 'time_is_gold',
+        steps: [
+          '第一幕：時鐘的指針「滴答、滴答」不停地往前走...',
+          '第二幕：小朋友把握時間認真看書學習，時間化作一顆顆閃亮的金幣！',
+          '第三幕：想要用很多金幣把過去的時間買回來，時鐘卻不會倒轉！'
+        ],
+        prompt: '形容「時間像黃金一樣寶貴，甚至比黃金更難買到」，是哪句俗諺？',
+        options: ['一寸光陰一寸金，寸金難買寸光陰', '光陰似箭，日月如梭', '活到老，學到老', '書中自有黃金屋'],
+        answer: 0,
+        wiki: '【一寸光陰一寸金，寸金難買寸光陰】提醒我們時間非常寶貴，過去了就買不回來，要好好珍惜每一分每一秒。'
+      },
+      {
+        scene: 'smile_ten_years',
+        steps: [
+          '第一幕：老爺爺原本皺著眉頭，看起來有點疲倦...',
+          '第二幕：他看到孫子講笑話，忍不住「哈哈大笑」開懷起來！',
+          '第三幕：開心的笑聲讓爺爺精神百倍，看起來年輕了好幾歲！'
+        ],
+        prompt: '保持心情愉快、常常微笑有益健康，演的是哪句俗諺？',
+        options: ['笑一笑，十年少', '哭笑不得', '破涕為笑', '皮笑肉不笑'],
+        answer: 0,
+        wiki: '【笑一笑，十年少】意思是保持樂觀開朗的心情、常保微笑，能讓人心情愉快、身體健康、顯得年輕有活力。'
+      }
+    ],
+    xiehou: [
+      {
+        scene: 'bamboo_water',
+        steps: [
+          '第一幕：有人提著一個編織有很多洞洞的「竹籃子」到河邊打水...',
+          '第二幕：他用力把竹籃裝滿清涼的河水提起來...',
+          '第三幕：河水「哗啦啦」從竹籃縫隙全漏光了，最後籃子裡什麼也沒有！'
+        ],
+        prompt: '歇後語「竹籃打水——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['一場空', '滿載而歸', '水到渠成', '滴水不漏'],
+        answer: 0,
+        wiki: '【竹籃打水——一場空】竹籃有縫隙裝不住水，用來比喻白費力氣、沒有任何收穫。'
+      },
+      {
+        scene: 'mud_buddha_river',
+        steps: [
+          '第一幕：一尊用泥土捏成的泥菩薩掉進了大河裡...',
+          '第二幕：泥土遇到河水開始慢慢融化變軟...',
+          '第三幕：連自己都快保不住了，根本沒辦法去救別人！'
+        ],
+        prompt: '歇後語「泥菩薩過江——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['自身難保', '大顯神威', '風平浪靜', '如魚得水'],
+        answer: 0,
+        wiki: '【泥菩薩過江——自身難保】泥塑的菩薩下水就會融化，比喻自己都陷入困境、保不住自己了，更無力幫助別人。'
+      },
+      {
+        scene: 'mouse_street',
+        steps: [
+          '第一幕：一隻偷吃食物的小老鼠大搖大擺跑到熱鬧的大街上...',
+          '第二幕：路人看到牠立刻大喊：「有老鼠！快打！」',
+          '第三幕：整條街的人都拿著掃把追著老鼠跑！'
+        ],
+        prompt: '歇後語「老鼠過街——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['人人喊打', '人人稱讚', '大搖大擺', '無影無蹤'],
+        answer: 0,
+        wiki: '【老鼠過街——人人喊打】比喻做壞事、惹人厭惡的人或事物，大家看到都會齊聲反對與討厭。'
+      },
+      {
+        scene: 'chain_dragon_heart',
+        steps: [
+          '第一幕：畫面先出現「一心一意」四個字發光...',
+          '第二幕：接著「意」字連上「意氣風發」，「發」字又連上「發憤圖強」...',
+          '第三幕：像火車車廂一樣一節接一節扣在一起！'
+        ],
+        prompt: '把前一個成語的最後一個字當作下一個成語的開頭，這種遊戲叫什麼？',
+        options: ['成語接龍', '看圖猜字', '對對聯', '繞口令'],
+        answer: 0,
+        wiki: '【成語接龍】是一種有趣的語文文字遊戲，利用字詞首尾相接（同字或同音）來訓練詞彙量與反應力。'
+      },
+      {
+        scene: 'meat_bun_dog',
+        steps: [
+          '第一幕：有人拿著一顆香噴噴的熱肉包子丟向一隻小黃狗...',
+          '第二幕：小黃狗張大嘴巴「啊嗚」一口就把肉包子吞進肚子裡...',
+          '第三幕：小黃狗搖搖尾巴開心地跑走了，肉包子再也不會回來了！'
+        ],
+        prompt: '歇後語「肉包子打狗——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['有去無回', '原封不動', '失而復得', '物歸原主'],
+        answer: 0,
+        wiki: '【肉包子打狗——有去無回】比喻東西送出去或借出去之後，就再也收不回來了。'
+      }
+    ]
+  },
+
+  mid: {
+    animal: [
+      {
+        scene: 'rabbit_three_caves',
+        steps: [
+          '第一幕：一隻聰明的小野兔在草地上挖了第一個地洞...',
+          '第二幕：牠覺得只有一個洞不夠安全，又在旁邊挖了第二個、第三個秘密出口！',
+          '第三幕：獵人堵住第一個洞口時，野兔立刻從第三個洞口平安溜走了！'
+        ],
+        prompt: '野兔「事先準備好三個藏身洞穴以防萬一」，演的是哪個成語？',
+        options: ['狡兔三窟', '守株待兔', '兔死狐悲', '動如脫兔'],
+        answer: 0,
+        wiki: '【狡兔三窟】比喻人非常機警，事先做好多手準備或藏身之處，遇到危險時能順利脫身。'
+      },
+      {
+        scene: 'dragon_eyes',
+        steps: [
+          '第一幕：畫師在牆壁上畫了兩條威風凜凜的巨龍，卻故意不畫眼睛...',
+          '第二幕：大家覺得奇怪，畫師拿起畫筆輕輕替其中一條龍點上黑眼珠！',
+          '第三幕：瞬間電閃雷鳴，那條點了眼睛的巨龍竟然騰空飛上了天！'
+        ],
+        prompt: '畫師「替巨龍點上眼睛後整幅畫就活了起來」，演的是哪個成語？',
+        options: ['畫龍點睛', '葉公好龍', '龍飛鳳舞', '群龍無首'],
+        answer: 0,
+        wiki: '【畫龍點睛】比喻在作文或說話時，在關鍵地方加上一兩句精闢的話，讓整體內容更加生動傳神。'
+      },
+      {
+        scene: 'frog_ant_shake',
+        steps: [
+          '第一幕：一隻小螞蟻居然用力想要搖動一棵參天大樹...',
+          '第二幕：小螞蟻使出吃奶的力氣推啊推，臉都漲紅了...',
+          '第三幕：可是大樹連一片葉子都沒有晃動，小螞蟻自己反而累倒了！'
+        ],
+        prompt: '小螞蟻「不自量力想要搖動大樹」，演的是哪個成語？',
+        options: ['蚍蜉撼樹', '蠶食鯨吞', '螳臂當車', '飛蛾撲火'],
+        answer: 0,
+        wiki: '【蚍蜉撼樹】「蚍蜉」是大螞蟻。比喻力量微弱的人不自量力，想動搖強大的事物。'
+      },
+      {
+        scene: 'mantis_cicada',
+        steps: [
+          '第一幕：樹枝上一隻蟬正得意地吸著露水，沒發現身後一隻螳螂舉起大刀要抓牠...',
+          '第二幕：螳螂正準備撲上去，卻沒發現自己身後還有一隻黃雀正張嘴瞄準牠！',
+          '第三幕：三隻小動物連成一線，只顧著眼前的利益卻忘了背後的危險！'
+        ],
+        prompt: '這段「只顧眼前利益、沒發現背後也有危險」的動畫演的是哪個成語？',
+        options: ['螳螂捕蟬，黃雀在後', '鹬蚌相爭，漁翁得利', '蛇鼠一窩', '狼狽為奸'],
+        answer: 0,
+        wiki: '【螳螂捕蟬，黃雀在後】比喻目光短淺，只顧著算計眼前的利益，卻沒有察覺背後潛藏的危險。'
+      },
+      {
+        scene: 'old_horse_way',
+        steps: [
+          '第一幕：軍隊在沙漠山谷中迷失方向，找不到回去的路，大家都慌了...',
+          '第二幕：將軍放開一匹年老的戰馬，讓牠走在隊伍最前面帶路...',
+          '第三幕：老戰馬憑著豐富的記憶，果然帶著大家順利走出了迷宮！'
+        ],
+        prompt: '老馬「憑著豐富經驗帶領迷路的隊伍找到方向」，演的是哪個成語？',
+        options: ['老馬識途', '塞翁失馬', '馬不停蹄', '指鹿為馬'],
+        answer: 0,
+        wiki: '【老馬識途】比喻閱歷豐富、熟悉情況的人，能帶領大家找到正確的方向與解決方法。'
+      }
+    ],
+    fable: [
+      {
+        scene: 'grind_needle',
+        steps: [
+          '第一幕：小李白逃學跑到河邊，看見一位老奶奶正拿著一根粗粗的大鐵棒...',
+          '第二幕：老奶奶把大鐵棒放在石頭上「刷、刷、刷」不停地來回摩擦...',
+          '第三幕：鐵棒越磨越細，最後竟然閃出金光變成了一根細小的繡花針！'
+        ],
+        prompt: '老奶奶「把粗鐵棒慢慢磨成繡花針」，演的是哪個成語？',
+        options: ['鐵杵磨針', '愚公移山', '精衛填海', '鑿壁偷光'],
+        answer: 0,
+        wiki: '【鐵杵磨針】「杵」是搗衣的棒子。比喻只要有恆心與毅力，再困難的事情也能完成。'
+      },
+      {
+        scene: 'caochong_elephant',
+        steps: [
+          '第一幕：大家想知道大象有多重，聰明的小曹沖先把大象牽上一艘大船...',
+          '第二幕：船身往下沉，曹沖在船舷水面處刻了一條記號線，再把大象牽下船！',
+          '第三幕：接著往船上搬石頭，直到船身下沉到同一條記號線，秤石頭就知道大象重量！'
+        ],
+        prompt: '聰明少年「利用船隻水位線與石頭秤出大象重量」，演的是哪個成語典故？',
+        options: ['曹沖稱象', '司馬光砸缸', '孔融讓梨', '聞雞起舞'],
+        answer: 0,
+        wiki: '【曹沖稱象】展現了「化整為零」與浮力原理的聰明才智，教我們遇到難題時要靈活思考。'
+      },
+      {
+        scene: 'move_mountain',
+        steps: [
+          '第一幕：九十歲的愚公家門口擋著兩座大山，出門非常不方便...',
+          '第二幕：愚公帶著子孫天天拿著鋤頭與竹筐一筐一筐把石頭搬到海邊...',
+          '第三幕：他說：「我死了還有兒子、孫子，子子孫孫無窮盡，山不會再長高了！」'
+        ],
+        prompt: '老人「帶領子孫世世代代堅持挖山開路」，演的是哪個成語？',
+        options: ['愚公移山', '夸父追日', '女媧補天', '精衛填海'],
+        answer: 0,
+        wiki: '【愚公移山】比喻做事有毅力、不怕困難，只要堅持到底就一定能克服艱難。'
+      },
+      {
+        scene: 'cover_ears_bell',
+        steps: [
+          '第一幕：小偷看見一戶人家門口掛著一個漂亮的大銅鈴，想把它偷走...',
+          '第二幕：他一碰銅鈴就「叮噹！叮噹！」響得好大聲，怕被別人聽見...',
+          '第三幕：他竟然緊緊捂住「自己的兩隻耳朵」，以為自己聽不見別人也聽不見！'
+        ],
+        prompt: '小偷「捂住自己的耳朵以為別人就聽不見鈴聲」，演的是哪個成語？',
+        options: ['掩耳盜鈴', '自欺欺人', '偷天換日', '畫餅充飢'],
+        answer: 0,
+        wiki: '【掩耳盜鈴】比喻自己欺騙自己，明明掩蓋不住的事情偏要設法掩蓋，結果只是自欺欺人。'
+      },
+      {
+        scene: 'boat_sword',
+        steps: [
+          '第一幕：楚國人坐船過江時，心愛的一把寶劍不小心「撲通」掉進江水裡...',
+          '第二幕：他不馬上跳水打撈，反而拿出小刀在船邊刻了一個記號...',
+          '第三幕：等船靠岸停下來後，他才從刻記號的地方跳下水找劍，當然找不到！'
+        ],
+        prompt: '船一直在往前開，他卻「在船邊刻記號等靠岸才下水找劍」，演的是哪個成語？',
+        options: ['刻舟求劍', '緣木求魚', '水中撈月', '按圖索驥'],
+        answer: 0,
+        wiki: '【刻舟求劍】比喻拘泥成法、不知隨著情勢變化而變通的愚蠢做法。'
+      }
+    ],
+    nature: [
+      {
+        scene: 'thousand_miles_day',
+        steps: [
+          '第一幕：一匹神駿的千里馬站在起跑線上，揚起前蹄嘶鳴一聲...',
+          '第二幕：牠飛奔起來速度像閃電一樣快，轉眼間跨過高山與河流...',
+          '第三幕：太陽還沒下山，牠就已經跑完了一千里的路程！'
+        ],
+        prompt: '形容「馬跑得極快，或一個人的學習與進步神速」，是哪個誇飾成語？',
+        options: ['一日千里', '一步登天', '千山萬水', '萬馬奔騰'],
+        answer: 0,
+        wiki: '【一日千里】原形容良馬跑得極快，一天能跑一千里；現多用來比喻進步神速或事業發展極快。'
+      },
+      {
+        scene: 'nine_cows_hair',
+        steps: [
+          '第一幕：草地上站著整整九頭體型龐大的大黃牛...',
+          '第二幕：一陣微風吹過，從其中一頭牛身上輕輕飄落了「一根細牛毛」...',
+          '第三幕：跟九頭大牛比起來，那一根小牛毛簡直微不足道！'
+        ],
+        prompt: '九頭牛身上掉下一根毛，形容「數量極少、微不足道」，是哪個成語？',
+        options: ['九牛一毛', '九牛二虎', '牛毛細雨', '滄海一粟'],
+        answer: 0,
+        wiki: '【九牛一毛】比喻極大數量中的極小部分，微不足道。'
+      },
+      {
+        scene: 'wind_rain_symphony',
+        steps: [
+          '第一幕：暴風雨來臨，狂風「呼呼」吹彎了大樹，大雨「嘩啦」傾盆而下...',
+          '第二幕：風聲和雨聲交織在一起，在黑暗的夜晚裡又急又猛...',
+          '第三幕：屋內的人點起蠟燭，聽著窗外風雨交加的聲音！'
+        ],
+        prompt: '形容「風和雨同時猛烈襲來，或處境艱難動盪」，是哪個自然成語？',
+        options: ['風雨交加', '風調雨順', '和風細雨', '春風化雨'],
+        answer: 0,
+        wiki: '【風雨交加】指颳風又下雨，形容天氣十分惡劣，也常比喻困難或災禍接連而來。'
+      },
+      {
+        scene: 'autumn_clear',
+        steps: [
+          '第一幕：炎熱的夏天過去了，天空中白雲朵朵、藍天顯得特別高遠...',
+          '第二幕：金黃色的楓葉隨風飄落，微風吹在臉上涼爽又舒服...',
+          '第三幕：大家開心地背起背包出門去秋遊健行！'
+        ],
+        prompt: '形容「秋天天空晴朗高遠、氣候涼爽宜人」，是哪個季節成語？',
+        options: ['秋高氣爽', '春暖花開', '烈日炎炎', '寒風刺骨'],
+        answer: 0,
+        wiki: '【秋高氣爽】形容秋天天空高遠明朗、氣候涼爽舒適，最適合戶外踏青。'
+      },
+      {
+        scene: 'three_heads_six_arms',
+        steps: [
+          '第一幕：小哪吒遇到大怪獸，大喊一聲「變！」...',
+          '第二幕：他的肩膀左右各長出一個頭，變成「三個頭」...',
+          '第三幕：身體兩側又同時長出六條手臂，各自拿著法寶威風八面！'
+        ],
+        prompt: '神話人物「變出三個頭和六條手臂」，比喻本領高強，是哪個數字成語？',
+        options: ['三頭六臂', '三心二意', '五花八門', '七手八腳'],
+        answer: 0,
+        wiki: '【三頭六臂】原指神佛的法相，現用來比喻一個人本領高強、神通廣大。'
+      }
+    ],
+    proverb: [
+      {
+        scene: 'spring_stepmother',
+        steps: [
+          '第一幕：春天的早晨原本陽光普照、溫暖舒適，小朋友穿短袖出門...',
+          '第二幕：到了中午突然烏雲密布、刮起冷風又下起大雨！',
+          '第三幕：下午太陽又露臉變熱了，一天之內天氣變了好幾次！'
+        ],
+        prompt: '形容「春天氣候變化無常、說變就變」，演的是哪句台灣俗諺？',
+        options: ['春天後母面', '未吃五月粽，破裘毋甘放', '西北雨，落不過田岸', '一場秋雨一場寒'],
+        answer: 0,
+        wiki: '【春天後母面】是一句道地的台灣俗諺，形容春天的天氣陰晴不定、冷暖變化很快，就像晚娘的臉色一樣說變就變。'
+      },
+      {
+        scene: 'one_plow_one_harvest',
+        steps: [
+          '第一幕：春天時農夫在田裡揮汗耕地、播下種子、細心澆水除草...',
+          '第二幕：夏天經歷烈日與颱風的考驗，農夫依然每天細心照料...',
+          '第三幕：到了秋天，田裡結滿了金黃飽滿的稻穗，大豐收！'
+        ],
+        prompt: '付出多少努力就會得到多少回報，演的是哪句俗諺？',
+        options: ['一分耕耘，一分收穫', '坐享其成', '不勞而獲', '臨陣磨槍'],
+        answer: 0,
+        wiki: '【一分耕耘，一分收穫】比喻付出多少心血與努力，就會獲得相對應的成果，沒有白費的努力。'
+      },
+      {
+        scene: 'may_dumpling_coat',
+        steps: [
+          '第一幕：天氣慢慢變暖了，媽媽想把厚冬衣收進衣櫃裡...',
+          '第二幕：阿嬤指著日曆說：「端午節還沒到，天氣還會突然變冷喔！」',
+          '第三幕：果然隔天寒流又來了，幸好厚外套還沒收起來！'
+        ],
+        prompt: '提醒大家「端午節前氣候仍不穩定，厚衣服別急著收」，是哪句台灣俗諺？',
+        options: ['未吃五月粽，破裘毋甘放', '正月寒死豬，二月寒死牛', '清明穀雨，寒死老鼠', '立夏補老父'],
+        answer: 0,
+        wiki: '【未吃五月粽，破裘毋甘放】台語俗諺，「五月粽」指端午節粽子，「破裘」指冬天的厚棉襖。意思是端午節前天氣仍可能突然變冷，冬衣先別急著收。'
+      },
+      {
+        scene: 'fall_into_pit',
+        steps: [
+          '第一幕：小朋友走路只顧著看手機，沒注意前方有個大坑洞，「撲通」摔了一跤...',
+          '第二幕：他爬起來拍拍灰塵，把這個教訓牢牢記在心裡！',
+          '第三幕：下次再經過同一條路時，他抬頭看路，輕鬆跨過坑洞沒再跌倒！'
+        ],
+        prompt: '經歷一次失敗教訓後「變得更聰明謹慎」，演的是哪句俗諺？',
+        options: ['不經一事，不長一智', '一失足成千古恨', '重蹈覆轍', '明知故犯'],
+        answer: 0,
+        wiki: '【不經一事，不長一智】意思是沒有親身經歷過某件事，就不會增長這方面的知識與經驗（或作「吃一塹，長一智」）。'
+      },
+      {
+        scene: 'northwest_rain',
+        steps: [
+          '第一幕：夏天午後天空突然烏雲密布，下起一陣又急又大的暴雨...',
+          '第二幕：奇怪的是，這片田地正在下大雨，旁邊隔一條田埂的田地卻出著大太陽！',
+          '第三幕：而且才過了十幾分鐘，烏雲散去雨就停了！'
+        ],
+        prompt: '形容「夏季午後雷陣雨範圍小、來得快去得也快」，是哪句台灣俗諺？',
+        options: ['西北雨，落不過田岸', '清明時節雨紛紛', '九月颱，無人知', '春雨貴如油'],
+        answer: 0,
+        wiki: '【西北雨，落不過田岸】「西北雨」指台灣夏季午後雷陣雨，降雨範圍很局部，常常田埂這邊在下大雨，田埂那邊卻是大晴天。'
+      }
+    ],
+    xiehou: [
+      {
+        scene: 'little_monk_chant',
+        steps: [
+          '第一幕：小和尚坐在寺廟裡拿著木魚「叩、叩、叩」地敲...',
+          '第二幕：他的嘴巴雖然一直念著經文...',
+          '第三幕：可是頭頂上卻飄出「大雞腿、糖果、出去玩」的幻想泡泡！'
+        ],
+        prompt: '歇後語「小和尚念經——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['有口無心', '專心致志', '大徹大悟', '口若懸河'],
+        answer: 0,
+        wiki: '【小和尚念經——有口無心】比喻嘴上雖然在念或說，心裡卻沒有真的放在上面、不夠專心。'
+      },
+      {
+        scene: 'jiang_taigong_fish',
+        steps: [
+          '第一幕：白鬍子老爺爺姜太公坐在河邊釣魚，他的魚鉤竟然是「直的」且離水面三尺高...',
+          '第二幕：魚鉤上連一點魚餌也沒有放！',
+          '第三幕：姜太公說：「不想上鉤的魚快走，真心願意上鉤的魚自己來吧！」'
+        ],
+        prompt: '歇後語「姜太公釣魚——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['願者上鉤', '滿載而歸', '緣木求魚', '水中撈月'],
+        answer: 0,
+        wiki: '【姜太公釣魚——願者上鉤】比喻心甘情願地接受條件或落入圈套，不強迫別人。'
+      },
+      {
+        scene: 'weasel_chicken',
+        steps: [
+          '第一幕：過年到了，一隻狡猾的黃鼠狼提著禮物敲開雞舍的門...',
+          '第二幕：黃鼠狼滿臉笑容地說：「雞大哥，我來跟您拜年啦！」',
+          '第三幕：其實黃鼠狼背後藏著刀叉，心裡正流口水想吃掉公雞！'
+        ],
+        prompt: '歇後語「黃鼠狼給雞拜年——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['沒安好心', '誠心誠意', '皆大歡喜', '禮尚往來'],
+        answer: 0,
+        wiki: '【黃鼠狼給雞拜年——沒安好心】比喻壞人假裝友善、獻殷勤，背後其實藏著不懷好意的算計。'
+      },
+      {
+        scene: 'blind_elephant',
+        steps: [
+          '第一幕：幾位看不見的大叔一起摸一頭大象，摸到象腿的說：「大象像一根柱子！」',
+          '第二幕：摸到象耳朵的說：「不對！大象明明像一把大蒲扇！」',
+          '第三幕：摸到象尾巴的說：「你們都錯了，大象像一條粗麻繩！」'
+        ],
+        prompt: '歇後語「瞎子摸象——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['各執一詞（各說各話）', '一目了然', '心知肚明', '異口同聲'],
+        answer: 0,
+        wiki: '【瞎子摸象——各執一詞】比喻只看到事物的一小部分，就自以為了解全貌，彼此爭論不休。'
+      },
+      {
+        scene: 'dumb_eat_herb',
+        steps: [
+          '第一幕：一位不會說話的啞巴吃了一口超級苦的藥草「黃連」...',
+          '第二幕：苦得他五官都皺在一起、眼淚差點掉出來！',
+          '第三幕：可是他張開嘴巴「啊、啊」叫，卻說不出心裡有多苦！'
+        ],
+        prompt: '歇後語「啞巴吃黃連——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['有苦說不出', '甜在心頭', '口若懸河', '苦盡甘來'],
+        answer: 0,
+        wiki: '【啞巴吃黃連——有苦說不出】黃連是一種極苦的中藥材。比喻心裡有委屈或難處，卻沒辦法向別人訴說。'
+      }
+    ]
+  },
+
+  high: {
+    animal: [
+      {
+        scene: 'cup_bow_snake',
+        steps: [
+          '第一幕：主人請客人在大廳喝酒，牆壁上剛好掛著一張彎彎的弓...',
+          '第二幕：弓的影子倒映在酒杯裡，看起來就像一條正在扭動的小蛇！',
+          '第三幕：客人以為酒裡有蛇嚇得臉色發青，回家後竟然生了一場大病！'
+        ],
+        prompt: '把牆上弓的影子誤認為酒杯裡的蛇而嚇病自己，演的是哪個成語？',
+        options: ['杯弓蛇影', '畫蛇添足', '打草驚蛇', '虛張聲勢'],
+        answer: 0,
+        wiki: '【杯弓蛇影】比喻因疑神疑鬼而引起不必要的恐懼與驚慌。'
+      },
+      {
+        scene: 'guizhou_donkey',
+        steps: [
+          '第一幕：貴州本來沒有驢子，老虎第一次看到高大的驢子嚇得躲在樹後偷看...',
+          '第二幕：後來老虎試探靠近，驢子只會大叫一聲並用後腿「踢」了幾下！',
+          '第三幕：老虎發現驢子除了大叫和踢腿外再無別的本領，便撲上去吃掉了牠！'
+        ],
+        prompt: '驢子「只會大叫與踢腿，本領全都用光了」，演的是哪個成語？',
+        options: ['黔驢技窮', '老馬識途', '塞翁失馬', '虎視眈眈'],
+        answer: 0,
+        wiki: '【黔驢技窮】「黔」是貴州省簡稱。比喻有限的一點本領已經全部使完，再也想不出辦法了。'
+      },
+      {
+        scene: 'point_deer_horse',
+        steps: [
+          '第一幕：權臣趙高牽了一隻長著鹿角的「梅花鹿」來到皇宮大殿上...',
+          '第二幕：趙高指著梅花鹿對皇帝說：「陛下，這是一匹千里馬！」',
+          '第三幕：膽小的大臣們明明看到是鹿，卻不敢反駁，紛紛點頭附和說是馬！'
+        ],
+        prompt: '權臣「故意顛倒黑白，指著鹿硬說是馬」，演的是哪個成語？',
+        options: ['指鹿為馬', '馬首是瞻', '鹿死誰手', '盲人摸象'],
+        answer: 0,
+        wiki: '【指鹿為馬】出自《史記》，比喻故意顛倒是非、混淆黑白。'
+      },
+      {
+        scene: 'lost_horse_blessing',
+        steps: [
+          '第一幕：邊塞老翁家的馬走失了，鄰居來安慰他，他卻笑說：「說不定是好事！」',
+          '第二幕：幾個月後，那匹馬竟然帶著一匹駿馬一起回家了！',
+          '第三幕：兒子騎新馬摔斷腿，老翁仍淡定說：「說不定又是好事！」果然因此免去打仗！'
+        ],
+        prompt: '這段「壞事可能變好事、好事也可能變壞事」的動畫演的是哪個成語？',
+        options: ['塞翁失馬，焉知非福', '得不償失', '樂極生悲', '因禍得福'],
+        answer: 0,
+        wiki: '【塞翁失馬，焉知非福】比喻一時雖然受到損失，也許反而因此能得到好處；告訴我們面對得失要保持平常心。'
+      },
+      {
+        scene: 'snipe_clam',
+        steps: [
+          '第一幕：河蚌張開殼曬太陽，一隻鷸鳥飛過來一口啄住河蚌的肉...',
+          '第二幕：河蚌立刻緊緊合上殼夾住鷸鳥的長嘴巴，雙方誰也不肯放開誰！',
+          '第三幕：這時一位漁夫走過來，不費吹灰之力把牠們倆一起裝進魚簍裡！'
+        ],
+        prompt: '鷸鳥和河蚌「互相爭鬥互不相讓，結果讓第三者撿了便宜」，是哪個成語？',
+        options: ['鷸蚌相爭，漁翁得利', '螳螂捕蟬，黃雀在後', '兩敗俱傷', '坐山觀虎鬥'],
+        answer: 0,
+        wiki: '【鷸蚌相爭，漁翁得利】比喻雙方爭執不下、互不相讓，結果兩敗俱傷，讓第三者白白獲得利益。'
+      }
+    ],
+    fable: [
+      {
+        scene: 'borrow_arrows',
+        steps: [
+          '第一幕：江面上大霧瀰漫，諸葛亮派二十艘載滿「稻草人」的戰船逼近曹營並大聲擂鼓...',
+          '第二幕：曹操看不清敵情，下令弓箭手朝霧中萬箭齊發，箭全插在稻草人身上！',
+          '第三幕：諸葛亮笑著下令調轉船頭，滿載著十萬多支羽箭凱旋而歸！'
+        ],
+        prompt: '諸葛亮「利用大霧與稻草人船向敵軍借得十萬支箭」，演的是哪個成語？',
+        options: ['草船借箭', '空城計', '火燒連環船', '三顧茅廬'],
+        answer: 0,
+        wiki: '【草船借箭】出自《三國演義》，展現諸葛亮精通天文氣象與心理戰術的過人智慧。'
+      },
+      {
+        scene: 'four_sides_chu_song',
+        steps: [
+          '第一幕：項羽的軍隊被重重包圍在垓下，兵少糧盡...',
+          '第二幕：深夜裡，四周敵營竟然同時響起了項羽家鄉「楚國」的民謠歌聲！',
+          '第三幕：士兵們以為楚國已經全被佔領了，軍心大亂、紛紛無心再戰！'
+        ],
+        prompt: '深夜裡「四周都響起故鄉的歌聲，形容陷入孤立無援的絕境」，是哪個成語？',
+        options: ['四面楚歌', '破釜沉舟', '十面埋伏', '草木皆兵'],
+        answer: 0,
+        wiki: '【四面楚歌】出自《史記·項羽本紀》，比喻四面受敵、孤立無援、陷入絕境。'
+      },
+      {
+        scene: 'carry_thorns_apology',
+        steps: [
+          '第一幕：大將軍廉頗意識到自己之前嫉妒藺相如、處處刁難他是錯的...',
+          '第二幕：他脫下戰袍、光著上身，在背上背著一根帶刺的「荊條」...',
+          '第三幕：親自走到藺相如府門前跪下請罪，兩人從此成為生死之交！'
+        ],
+        prompt: '大將軍「光著上身背著荊條向對方誠心認錯賠罪」，演的是哪個成語？',
+        options: ['負荊請罪', '完璧歸趙', '紙上談兵', '臥薪嘗膽'],
+        answer: 0,
+        wiki: '【負荊請罪】比喻主動向對方承認錯誤、誠心賠禮道歉。'
+      },
+      {
+        scene: 'break_pots_sink_boats',
+        steps: [
+          '第一幕：項羽率領軍隊渡過漳水去救援鉅鹿，兵力比敵軍少得多...',
+          '第二幕：渡河後，項羽下令把所有的「煮飯鐵鍋全砸破」、把「渡船全鑿沉」！',
+          '第三幕：士兵們知道沒有退路、只能向前拼死作戰，結果大破敵軍！'
+        ],
+        prompt: '將軍「砸破鐵鍋、鑿沉船隻，抱著必勝決心絕不退縮」，演的是哪個成語？',
+        options: ['破釜沉舟', '背水一戰', '臨陣脫逃', '兵不厭詐'],
+        answer: 0,
+        wiki: '【破釜沉舟】「釜」是古代的鍋子。比喻下定最大決心，不留任何退路，誓死奮戰到底。'
+      },
+      {
+        scene: 'sleep_brushwood_gall',
+        steps: [
+          '第一幕：越王勾踐戰敗被俘回國後，為了不忘記國恥，晚上不睡軟床而睡在硬柴草上...',
+          '第二幕：他在座位上方懸掛一顆極苦的「苦膽」...',
+          '第三幕：每天吃飯前都要先舔一口苦膽，激勵自己發憤圖強，終於復國成功！'
+        ],
+        prompt: '國君「睡在柴草上、每天舔苦膽來激勵自己發憤圖強」，演的是哪個成語？',
+        options: ['臥薪嘗膽', '懸梁刺股', '聞雞起舞', '囊螢映雪'],
+        answer: 0,
+        wiki: '【臥薪嘗膽】「薪」是柴草。比喻刻苦自勵、忍辱負重、發憤圖強。'
+      }
+    ],
+    nature: [
+      {
+        scene: 'thousand_jin_hair',
+        steps: [
+          '第一幕：一顆重達「一千斤」的巨大鐵球高高懸掛在半空中...',
+          '第二幕：仔細一看，吊住這顆千斤巨球的竟然只有「一根細頭髮」！',
+          '第三幕：細頭髮被拉得緊繃發抖，隨時都可能斷裂，驚險萬分！'
+        ],
+        prompt: '用「一根頭髮吊住一千斤重物」，形容情況極度危急，是哪個數字成語？',
+        options: ['千鈞一髮', '九死一生', '萬無一失', '一觸即發'],
+        answer: 0,
+        wiki: '【千鈞一髮】古代三十斤為一鈞，千鈞即三萬斤。比喻情況到了萬分危急的關頭。'
+      },
+      {
+        scene: 'morning_three_evening_four',
+        steps: [
+          '第一幕：養猴人說：「早上給你們三顆栗子，晚上給四顆！」猴子們生氣大鬧...',
+          '第二幕：養猴人立刻改口：「那改成早上給四顆，晚上給三顆好不好？」',
+          '第三幕：其實總數都是七顆，猴子們卻以為變多了，開心地跳了起來！'
+        ],
+        prompt: '養猴人「把早三晚四改成早四晚三哄騙猴子」，演的是哪個成語？',
+        options: ['朝三暮四', '朝秦暮楚', '三令五申', '朝令夕改'],
+        answer: 0,
+        wiki: '【朝三暮四】原指用花言巧語欺騙人（實質未變），現也用來比喻人反覆無常、心意不定。'
+      },
+      {
+        scene: 'snow_charcoal',
+        steps: [
+          '第一幕：大雪紛飛的寒冬裡，貧苦人家家裡沒有火爐，冷得直發抖...',
+          '第二幕：這時朋友冒著風雪送來了一籃溫暖燃燒的「木炭」...',
+          '第三幕：屋裡頓時暖和起來，一家人感動得熱淚盈眶！'
+        ],
+        prompt: '在「大雪天裡送來溫暖的木炭」，比喻在別人急需時給予幫助，是哪個成語？',
+        options: ['雪中送炭', '錦上添花', '落井下石', '冰消瓦解'],
+        answer: 0,
+        wiki: '【雪中送炭】比喻在別人最困難、最急需的時候給予物質或精神上的幫助，最為珍貴。'
+      },
+      {
+        scene: 'drop_water_grace',
+        steps: [
+          '第一幕：旅人快渴死時，好心人遞給他「一滴清涼的水」救了他一命...',
+          '第二幕：旅人銘記在心，多年後事業有成，回來建造了一座「湧泉」報答恩人！',
+          '第三幕：泉水清澈源源不絕，報答當年的點滴恩情！'
+        ],
+        prompt: '受人「一滴水的恩惠，日後以湧泉相報」，演的是哪個自然成語？',
+        options: ['滴水之恩，湧泉相報', '飲水思源', '水落石出', '覆水難收'],
+        answer: 0,
+        wiki: '【滴水之恩，湧泉相報】意思是即使只受過別人一點小小的恩惠，也應該銘記在心並加倍報答。'
+      },
+      {
+        scene: 'grass_trees_soldiers',
+        steps: [
+          '第一幕：逃跑的敗軍抬頭看向遠處的八公山...',
+          '第二幕：山風吹過，山上的青草和樹木隨風搖晃...',
+          '第三幕：逃兵們嚇得眼花，把每一棵草和樹都看成敵軍的士兵，拔腿狂奔！'
+        ],
+        prompt: '逃兵「把山上的草和樹都誤看成敵軍士兵」，形容驚慌疑懼，是哪個成語？',
+        options: ['草木皆兵', '風聲鶴唳', '杯弓蛇影', '樹大根深'],
+        answer: 0,
+        wiki: '【草木皆兵】出自淝水之戰，形容人在極度驚慌時疑神疑鬼，連一點風吹草動都以為是敵人。'
+      }
+    ],
+    proverb: [
+      {
+        scene: 'eat_fruit_worship_tree',
+        steps: [
+          '第一幕：小朋友在果園裡摘下一顆香甜多汁的大水果，吃得津津有味...',
+          '第二幕：他沒有忘記是誰種出這顆果實，轉身向大樹與辛勤的農夫深深鞠躬道謝！',
+          '第三幕：大樹開心地搖晃樹葉，結出更多果實！'
+        ],
+        prompt: '比喻「懂得感恩、飲水思源，不忘記幫助過自己的人」，是哪句台灣俗諺？',
+        options: ['吃果子拜樹頭', '前人種樹，後人乘涼', '樹大招風', '十年樹木，百年樹人'],
+        answer: 0,
+        wiki: '【吃果子拜樹頭】道地的台灣俗諺，意思是吃水果時要感謝果樹的栽培，比喻做人要懂得飲水思源、知恩圖報。'
+      },
+      {
+        scene: 'long_road_horse_power',
+        steps: [
+          '第一幕：兩匹馬一起出發，剛開始跑得一樣快，分不出誰更有耐力...',
+          '第二幕：經過漫長遙遠的沙漠與高山考驗後，真本事終於顯現出來！',
+          '第三幕：同樣地，相處時間久了，也能真正看清一個人的品格與真心！'
+        ],
+        prompt: '比喻「經過長久考驗才能看出真正實力與人心善惡」，是哪句俗諺？',
+        options: ['路遙知馬力，日久見人心', '千里之行，始於足下', '近朱者赤，近墨者黑', '真金不怕火煉'],
+        answer: 0,
+        wiki: '【路遙知馬力，日久見人心】路途遙遠才能知道馬的耐力好壞，相處時間長久才能看出一個人的真心與品格。'
+      },
+      {
+        scene: 'rolling_stone_moss',
+        steps: [
+          '第一幕：河邊一塊大石頭天天被大水沖得滾來滾去、換來換去...',
+          '第二幕：因為一直不停地變換地方，石頭表面光禿禿的，連一點綠色青苔都長不出來！',
+          '第三幕：旁邊安穩紮根在一個地方的石頭，卻長出了厚實翠綠的青苔！'
+        ],
+        prompt: '比喻「做事如果頻繁變換方向、不能專心堅持，就難有成就」，是哪句俗諺？',
+        options: ['滾石不生苔', '他山之石，可以攻錯', '滴水穿石', '搬起石頭砸自己的腳'],
+        answer: 0,
+        wiki: '【滾石不生苔】比喻一個人如果經常更換工作或目標、缺乏恆心毅力，就難以累積經驗與成就。'
+      },
+      {
+        scene: 'first_year_scholar',
+        steps: [
+          '第一幕：第一年全村裡有好幾個人考中狀元，大家都覺得考中狀元很簡單...',
+          '第二幕：第二年村裡只剩下一個會做「豬肉粿」的師傅考中，數量變少了！',
+          '第三幕：到了第三年，村裡甚至連會做豬肉粿的師傅都沒考上（一年不如一年）！'
+        ],
+        prompt: '形容「情況一年比一年差、水準逐漸退步」，是哪句幽默的台灣俗諺？',
+        options: ['一年夥計，二年狀元，三年豬肉粿', '十年河東，十年河西', '一代不如一代', '歲歲平安'],
+        answer: 0,
+        wiki: '【一年夥計，二年狀元，三年豬肉粿】（或作「一年狀元，二年豬肉粿」）是台灣趣味俗諺，形容事物剛開始很風光，後來卻一年不如一年。'
+      },
+      {
+        scene: 'gold_not_afraid_fire',
+        steps: [
+          '第一幕：工匠把一塊閃亮的黃金和一塊假黃銅一起放進熊熊烈火中燒煉...',
+          '第二幕：假黃銅被大火一燒立刻變黑融化、露出原形！',
+          '第三幕：真金經過高溫烈火考驗後，反而變得更加純淨耀眼！'
+        ],
+        prompt: '比喻「真正有實力、品格正直的人經得起任何嚴峻考驗」，是哪句俗諺？',
+        options: ['真金不怕火煉', '烈火見真金', '點石成金', '金玉其外，敗絮其中'],
+        answer: 0,
+        wiki: '【真金不怕火煉】比喻正確的道理、正直的人格或真實的本領，經得起任何艱難環境的考驗。'
+      }
+    ],
+    xiehou: [
+      {
+        scene: 'zhou_yu_huang_gai',
+        steps: [
+          '第一幕：三國大營裡，都督周瑜舉起軍棍作勢重重打向老將黃蓋...',
+          '第二幕：黃蓋配合演出「哎呀好痛」倒在地上，假裝決裂逃去投降曹操！',
+          '第三幕：等敵軍探子一走，周瑜和黃蓋竟然偷偷眨眼比出「讚」的手勢！'
+        ],
+        prompt: '歇後語「周瑜打黃蓋——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['一個願打，一個願挨', '兩敗俱傷', '勢不兩立', '大義滅親'],
+        answer: 0,
+        wiki: '【周瑜打黃蓋——一個願打，一個願挨】出自《三國演義》苦肉計，比喻雙方都心甘情願配合做某件事。'
+      },
+      {
+        scene: 'liu_bei_jingzhou',
+        steps: [
+          '第一幕：劉備向東吳借了荊州這塊地盤，說好等打下西川就還給東吳...',
+          '第二幕：後來劉備打下了西川，東吳派人來討回荊州...',
+          '第三幕：劉備卻抱著荊州地圖一直找理由推託，死活就是不肯歸還！'
+        ],
+        prompt: '歇後語「劉備借荊州——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['有借無還', '完璧歸趙', '信守承諾', '雙手奉上'],
+        answer: 0,
+        wiki: '【劉備借荊州——有借無還】比喻向別人借了東西以後長期佔用，不再歸還。'
+      },
+      {
+        scene: 'zhang_fei_needle',
+        steps: [
+          '第一幕：五大三粗、滿臉鬍子的猛將張飛，手裡竟然捏著一根超級細小的繡花針...',
+          '第二幕：他睜大像銅鈴一樣的圓眼睛，小心翼翼地穿針引線...',
+          '第三幕：沒想到粗獷的張飛竟然真把細線穿進針孔裡，露出一絲得意的微笑！'
+        ],
+        prompt: '歇後語「張飛穿針——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['大眼瞪小眼（粗中有細）', '有勇無謀', '一竅不通', '手忙腳亂'],
+        answer: 0,
+        wiki: '【張飛穿針——大眼瞪小眼 / 粗中有細】張飛眼睛大、繡花針眼小，既形容兩人互相看著不知所措，也常引申為粗獷的人也有細心的一面。'
+      },
+      {
+        scene: 'sun_wukong_72',
+        steps: [
+          '第一幕：齊天大聖孫悟空拔下一撮毫毛吹了一口氣...',
+          '第二幕：一會兒變成大老虎、一會兒變成老鷹、一會兒又變成一座小廟...',
+          '第三幕：神通廣大，總共有七十二種神奇的變化！'
+        ],
+        prompt: '歇後語「孫悟空七十二變——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['神通廣大（花樣多）', '一成不變', '原形畢露', '束手無策'],
+        answer: 0,
+        wiki: '【孫悟空七十二變——神通廣大 / 花樣多】形容本領極高、點子與方法非常多樣。'
+      },
+      {
+        scene: 'kongming_empty_city',
+        steps: [
+          '第一幕：敵軍大部隊兵臨城下，城裡卻幾乎沒有士兵...',
+          '第二幕：諸葛亮竟然下令大開城門，自己坐在城樓上悠閒地彈琴焚香！',
+          '第三幕：敵軍將領懷疑城裡有埋伏，嚇得趕緊下令撤軍！'
+        ],
+        prompt: '歇後語「諸葛亮唱空城計——（ ？ ）」，看動畫猜後半句是什麼？',
+        options: ['急中生智（沒辦法中的辦法）', '十拿九穩', '自投羅網', '兵強馬壯'],
+        answer: 0,
+        wiki: '【諸葛亮唱空城計——急中生智 / 沒辦法中的辦法】比喻在萬分危急、無兵可用的情況下，冷靜鎮定地想出奇招化險為夷。'
+      }
+    ]
+  }
+};
+
+/* ================= GAME STATE ================= */
+let state = {
+  playerName: '',
+  grade: 'low',
+  mode: 'standard',
+  score: 0,
+  streak: 0,
+  maxStreak: 0,
+  correctCount: 0,
+  totalAnswered: 0,
+  completedZones: [],
+  currentZone: null,
+  zoneQuestions: [],
+  qIndex: 0,
+  animTimers: []
+};
+
+/* ================= UI SELECTION & NAVIGATION ================= */
+function selectGrade(grade, el) {
+  sfxPop();
+  state.grade = grade;
+  document.querySelectorAll('#gradeSelector .select-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectMode(mode, el) {
+  sfxPop();
+  state.mode = mode;
+  document.querySelectorAll('#modeSelector .select-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function updateHUD() {
+  const gradeLabel = { low: '低年級', mid: '中年級', high: '高年級' }[state.grade];
+  document.getElementById('hudPlayer').textContent = state.playerName
+    ? `👤 ${state.playerName} (${gradeLabel})`
+    : '👤 尚未登入';
+  document.getElementById('hudScore').textContent = `⭐ ${state.score} 分`;
+  document.getElementById('hudStreak').textContent = `🔥 連勝 ${state.streak}`;
+}
+
+function startGame() {
+  const rawName = document.getElementById('playerName').value.trim();
+  if (!rawName) {
+    alert('請先輸入你的姓名或座號喔！');
+    document.getElementById('playerName').focus();
+    return;
+  }
+  sfxCorrect();
+  state.playerName = rawName;
+  state.score = 0;
+  state.streak = 0;
+  state.maxStreak = 0;
+  state.correctCount = 0;
+  state.totalAnswered = 0;
+  state.completedZones = [];
+  updateHUD();
+  renderMap();
+  showScreen('screenMap');
+}
+
+function resetToHome() {
+  clearAnimTimers();
+  state.playerName = '';
+  state.score = 0;
+  state.streak = 0;
+  updateHUD();
+  showScreen('screenStart');
+}
+
+/* ================= MAP RENDERING ================= */
+function renderMap() {
+  const perZone = state.mode === 'standard' ? 3 : 5;
+  document.getElementById('mapSubtitle').textContent =
+    `目前模式：${state.mode === 'standard' ? '🎲 標準劇場（每區隨機 3 題）' : '👑 大師全挑戰（每區 5 題全破）'}｜已完成 ${state.completedZones.length} / 5 區`;
+
+  const container = document.getElementById('zonesContainer');
+  container.innerHTML = '';
+
+  ZONES.forEach(z => {
+    const isDone = state.completedZones.includes(z.id);
+    const card = document.createElement('div');
+    card.className = `zone-card ${isDone ? 'done' : ''}`;
+    card.innerHTML = `
+      <div>
+        <div class="zone-icon">${z.icon}</div>
+        <div class="zone-title">${z.name}</div>
+        <div class="zone-desc">${z.desc}</div>
+      </div>
+      <span class="zone-status">${isDone ? '✅ 已通關' : `🎬 進入看劇 (${perZone}題)`}</span>
+    `;
+    if (!isDone) {
+      card.onclick = () => enterZone(z);
+    }
+    container.appendChild(card);
+  });
+}
+
+/* ================= ZONE & QUESTION FLOW ================= */
+function enterZone(zone) {
+  sfxPop();
+  state.currentZone = zone;
+  const pool = [...QUESTION_BANK[state.grade][zone.id]];
+  const count = state.mode === 'standard' ? 3 : 5;
+
+  if (state.mode === 'standard') {
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    state.zoneQuestions = pool.slice(0, count);
+  } else {
+    state.zoneQuestions = pool;
+  }
+
+  state.qIndex = 0;
+  document.getElementById('quizZoneTitle').textContent = `${zone.icon} ${zone.name}`;
+  showScreen('screenQuiz');
+  loadQuestion();
+}
+
+function clearAnimTimers() {
+  state.animTimers.forEach(t => clearTimeout(t));
+  state.animTimers = [];
+}
+
+function loadQuestion() {
+  clearAnimTimers();
+  const q = state.zoneQuestions[state.qIndex];
+  const totalInZone = state.zoneQuestions.length;
+  document.getElementById('quizProgress').textContent = `本區第 ${state.qIndex + 1} / ${totalInZone} 題`;
+
+  const qPanel = document.getElementById('questionPanel');
+  qPanel.classList.remove('revealed');
+  document.getElementById('feedbackBox').classList.remove('show');
+  document.getElementById('btnSkipAnim').style.display = 'inline-block';
+
+  const indexedOpts = q.options.map((text, idx) => ({ text, isCorrect: idx === q.answer }));
+  for (let i = indexedOpts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexedOpts[i], indexedOpts[j]] = [indexedOpts[j], indexedOpts[i]];
+  }
+  q._renderedOpts = indexedOpts;
+
+  document.getElementById('questionText').textContent = `❓ ${q.prompt}`;
+  const optContainer = document.getElementById('optionsContainer');
+  optContainer.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  indexedOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span style="background:#e9ecef;padding:2px 8px;border-radius:8px;">${labels[i]}</span> <span>${opt.text}</span>`;
+    btn.onclick = () => submitAnswer(i, btn);
+    optContainer.appendChild(btn);
+  });
+
+  playStoryAnimation(q, true);
+}
+
+function replayAnimation() {
+  sfxPop();
+  const q = state.zoneQuestions[state.qIndex];
+  playStoryAnimation(q, false);
+}
+
+function playStoryAnimation(q, autoRevealAfter) {
+  clearAnimTimers();
+  const svg = document.getElementById('cinemaSvg');
+  const subBar = document.getElementById('cinemaSubtitle');
+  const statusTxt = document.getElementById('stageStatusText');
+
+  statusTxt.textContent = '🎬 劇情上映中...請仔細觀察畫面動作！';
+  renderSceneSVG(svg, q.scene, 0);
+  subBar.textContent = q.steps[0];
+
+  const t1 = setTimeout(() => {
+    renderSceneSVG(svg, q.scene, 1);
+    subBar.textContent = q.steps[1];
+  }, 1300);
+
+  const t2 = setTimeout(() => {
+    renderSceneSVG(svg, q.scene, 2);
+    subBar.textContent = q.steps[2];
+  }, 2600);
+
+  state.animTimers.push(t1, t2);
+
+  if (autoRevealAfter) {
+    const t3 = setTimeout(() => {
+      revealQuestion();
+    }, 3900);
+    state.animTimers.push(t3);
+  }
+}
+
+function revealQuestion() {
+  clearAnimTimers();
+  const q = state.zoneQuestions[state.qIndex];
+  renderSceneSVG(document.getElementById('cinemaSvg'), q.scene, 2);
+  document.getElementById('cinemaSubtitle').textContent = q.steps[2];
+  document.getElementById('stageStatusText').textContent = '💡 劇情演完囉！請選出正確答案（可隨時重看）';
+  document.getElementById('btnSkipAnim').style.display = 'none';
+  document.getElementById('questionPanel').classList.add('revealed');
+}
+
+function submitAnswer(chosenIndex, btnEl) {
+  const q = state.zoneQuestions[state.qIndex];
+  const opts = q._renderedOpts;
+  const allBtns = document.querySelectorAll('#optionsContainer .opt-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  state.totalAnswered++;
+  const isRight = opts[chosenIndex].isCorrect;
+
+  if (isRight) {
+    sfxCorrect();
+    btnEl.classList.add('correct');
+    state.streak++;
+    if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+    state.correctCount++;
+    const bonus = (state.streak - 1) * 20;
+    const gained = 100 + bonus;
+    state.score += gained;
+    document.getElementById('fbTitle').innerHTML = `✅ 答對了！獲得 <span style="color:#d62828;">+${gained} 分</span>${bonus > 0 ? `（含連勝加成 +${bonus}）` : ''}`;
+  } else {
+    sfxWrong();
+    btnEl.classList.add('wrong');
+    state.streak = 0;
+    opts.forEach((o, idx) => {
+      if (o.isCorrect) allBtns[idx].classList.add('correct');
+    });
+    const rightText = opts.find(o => o.isCorrect).text;
+    document.getElementById('fbTitle').innerHTML = `❌ 差一點點！正確答案是：<span style="color:#2d6a4f;">${rightText}</span>`;
+  }
+
+  updateHUD();
+  document.getElementById('fbWiki').textContent = q.wiki;
+  const fbBox = document.getElementById('feedbackBox');
+  fbBox.classList.add('show');
+
+  const isLastInZone = state.qIndex === state.zoneQuestions.length - 1;
+  document.getElementById('btnNextQ').textContent = isLastInZone ? '完成本區探索 🏁' : '下一題 ➡️';
+}
+
+function nextQuestion() {
+  sfxPop();
+  state.qIndex++;
+  if (state.qIndex < state.zoneQuestions.length) {
+    loadQuestion();
+  } else {
+    state.completedZones.push(state.currentZone.id);
+    if (state.completedZones.length === ZONES.length) {
+      finishGame();
+    } else {
+      renderMap();
+      showScreen('screenMap');
+    }
+  }
+}
+
+/* ================= FINISH & LEADERBOARD ================= */
+function finishGame() {
+  sfxCorrect();
+  const accuracy = state.totalAnswered > 0 ? state.correctCount / state.totalAnswered : 0;
+  let title = '🌱 語文森林見習生';
+  if (accuracy >= 0.9) title = '👑 成語與俗諺大宗師';
+  else if (accuracy >= 0.75) title = '🏅 博學語文小博士';
+  else if (accuracy >= 0.5) title = '🌿 森林故事探索家';
+
+  const gradeLabel = { low: '低年級', mid: '中年級', high: '高年級' }[state.grade];
+  const modeLabel = state.mode === 'standard' ? '標準(15題)' : '大師(25題)';
+
+  document.getElementById('resPlayerInfo').textContent = `挑戰者：${state.playerName}（${gradeLabel}｜${modeLabel}）`;
+  document.getElementById('resRankTitle').textContent = title;
+  document.getElementById('resScore').textContent = `${state.score} 分`;
+  document.getElementById('resCorrect').textContent = `${state.correctCount} / ${state.totalAnswered}`;
+  document.getElementById('resMaxStreak').textContent = `${state.maxStreak} 連勝`;
+
+  saveToLeaderboard({
+    name: state.playerName,
+    grade: state.grade,
+    gradeLabel,
+    modeLabel,
+    score: state.score,
+    ts: Date.now()
+  });
+
+  showScreen('screenResult');
+}
+
+const LB_KEY = 'idiom_story_cinema_lb_v1';
+function getLeaderboard() {
+  try { return JSON.parse(localStorage.getItem(LB_KEY) || '[]'); }
+  catch (e) { return []; }
+}
+function saveToLeaderboard(entry) {
+  const list = getLeaderboard();
+  list.push(entry);
+  list.sort((a, b) => b.score - a.score || a.ts - b.ts);
+  localStorage.setItem(LB_KEY, JSON.stringify(list.slice(0, 100)));
+}
+function openLeaderboard() {
+  sfxPop();
+  document.querySelectorAll('#lbTabs .lb-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+  renderLeaderboard('all');
+  document.getElementById('lbModal').classList.add('open');
+}
+function closeLeaderboard() {
+  document.getElementById('lbModal').classList.remove('open');
+}
+function renderLeaderboard(filterGrade, tabEl) {
+  if (tabEl) {
+    document.querySelectorAll('#lbTabs .lb-tab').forEach(t => t.classList.remove('active'));
+    tabEl.classList.add('active');
+  }
+  const list = getLeaderboard().filter(item => filterGrade === 'all' || item.grade === filterGrade);
+  const tbody = document.getElementById('lbBody');
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;color:#6c757d;">目前還沒有挑戰紀錄，快來搶下第一名吧！</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map((item, idx) => {
+    const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}`;
+    return `<tr>
+      <td><strong>${medal}</strong></td>
+      <td><strong>${escapeHTML(item.name)}</strong></td>
+      <td>${item.gradeLabel}</td>
+      <td>${item.modeLabel}</td>
+      <td style="color:#d62828;font-weight:900;">${item.score}</td>
+    </tr>`;
+  }).join('');
+}
+function clearLeaderboard() {
+  if (confirm('確定要清除所有本機排行榜紀錄嗎？（清除後無法復原）')) {
+    localStorage.removeItem(LB_KEY);
+    renderLeaderboard('all');
+  }
+}
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+
+/* ================= RICH MULTI-STEP SVG STORY ANIMATION ENGINE ================= */
+function renderSceneSVG(svg, scene, step) {
+  let bg = `
+    <circle cx="530" cy="45" r="26" fill="#ffd166" opacity="0.9"/>
+    <g fill="#ffffff" opacity="0.85">
+      <circle cx="110" cy="45" r="18"/><circle cx="130" cy="42" r="22"/><circle cx="152" cy="46" r="16"/>
+      <circle cx="340" cy="36" r="15"/><circle cx="358" cy="34" r="19"/><circle cx="376" cy="38" r="14"/>
+    </g>
+  `;
+
+  const person = (x, y, robeColor = '#457b9d', hat = true, happy = true) => `
+    <g transform="translate(${x},${y})">
+      <path d="M-18,35 L18,35 L12,0 L-12,0 Z" fill="${robeColor}"/>
+      <circle cx="0" cy="-14" r="14" fill="#ffcdb2"/>
+      ${hat ? '<rect x="-12" y="-32" width="24" height="8" rx="3" fill="#1d3557"/><rect x="-7" y="-40" width="14" height="10" fill="#1d3557"/>' : ''}
+      <circle cx="-5" cy="-16" r="2" fill="#2b2d42"/><circle cx="5" cy="-16" r="2" fill="#2b2d42"/>
+      ${happy ? '<path d="M-5,-9 Q0,-4 5,-9" stroke="#e63946" stroke-width="2" fill="none"/>'
+              : '<circle cx="0" cy="-8" r="3.5" fill="#e63946"/>'}
+    </g>`;
+
+  const tree = (x, y) => `
+    <g transform="translate(${x},${y})">
+      <rect x="-10" y="0" width="20" height="55" fill="#7f5539"/>
+      <circle cx="0" cy="-18" r="34" fill="#2d6a4f"/>
+      <circle cx="-22" cy="-5" r="24" fill="#40916c"/>
+      <circle cx="22" cy="-5" r="24" fill="#40916c"/>
+    </g>`;
+
+  let content = '';
+
+  switch (scene) {
+    case 'snake_feet':
+      content = `
+        <rect x="190" y="45" width="220" height="135" rx="8" fill="#fffdf7" stroke="#7f5539" stroke-width="5"/>
+        <path d="M230,130 Q265,85 300,130 T370,115" stroke="#2a9d8f" stroke-width="11" fill="none" stroke-linecap="round"/>
+        <circle cx="373" cy="113" r="8" fill="#2a9d8f"/>
+        <path d="M380,113 L392,108 M380,113 L392,118" stroke="#e63946" stroke-width="2"/>
+        ${step >= 1 ? `
+          <g stroke="#e76f51" stroke-width="4" stroke-linecap="round" class="anim-pulse">
+            <line x1="255" y1="122" x2="245" y2="150"/><line x1="245" y1="150" x2="236" y2="152"/>
+            <line x1="285" y1="122" x2="278" y2="150"/><line x1="278" y1="150" x2="269" y2="152"/>
+            <line x1="320" y1="124" x2="315" y2="152"/><line x1="315" y1="152" x2="306" y2="154"/>
+            <line x1="350" y1="122" x2="348" y2="150"/><line x1="348" y1="150" x2="339" y2="152"/>
+          </g>
+        ` : ''}
+        ${person(130, 145, '#e76f51', true, step < 2)}
+        <line x1="145" y1="145" x2="${step === 1 ? 245 : 175}" y2="${step === 1 ? 140 : 120}" stroke="#7f5539" stroke-width="5" stroke-linecap="round"/>
+        ${step === 2 ? '<text x="440" y="95" font-size="36" class="anim-float">🏺💨</text>' : '<text x="450" y="135" font-size="36">🏺</text>'}
+      `;
+      break;
+
+    case 'fox_tiger':
+      content = `
+        ${tree(80, 120)} ${tree(520, 120)}
+        <g transform="translate(${180 + step * 35}, 150)" class="anim-bounce">
+          <ellipse cx="0" cy="0" rx="26" ry="15" fill="#f77f00"/>
+          <circle cx="24" cy="-10" r="13" fill="#f77f00"/>
+          <polygon points="18,-20 22,-32 27,-20" fill="#d62828"/>
+          <ellipse cx="-32" cy="-5" rx="18" ry="8" fill="#fcbf49"/>
+          <text x="12" y="-28" font-size="18">👑</text>
+        </g>
+        <g transform="translate(${105 + step * 35}, 142)">
+          <ellipse cx="0" cy="0" rx="38" ry="22" fill="#ffb703" stroke="#000" stroke-width="2"/>
+          <circle cx="34" cy="-12" r="17" fill="#ffb703" stroke="#000" stroke-width="2"/>
+          <path d="M-10,-15 L-5,5 M5,-15 L10,5 M28,-22 L38,-22" stroke="#000" stroke-width="3"/>
+        </g>
+        <g transform="translate(${430 + (step === 2 ? 70 : 0)}, 155)" class="${step === 2 ? 'anim-bounce' : ''}">
+          <ellipse cx="0" cy="0" rx="16" ry="12" fill="#fff" stroke="#adb5bd" stroke-width="2"/>
+          <ellipse cx="-4" cy="-18" rx="4" ry="12" fill="#fff" stroke="#adb5bd" stroke-width="2"/>
+          <ellipse cx="4" cy="-18" rx="4" ry="12" fill="#fff" stroke="#adb5bd" stroke-width="2"/>
+          ${step === 2 ? '<text x="-10" y="-34" font-size="22">😱💨</text>' : ''}
+        </g>
+      `;
+      break;
+
+    case 'well_frog':
+      content = `
+        <rect x="210" y="95" width="180" height="125" fill="#6c757d" stroke="#343a40" stroke-width="4"/>
+        <rect x="230" y="105" width="140" height="115" fill="#1d3557"/>
+        <ellipse cx="300" cy="95" rx="90" ry="14" fill="#adb5bd" stroke="#343a40" stroke-width="3"/>
+        <ellipse cx="300" cy="95" rx="70" ry="9" fill="#48cae4"/>
+        <g transform="translate(300, 185)" class="anim-bounce">
+          <ellipse cx="0" cy="0" rx="22" ry="15" fill="#52b788"/>
+          <circle cx="-10" cy="-14" r="6" fill="#fff"/><circle cx="10" cy="-14" r="6" fill="#fff"/>
+          <circle cx="-10" cy="-14" r="3" fill="#000"/><circle cx="10" cy="-14" r="3" fill="#000"/>
+        </g>
+        ${step >= 1 ? '<line x1="285" y1="165" x2="245" y2="95" stroke="#ffd166" stroke-width="2" stroke-dasharray="5,5"/><line x1="315" y1="165" x2="355" y2="95" stroke="#ffd166" stroke-width="2" stroke-dasharray="5,5"/>' : ''}
+        ${step === 2 ? '<text x="420" y="145" font-size="44" class="anim-bounce">🐢🌊</text>' : ''}
+      `;
+      break;
+
+    case 'play_lute_cow':
+      content = `
+        ${person(180, 145, '#457b9d', true, true)}
+        <ellipse cx="205" cy="155" rx="24" ry="9" fill="#bc6c25" transform="rotate(-15 205 155)"/>
+        <text x="235" y="115" font-size="26" class="anim-float">🎵🎶🎼</text>
+        <g transform="translate(395, 145)">
+          <ellipse cx="0" cy="0" rx="44" ry="26" fill="#dda15e"/>
+          <circle cx="-38" cy="-12" r="18" fill="#dda15e"/>
+          <path d="M-48,-26 Q-55,-38 -42,-32 M-28,-26 Q-21,-38 -34,-32" stroke="#fefae0" stroke-width="4" fill="none"/>
+          <text x="-55" y="25" font-size="24">🌿😋</text>
+          ${step === 2 ? '<text x="-20" y="-42" font-size="22">❓💤</text>' : ''}
+        </g>
+      `;
+      break;
+
+    case 'bird_bow':
+      content = `
+        ${person(140, 145, '#606c38', true, true)}
+        <path d="M165,110 Q195,140 165,170" stroke="#7f5539" stroke-width="5" fill="none"/>
+        <line x1="165" y1="110" x2="${step === 1 ? 152 : 165}" y2="140" stroke="#fff" stroke-width="2"/>
+        <line x1="${step === 1 ? 152 : 165}" y1="140" x2="165" y2="170" stroke="#fff" stroke-width="2"/>
+        ${step >= 1 ? '<text x="200" y="135" font-size="24" class="anim-pulse">💥嘣！</text>' : ''}
+        <g transform="translate(390, ${step === 2 ? 155 : 65})" class="${step < 2 ? 'anim-sway' : ''}">
+          <path d="M-30,0 Q-15,-20 0,0 Q15,-20 30,0" stroke="#2b2d42" stroke-width="5" fill="none"/>
+          ${step === 2 ? '<text x="-15" y="-20" font-size="28">💫😱</text>' : ''}
+        </g>
+      `;
+      break;
+
+    case 'pull_seedling':
+      content = `
+        ${person(160, 145, '#e76f51', true, step < 2)}
+        ${[270, 330, 390, 450].map((x, idx) => {
+          const h = step === 0 ? 22 : 45;
+          const color = step === 2 ? '#bc6c25' : '#2d6a4f';
+          const rot = step === 2 ? `rotate(55 ${x} 175)` : '';
+          return `
+            <g transform="${rot}">
+              <line x1="${x}" y1="175" x2="${x}" y2="${175 - h}" stroke="${color}" stroke-width="5" stroke-linecap="round"/>
+              <ellipse cx="${x - 8}" cy="${175 - h + 6}" rx="9" ry="4" fill="${color}" transform="rotate(-25 ${x - 8} ${175 - h + 6})"/>
+              <ellipse cx="${x + 8}" cy="${175 - h + 6}" rx="9" ry="4" fill="${color}" transform="rotate(25 ${x + 8} ${175 - h + 6})"/>
+            </g>
+          `;
+        }).join('')}
+        ${step === 1 ? '<text x="320" y="95" font-size="30" class="anim-bounce">⬆️💪</text>' : ''}
+        ${step === 2 ? '<text x="330" y="105" font-size="32">☀️🥀</text>' : ''}
+      `;
+      break;
+
+    case 'wait_rabbit':
+      content = `
+        ${tree(360, 120)}
+        ${step === 0 ? `
+          <g transform="translate(295, 162)">
+            <ellipse cx="0" cy="0" rx="20" ry="12" fill="#fff" stroke="#adb5bd" stroke-width="2"/>
+            <text x="15" y="-12" font-size="26">💥💫</text>
+          </g>
+        ` : ''}
+        ${person(step >= 1 ? 315 : 170, 145, '#457b9d', true, true)}
+        ${step >= 1 ? '<text x="160" y="168" font-size="28">⛏️💤</text>' : '<text x="200" y="150" font-size="28">⛏️</text>'}
+        ${step === 2 ? '<text x="295" y="95" font-size="28" class="anim-float">💤🐰❓</text>' : ''}
+      `;
+      break;
+
+    case 'turtle_rabbit':
+      content = `
+        <line x1="80" y1="180" x2="520" y2="180" stroke="#7f5539" stroke-width="6"/>
+        <line x1="490" y1="120" x2="490" y2="180" stroke="#e63946" stroke-width="4"/>
+        <polygon points="490,120 525,132 490,144" fill="#e63946"/>
+        <g transform="translate(${step === 0 ? 290 : 300}, 162)">
+          <ellipse cx="0" cy="0" rx="22" ry="13" fill="#fff" stroke="#adb5bd" stroke-width="2"/>
+          <ellipse cx="-6" cy="-16" rx="4" ry="11" fill="#fff" stroke="#adb5bd" stroke-width="2"/>
+          <text x="12" y="-15" font-size="24" class="anim-float">${step >= 1 ? '💤😴' : '⚡'}</text>
+        </g>
+        <g transform="translate(${130 + step * 185}, 165)" class="anim-bounce">
+          <path d="M-22,5 A22,18 0 0,1 22,5 Z" fill="#2d6a4f"/>
+          <circle cx="24" cy="0" r="8" fill="#52b788"/>
+          ${step === 2 ? '<text x="0" y="-22" font-size="26">🏆🎉</text>' : ''}
+        </g>
+      `;
+      break;
+
+    case 'spear_shield':
+      content = `
+        ${person(300, 145, '#9e2a2b', true, step < 2)}
+        <line x1="230" y1="75" x2="230" y2="195" stroke="#7f5539" stroke-width="6"/>
+        <polygon points="230,52 220,78 240,78" fill="#adb5bd"/>
+        <ellipse cx="370" cy="135" rx="26" ry="34" fill="#f4a261" stroke="#7f5539" stroke-width="5"/>
+        <text x="170" y="65" font-size="18" font-weight="bold" fill="#1d3557">${step === 0 ? '「最鋒利的矛！」' : ''}</text>
+        <text x="330" y="65" font-size="18" font-weight="bold" fill="#1d3557">${step === 1 ? '「最堅固的盾！」' : ''}</text>
+        ${step === 2 ? '<text x="275" y="88" font-size="34" class="anim-pulse">❓💦</text>' : ''}
+      `;
+      break;
+
+    case 'mend_sheep':
+      content = `
+        <rect x="210" y="105" width="230" height="75" fill="none" stroke="#7f5539" stroke-width="6"/>
+        <line x1="265" y1="105" x2="265" y2="180" stroke="#7f5539" stroke-width="5"/>
+        <line x1="385" y1="105" x2="385" y2="180" stroke="#7f5539" stroke-width="5"/>
+        ${step === 0
+          ? '<circle cx="325" cy="142" r="24" fill="#1d3557"/><text x="308" y="150" font-size="22">🕳️🐺</text>'
+          : '<rect x="302" y="112" width="46" height="60" fill="#bc6c25" stroke="#432818" stroke-width="3"/><text x="312" y="148" font-size="22">🔨✅</text>'}
+        ${person(150, 145, '#457b9d', true, true)}
+        <text x="465" y="155" font-size="36">🐑🐑</text>
+      `;
+      break;
+
+    case 'heart_seven_eight':
+      content = `
+        ${person(240, 145, '#457b9d', true, false)}
+        <text x="218" y="95" font-size="24" class="anim-bounce">💦😰</text>
+        <g transform="translate(380, ${step === 1 ? 85 : 155})" class="anim-pulse">
+          <text x="0" y="0" font-size="56">💓</text>
+          <text x="65" y="-10" font-size="32" font-weight="900" fill="#e63946">${step === 1 ? '7 ⬆️' : '8 ⬇️'}</text>
+        </g>
+      `;
+      break;
+
+    case 'three_hearts_two':
+      content = `
+        <rect x="330" y="175" width="270" height="55" fill="#48cae4"/>
+        <g transform="translate(260, 145)">
+          <circle cx="0" cy="-14" r="16" fill="#ffb703"/>
+          <polygon points="-14,-24 -8,-38 -2,-26" fill="#ffb703"/>
+          <polygon points="14,-24 8,-38 2,-26" fill="#ffb703"/>
+          <path d="M-16,35 L16,35 L12,0 L-12,0 Z" fill="#fb8500"/>
+        </g>
+        <line x1="275" y1="145" x2="380" y2="115" stroke="#7f5539" stroke-width="4"/>
+        <line x1="380" y1="115" x2="380" y2="185" stroke="#fff" stroke-width="2"/>
+        ${step >= 1 ? '<text x="150" y="85" font-size="34" class="anim-bounce">🦋</text>' : ''}
+        ${step === 2 ? '<text x="430" y="85" font-size="34" class="anim-sway">🚁🦟</text><text x="365" y="210" font-size="24">🐟💨</text>' : ''}
+      `;
+      break;
+
+    case 'spring_flowers':
+      content = `
+        ${tree(110, 120)} ${tree(490, 120)}
+        ${[190, 250, 310, 370, 430].map((x, i) => `
+          <g transform="translate(${x}, 168)" class="anim-pulse">
+            <line x1="0" y1="0" x2="0" y2="-24" stroke="#2d6a4f" stroke-width="4"/>
+            <circle cx="0" cy="-28" r="${6 + step * 3}" fill="${['#ff595e','#ffca3a','#ff924c','#ff70a6','#9b5de5'][i]}"/>
+            <circle cx="0" cy="-28" r="4" fill="#fff"/>
+          </g>
+        `).join('')}
+        <text x="275" y="95" font-size="34" class="anim-float">🦋🌸🐝</text>
+      `;
+      break;
+
+    case 'colorful_rainbow':
+      content = `
+        <path d="M120,180 A180,140 0 0,1 480,180" stroke="#ff595e" stroke-width="10" fill="none"/>
+        <path d="M130,180 A170,130 0 0,1 470,180" stroke="#ffca3a" stroke-width="10" fill="none"/>
+        <path d="M140,180 A160,120 0 0,1 460,180" stroke="#8ac926" stroke-width="10" fill="none"/>
+        <path d="M150,180 A150,110 0 0,1 450,180" stroke="#1982c4" stroke-width="10" fill="none"/>
+        <path d="M160,180 A140,100 0 0,1 440,180" stroke="#6a4c93" stroke-width="10" fill="none"/>
+        <text x="260" y="155" font-size="38" class="anim-pulse">🎈🎨🌺</text>
+      `;
+      break;
+
+    case 'water_drop_stone':
+      content = `
+        <rect x="140" y="45" width="170" height="16" fill="#7f5539"/>
+        <path d="M300,65 Q308,82 300,88 Q292,82 300,65 Z" fill="#00b4d8" class="anim-bounce"/>
+        <ellipse cx="300" cy="175" rx="68" ry="26" fill="#6c757d" stroke="#343a40" stroke-width="3"/>
+        ${step === 2 ? '<ellipse cx="300" cy="168" rx="14" ry="8" fill="#1d3557"/><text x="330" y="145" font-size="26">🕳️✨</text>' : ''}
+        <text x="410" y="100" font-size="24">${step >= 1 ? '⏳ 10年過去...' : '💧滴答...'}</text>
+      `;
+      break;
+
+    case 'early_bird':
+      content = `
+        <circle cx="110" cy="145" r="45" fill="#ffb703" class="anim-pulse"/>
+        <g transform="translate(${240 + step * 45}, 148)" class="anim-bounce">
+          <circle cx="0" cy="0" r="18" fill="#4cc9f0"/>
+          <polygon points="16,-3 28,0 16,3" fill="#f77f00"/>
+          ${step >= 1 ? '<text x="26" y="8" font-size="24">🐛😋</text>' : ''}
+        </g>
+        <g transform="translate(470, 155)">
+          <circle cx="0" cy="0" r="18" fill="#adb5bd"/>
+          <text x="-12" y="-22" font-size="22">💤😴</text>
+        </g>
+      `;
+      break;
+
+    case 'wash_hands':
+      content = `
+        <path d="M180,60 L250,60 L250,90" stroke="#6c757d" stroke-width="12" fill="none"/>
+        <path d="M250,95 L250,175" stroke="#48cae4" stroke-width="14" stroke-dasharray="10,6"/>
+        <text x="215" y="155" font-size="44" class="anim-pulse">🧼👐🫧</text>
+        ${step < 2
+          ? '<text x="320" y="145" font-size="36" class="anim-bounce">🦠😈</text>'
+          : '<text x="420" y="120" font-size="34" class="anim-float">🦠😱💨</text><text x="350" y="170" font-size="34">🍱✨</text>'}
+      `;
+      break;
+
+    case 'three_cobblers':
+      content = `
+        <rect x="270" y="165" width="90" height="65" fill="#48cae4"/>
+        ${person(140, 145, '#457b9d', true, true)}
+        ${person(190, 145, '#2a9d8f', true, true)}
+        ${person(240, 145, '#e76f51', true, true)}
+        <text x="165" y="92" font-size="30" class="anim-pulse">💡💡💡</text>
+        ${step === 2 ? '<rect x="265" y="158" width="100" height="12" fill="#bc6c25"/><text x="400" y="150" font-size="32">🌉🎉</text>' : ''}
+      `;
+      break;
+
+    case 'time_is_gold':
+      content = `
+        <circle cx="220" cy="125" r="52" fill="#fff" stroke="#e76f51" stroke-width="7"/>
+        <line x1="220" y1="125" x2="220" y2="88" stroke="#1d3557" stroke-width="5" stroke-linecap="round"/>
+        <line x1="220" y1="125" x2="${step === 1 ? 255 : 245}" y2="${step === 1 ? 125 : 145}" stroke="#e63946" stroke-width="4" stroke-linecap="round"/>
+        <text x="340" y="135" font-size="44" class="anim-bounce">🪙💰✨</text>
+        ${step === 2 ? '<text x="330" y="85" font-size="24" fill="#d62828" font-weight="bold">🚫 買不回來！</text>' : ''}
+      `;
+      break;
+
+    case 'smile_ten_years':
+      content = `
+        ${person(210, 145, '#6c757d', false, step >= 1)}
+        ${person(350, 152, '#f4a261', false, true)}
+        <text x="195" y="92" font-size="34" class="anim-bounce">${step >= 1 ? '😄✨💖' : '😔'}</text>
+        ${step === 2 ? '<text x="410" y="125" font-size="28" fill="#2d6a4f" font-weight="900">活力 -10歲！</text>' : ''}
+      `;
+      break;
+
+    case 'bamboo_water':
+      content = `
+        <rect x="0" y="185" width="600" height="45" fill="#48cae4"/>
+        <g transform="translate(300, ${145 - step * 25})">
+          <polygon points="-35,-25 35,-25 25,25 -25,25" fill="#dda15e" stroke="#7f5539" stroke-width="4"/>
+          <line x1="-25" y1="-10" x2="25" y2="-10" stroke="#7f5539" stroke-width="2" stroke-dasharray="6,6"/>
+          <line x1="-20" y1="8" x2="20" y2="8" stroke="#7f5539" stroke-width="2" stroke-dasharray="6,6"/>
+          ${step >= 1 ? '<text x="-22" y="52" font-size="28" class="anim-bounce">💧💧💧</text>' : ''}
+        </g>
+        ${step === 2 ? '<text x="360" y="100" font-size="28" fill="#d62828" font-weight="900">💨 空空如也！</text>' : ''}
+      `;
+      break;
+
+    case 'mud_buddha_river':
+      content = `
+        <rect x="0" y="160" width="600" height="70" fill="#0096c7"/>
+        <g transform="translate(300, ${135 + step * 14})">
+          <circle cx="0" cy="-22" r="18" fill="#bc6c25" opacity="${1 - step * 0.25}"/>
+          <path d="M-28,25 L28,25 L18,-5 L-18,-5 Z" fill="#bc6c25" opacity="${1 - step * 0.25}"/>
+          ${step >= 1 ? '<text x="-35" y="-42" font-size="26">💦😱融化啦！</text>' : ''}
+        </g>
+      `;
+      break;
+
+    case 'mouse_street':
+      content = `
+        <g transform="translate(${200 + step * 65}, 162)" class="anim-bounce">
+          <ellipse cx="0" cy="0" rx="22" ry="13" fill="#6c757d"/>
+          <circle cx="16" cy="-12" r="8" fill="#adb5bd"/>
+          <text x="-15" y="-22" font-size="22">🐭💨</text>
+        </g>
+        <text x="110" y="155" font-size="38" class="anim-sway">🧹😤</text>
+        <text x="450" y="155" font-size="38" class="anim-sway">👟😡</text>
+      `;
+      break;
+
+    case 'chain_dragon_heart':
+      content = `
+        <rect x="70" y="95" width="130" height="50" rx="12" fill="#ffd166" stroke="#e76f51" stroke-width="4"/>
+        <text x="92" y="128" font-size="22" font-weight="900">一心一<tspan fill="#d62828">意</tspan></text>
+        ${step >= 1 ? `
+          <text x="206" y="128" font-size="24">➡️</text>
+          <rect x="238" y="95" width="130" height="50" rx="12" fill="#a8dadc" stroke="#1d3557" stroke-width="4"/>
+          <text x="258" y="128" font-size="22" font-weight="900"><tspan fill="#d62828">意</tspan>氣風<tspan fill="#2d6a4f">發</tspan></text>
+        ` : ''}
+        ${step === 2 ? `
+          <text x="374" y="128" font-size="24">➡️</text>
+          <rect x="406" y="95" width="130" height="50" rx="12" fill="#d8f3dc" stroke="#2d6a4f" stroke-width="4"/>
+          <text x="426" y="128" font-size="22" font-weight="900"><tspan fill="#2d6a4f">發</tspan>憤圖強</text>
+        ` : ''}
+      `;
+      break;
+
+    case 'meat_bun_dog':
+      content = `
+        ${person(140, 145, '#457b9d', true, step === 0)}
+        ${step === 0 ? '<text x="230" y="125" font-size="34" class="anim-bounce">🥟💨</text>' : ''}
+        <g transform="translate(${380 + (step === 2 ? 95 : 0)}, 155)" class="anim-bounce">
+          <ellipse cx="0" cy="0" rx="28" ry="16" fill="#d4a373"/>
+          <circle cx="-24" cy="-12" r="14" fill="#d4a373"/>
+          <text x="-35" y="-28" font-size="24">${step >= 1 ? '😋🥟❤️' : '🐶'}</text>
+        </g>
+      `;
+      break;
+
+    /* ---- MID GRADE SCENES ---- */
+    case 'rabbit_three_caves':
+      content = `
+        ${[180, 300, 420].map((x, idx) => `
+          <g>
+            <ellipse cx="${x}" cy="178" rx="26" ry="12" fill="#1d3557"/>
+            <text x="${x - 10}" y="160" font-size="18" font-weight="bold" fill="#1d3557">洞${idx + 1}</text>
+          </g>
+        `).join('')}
+        <text x="165" y="140" font-size="32">${step >= 1 ? '🏹🧔' : ''}</text>
+        <g transform="translate(${step === 0 ? 180 : step === 1 ? 300 : 420}, 152)" class="anim-bounce">
+          <text x="-16" y="0" font-size="34">🐇✨</text>
+        </g>
+      `;
+      break;
+
+    case 'dragon_eyes':
+      content = `
+        <rect x="170" y="42" width="260" height="145" rx="10" fill="#fefae0" stroke="#7f5539" stroke-width="5"/>
+        <path d="M210,145 Q250,70 300,120 T385,85" stroke="#2d6a4f" stroke-width="14" fill="none" stroke-linecap="round"/>
+        <circle cx="385" cy="85" r="15" fill="#2d6a4f"/>
+        <circle cx="388" cy="82" r="5" fill="#fff"/>
+        ${step >= 1 ? '<circle cx="389" cy="82" r="3" fill="#000"/>' : ''}
+        ${step === 2 ? '<text x="240" y="95" font-size="44" class="anim-bounce">🐉⚡☁️</text>' : person(120, 145, '#e76f51', true, true)}
+      `;
+      break;
+
+    case 'frog_ant_shake':
+      content = `
+        <rect x="330" y="55" width="36" height="135" fill="#7f5539"/>
+        <circle cx="348" cy="48" r="58" fill="#2d6a4f"/>
+        <g transform="translate(295, 165)" class="${step === 1 ? 'anim-bounce' : ''}">
+          <circle cx="0" cy="0" r="8" fill="#2b2d42"/>
+          <circle cx="-12" cy="2" r="7" fill="#2b2d42"/>
+          <circle cx="12" cy="-2" r="6" fill="#2b2d42"/>
+          <text x="-20" y="-18" font-size="22">${step === 1 ? '😤💪' : step === 2 ? '😵💦' : '🐜'}</text>
+        </g>
+      `;
+      break;
+
+    case 'mantis_cicada':
+      content = `
+        <line x1="100" y1="155" x2="500" y2="155" stroke="#7f5539" stroke-width="10"/>
+        <text x="410" y="142" font-size="34">🪰</text>
+        <text x="295" y="142" font-size="38" class="anim-bounce">🦗⚔️</text>
+        ${step >= 1 ? '<text x="175" y="135" font-size="42" class="anim-sway">🐦👀</text>' : ''}
+      `;
+      break;
+
+    case 'old_horse_way':
+      content = `
+        <path d="M80,175 Q220,120 340,165 T520,115" stroke="#e9c46a" stroke-width="14" fill="none" stroke-dasharray="12,8"/>
+        <g transform="translate(${180 + step * 95}, 142)" class="anim-bounce">
+          <text x="-20" y="0" font-size="42">🐴🧭</text>
+        </g>
+        ${person(110 + step * 75, 150, '#457b9d', true, true)}
+      `;
+      break;
+
+    case 'grind_needle':
+      content = `
+        ${person(175, 145, '#6a4c93', false, true)}
+        <rect x="260" y="155" width="120" height="30" rx="6" fill="#6c757d"/>
+        ${step < 2
+          ? `<rect x="275" y="132" width="90" height="${step === 0 ? 18 : 9}" rx="4" fill="#adb5bd" class="anim-sway"/>`
+          : '<line x1="295" y1="138" x2="355" y2="138" stroke="#ffd166" stroke-width="3"/><text x="315" y="122" font-size="32" class="anim-pulse">🪡✨</text>'}
+      `;
+      break;
+
+    case 'caochong_elephant':
+      content = `
+        <rect x="0" y="165" width="600" height="65" fill="#0096c7"/>
+        <g transform="translate(300, ${step === 0 ? 155 : 158})">
+          <polygon points="-110,-15 110,-15 85,25 -85,25" fill="#bc6c25" stroke="#432818" stroke-width="4"/>
+          <line x1="-92" y1="12" x2="92" y2="12" stroke="#e63946" stroke-width="4"/>
+          ${step < 2
+            ? '<text x="-30" y="-20" font-size="56">🐘</text>'
+            : '<text x="-65" y="-16" font-size="34">🪨🪨🪨🪨</text>'}
+        </g>
+        ${person(120, 145, '#2a9d8f', true, true)}
+      `;
+      break;
+
+    case 'move_mountain':
+      content = `
+        <polygon points="360,185 450,55 540,185" fill="#52b788" stroke="#1b4332" stroke-width="4"/>
+        ${person(160 + step * 35, 145, '#457b9d', true, true)}
+        ${person(215 + step * 35, 152, '#e76f51', false, true)}
+        <text x="${255 + step * 35}" y="148" font-size="28" class="anim-bounce">🧺🪨</text>
+      `;
+      break;
+
+    case 'cover_ears_bell':
+      content = `
+        <polygon points="390,75 430,75 445,125 375,125" fill="#ffd166" stroke="#bc6c25" stroke-width="4"/>
+        <circle cx="410" cy="130" r="8" fill="#bc6c25"/>
+        <text x="445" y="105" font-size="26" class="anim-pulse">🔔叮噹！</text>
+        ${person(240, 145, '#2b2d42', true, false)}
+        ${step >= 1 ? '<text x="210" y="135" font-size="32">🙉🙈</text>' : ''}
+      `;
+      break;
+
+    case 'boat_sword':
+      content = `
+        <rect x="0" y="165" width="600" height="65" fill="#48cae4"/>
+        <g transform="translate(${170 + step * 110}, 152)">
+          <polygon points="-75,-12 75,-12 55,20 -55,20" fill="#bc6c25"/>
+          <line x1="20" y1="-12" x2="20" y2="12" stroke="#e63946" stroke-width="5"/>
+          ${person(0, -18, '#457b9d', true, step < 2)}
+        </g>
+        <text x="180" y="210" font-size="30">🗡️💧</text>
+        ${step === 2 ? '<text x="415" y="110" font-size="28">❓🌊</text>' : ''}
+      `;
+      break;
+
+    case 'thousand_miles_day':
+      content = `
+        <g transform="translate(${140 + step * 150}, 145)" class="anim-bounce">
+          <text x="-25" y="0" font-size="54">🐎💨</text>
+        </g>
+        <text x="430" y="110" font-size="26" font-weight="900" fill="#d62828">${step === 2 ? '🏁 1000里！' : '⚡疾風！'}</text>
+      `;
+      break;
+
+    case 'nine_cows_hair':
+      content = `
+        <text x="120" y="150" font-size="42">🐂🐂🐂</text>
+        <text x="120" y="190" font-size="42">🐂🐂🐂</text>
+        <path d="M390,110 Q410,135 395,160" stroke="#7f5539" stroke-width="3" fill="none" class="anim-float"/>
+        <text x="425" y="145" font-size="24" font-weight="bold" fill="#1d3557">⬅️ 1根細毛</text>
+      `;
+      break;
+
+    case 'wind_rain_symphony':
+      content = `
+        <rect x="0" y="0" width="600" height="230" fill="#343a40" opacity="0.45"/>
+        <text x="130" y="95" font-size="48" class="anim-sway">🌪️💨</text>
+        <text x="270" y="115" font-size="44" class="anim-bounce">⛈️🌧️🌧️</text>
+        <g transform="translate(430, 120)" class="anim-sway">${tree(0, 0)}</g>
+      `;
+      break;
+
+    case 'autumn_clear':
+      content = `
+        <text x="140" y="125" font-size="48" class="anim-float">🍁🍂🍁</text>
+        <text x="360" y="115" font-size="44">☀️🌤️</text>
+        ${person(280, 150, '#e76f51', true, true)}
+        <text x="315" y="150" font-size="30">🎒</text>
+      `;
+      break;
+
+    case 'three_heads_six_arms':
+      content = `
+        <g transform="translate(300, 145)" class="anim-pulse">
+          <path d="M-24,40 L24,40 L16,0 L-16,0 Z" fill="#e63946"/>
+          <circle cx="0" cy="-16" r="15" fill="#ffcdb2"/>
+          ${step >= 1 ? '<circle cx="-24" cy="-12" r="12" fill="#ffcdb2"/><circle cx="24" cy="-12" r="12" fill="#ffcdb2"/>' : ''}
+          ${step === 2 ? `
+            <line x1="-18" y1="5" x2="-58" y2="-15" stroke="#ffcdb2" stroke-width="6"/>
+            <line x1="-18" y1="15" x2="-62" y2="15" stroke="#ffcdb2" stroke-width="6"/>
+            <line x1="-18" y1="25" x2="-55" y2="42" stroke="#ffcdb2" stroke-width="6"/>
+            <line x1="18" y1="5" x2="58" y2="-15" stroke="#ffcdb2" stroke-width="6"/>
+            <line x1="18" y1="15" x2="62" y2="15" stroke="#ffcdb2" stroke-width="6"/>
+            <line x1="18" y1="25" x2="55" y2="42" stroke="#ffcdb2" stroke-width="6"/>
+            <text x="-85" y="-12" font-size="22">🔱</text><text x="65" y="-12" font-size="22">🔥</text>
+          ` : ''}
+        </g>
+      `;
+      break;
+
+    case 'spring_stepmother':
+      content = `
+        <text x="140" y="115" font-size="48">${step === 0 ? '☀️😄' : step === 1 ? '⛈️🥶' : '🌤️😅'}</text>
+        ${person(350, 145, '#457b9d', true, step !== 1)}
+        <text x="410" y="130" font-size="24" font-weight="bold" fill="#1d3557">${step === 0 ? '早上好熱' : step === 1 ? '中午好冷！' : '下午又晴了'}</text>
+      `;
+      break;
+
+    case 'one_plow_one_harvest':
+      content = `
+        ${person(160, 145, '#606c38', true, true)}
+        <text x="220" y="150" font-size="34">${step === 0 ? '🌱💦' : step === 1 ? '🌿☀️' : '🌾🌾🌾🎉'}</text>
+        <text x="380" y="120" font-size="28" font-weight="900" fill="#2d6a4f">${step === 2 ? '大豐收！' : '辛勤耕耘中...'}</text>
+      `;
+      break;
+
+    case 'may_dumpling_coat':
+      content = `
+        <rect x="130" y="65" width="95" height="95" rx="10" fill="#fff" stroke="#e63946" stroke-width="4"/>
+        <text x="145" y="105" font-size="20" font-weight="900" fill="#e63946">五月端午</text>
+        <text x="155" y="145" font-size="34">🍙</text>
+        <text x="330" y="145" font-size="52" class="anim-sway">🧥❄️</text>
+      `;
+      break;
+
+    case 'fall_into_pit':
+      content = `
+        <ellipse cx="300" cy="182" rx="45" ry="14" fill="#1d3557"/>
+        <g transform="translate(${170 + step * 115}, ${step === 1 ? 168 : 138})" class="anim-bounce">
+          ${person(0, 0, '#457b9d', true, step !== 1)}
+        </g>
+        <text x="370" y="105" font-size="30">${step === 2 ? '💡✅ 記取教訓！' : step === 1 ? '💥哎呀！' : '📱👀'}</text>
+      `;
+      break;
+
+    case 'northwest_rain':
+      content = `
+        <line x1="300" y1="50" x2="300" y2="210" stroke="#7f5539" stroke-width="6" stroke-dasharray="8,6"/>
+        <text x="140" y="110" font-size="46" class="anim-bounce">⛈️🌧️</text>
+        <text x="390" y="110" font-size="46" class="anim-pulse">☀️🌈</text>
+      `;
+      break;
+
+    case 'little_monk_chant':
+      content = `
+        ${person(240, 145, '#f4a261', false, true)}
+        <ellipse cx="290" cy="155" rx="18" ry="14" fill="#bc6c25"/>
+        <text x="278" y="130" font-size="22" class="anim-bounce">叩！叩！</text>
+        ${step >= 1 ? '<text x="345" y="95" font-size="36" class="anim-float">💭🍗🎮</text>' : ''}
+      `;
+      break;
+
+    case 'jiang_taigong_fish':
+      content = `
+        <rect x="330" y="175" width="270" height="55" fill="#48cae4"/>
+        ${person(210, 145, '#e9ecef', true, true)}
+        <line x1="230" y1="145" x2="395" y2="95" stroke="#7f5539" stroke-width="4"/>
+        <line x1="395" y1="95" x2="395" y2="145" stroke="#fff" stroke-width="2"/>
+        <text x="385" y="155" font-size="22">📏直鉤無餌</text>
+        ${step === 2 ? '<text x="430" y="205" font-size="30" class="anim-bounce">🐟⬆️😄</text>' : ''}
+      `;
+      break;
+
+    case 'weasel_chicken':
+      content = `
+        <g transform="translate(210, 150)" class="anim-bounce">
+          <ellipse cx="0" cy="0" rx="26" ry="14" fill="#d4a373"/>
+          <text x="25" y="-12" font-size="28">🎁😈</text>
+        </g>
+        <g transform="translate(410, 150)">
+          <text x="-20" y="5" font-size="46">🐓💦</text>
+        </g>
+      `;
+      break;
+
+    case 'blind_elephant':
+      content = `
+        <text x="255" y="155" font-size="88">🐘</text>
+        <text x="150" y="100" font-size="20" font-weight="bold" fill="#1d3557">${step >= 0 ? '🕶️「像柱子！」' : ''}</text>
+        <text x="360" y="95" font-size="20" font-weight="bold" fill="#1d3557">${step >= 1 ? '🕶️「像扇子！」' : ''}</text>
+        <text x="370" y="175" font-size="20" font-weight="bold" fill="#1d3557">${step === 2 ? '🕶️「像繩子！」' : ''}</text>
+      `;
+      break;
+
+    case 'dumb_eat_herb':
+      content = `
+        ${person(250, 145, '#457b9d', true, false)}
+        <text x="305" y="135" font-size="34" class="anim-pulse">🌿😖😭</text>
+        <text x="350" y="95" font-size="24" font-weight="900" fill="#800f2f">${step === 2 ? '🤐 說不出有多苦！' : ''}</text>
+      `;
+      break;
+
+    /* ---- HIGH GRADE SCENES ---- */
+    case 'cup_bow_snake':
+      content = `
+        <path d="M130,55 Q175,95 130,135" stroke="#7f5539" stroke-width="6" fill="none"/>
+        <line x1="130" y1="55" x2="130" y2="135" stroke="#fff" stroke-width="2"/>
+        <rect x="240" y="145" width="60" height="45" rx="6" fill="#ffd166" stroke="#bc6c25" stroke-width="3"/>
+        <path d="M255,165 Q270,152 285,165" stroke="#2a9d8f" stroke-width="4" fill="none" class="anim-sway"/>
+        ${person(400, 145, '#457b9d', true, false)}
+        ${step === 2 ? '<text x="380" y="92" font-size="32" class="anim-bounce">🐍😱🤒</text>' : ''}
+      `;
+      break;
+
+    case 'guizhou_donkey':
+      content = `
+        <g transform="translate(220, 148)" class="${step === 1 ? 'anim-bounce' : ''}">
+          <text x="-20" y="5" font-size="52">🫏</text>
+          ${step === 1 ? '<text x="35" y="-15" font-size="24">📢🦵💥</text>' : ''}
+        </g>
+        <g transform="translate(${430 - step * 65}, 148)">
+          <text x="-20" y="5" font-size="52">🐅</text>
+        </g>
+      `;
+      break;
+
+    case 'point_deer_horse':
+      content = `
+        ${person(180, 145, '#6a4c93', true, true)}
+        <text x="285" y="155" font-size="58">🦌</text>
+        <text x="235" y="92" font-size="24" font-weight="900" fill="#d62828">👉「這是一匹馬！」</text>
+        ${step === 2 ? '<text x="415" y="145" font-size="34">🙇‍♂️🙇‍♂️💦</text>' : ''}
+      `;
+      break;
+
+    case 'lost_horse_blessing':
+      content = `
+        ${person(180, 145, '#606c38', true, true)}
+        <text x="290" y="145" font-size="44" class="anim-bounce">
+          ${step === 0 ? '🐴💨 跑走了' : step === 1 ? '🐴🐴🎉 帶回駿馬' : '🩼🛡️ 免去打仗'}
+        </text>
+      `;
+      break;
+
+    case 'snipe_clam':
+      content = `
+        <text x="210" y="150" font-size="48" class="anim-sway">🦢</text>
+        <text x="280" y="155" font-size="48" class="anim-pulse">🦪</text>
+        ${step === 2 ? '<text x="410" y="145" font-size="48" class="anim-bounce">🎣🧺😄</text>' : ''}
+      `;
+      break;
+
+    case 'borrow_arrows':
+      content = `
+        <rect x="0" y="165" width="600" height="65" fill="#1d3557"/>
+        <polygon points="150,145 360,145 335,175 175,175" fill="#bc6c25"/>
+        <text x="185" y="140" font-size="34">🌾🧍🌾🧍</text>
+        ${step >= 1 ? '<text x="230" y="105" font-size="32" class="anim-bounce">🏹🏹🏹🏹</text>' : ''}
+        <text x="440" y="110" font-size="30" opacity="0.7">🌫️🌫️🌫️</text>
+      `;
+      break;
+
+    case 'four_sides_chu_song':
+      content = `
+        <rect x="0" y="0" width="600" height="230" fill="#1d3557" opacity="0.65"/>
+        ${person(300, 145, '#9e2a2b', true, false)}
+        <text x="110" y="95" font-size="28" class="anim-float">🎵楚歌</text>
+        <text x="430" y="95" font-size="28" class="anim-float">🎶楚歌</text>
+        <text x="120" y="185" font-size="28" class="anim-float">🎶楚歌</text>
+        <text x="420" y="185" font-size="28" class="anim-float">🎵楚歌</text>
+      `;
+      break;
+
+    case 'carry_thorns_apology':
+      content = `
+        ${person(240 + step * 35, 152, '#ffcdb2', false, false)}
+        <text x="${210 + step * 35}" y="138" font-size="34">🌵🪵</text>
+        ${person(410, 145, '#2a9d8f', true, true)}
+        ${step === 2 ? '<text x="315" y="95" font-size="30">🤝💖</text>' : ''}
+      `;
+      break;
+
+    case 'break_pots_sink_boats':
+      content = `
+        <rect x="330" y="165" width="270" height="65" fill="#0077b6"/>
+        <text x="160" y="150" font-size="44" class="anim-bounce">🍳🔨💥</text>
+        <text x="410" y="175" font-size="44" class="anim-sway">⛵⬇️🌊</text>
+      `;
+      break;
+
+    case 'sleep_brushwood_gall':
+      content = `
+        <rect x="160" y="160" width="160" height="22" fill="#dda15e"/>
+        ${person(240, 142, '#457b9d', true, false)}
+        <line x1="390" y1="45" x2="390" y2="105" stroke="#7f5539" stroke-width="4"/>
+        <ellipse cx="390" cy="118" rx="14" ry="20" fill="#2d6a4f" class="anim-sway"/>
+        <text x="415" y="122" font-size="22" font-weight="bold" fill="#2d6a4f">⬅️ 苦膽</text>
+      `;
+      break;
+
+    case 'thousand_jin_hair':
+      content = `
+        <line x1="300" y1="35" x2="300" y2="105" stroke="#2b2d42" stroke-width="1.5" class="anim-sway"/>
+        <circle cx="300" cy="145" r="42" fill="#343a40" class="anim-pulse"/>
+        <text x="268" y="152" font-size="20" fill="#ffd166" font-weight="900">1000鈞</text>
+        <text x="355" y="80" font-size="24" fill="#d62828" font-weight="bold">⬅️ 1根細髮！</text>
+      `;
+      break;
+
+    case 'morning_three_evening_four':
+      content = `
+        ${person(180, 145, '#606c38', true, true)}
+        <text x="265" y="100" font-size="24" font-weight="900" fill="#1d3557">
+          ${step === 0 ? '早3顆 🌰 晚4顆' : '早4顆 🌰 晚3顆'}
+        </text>
+        <text x="360" y="155" font-size="48" class="anim-bounce">${step === 0 ? '🐒😡' : '🐒🎉'}</text>
+      `;
+      break;
+
+    case 'snow_charcoal':
+      content = `
+        <rect x="0" y="0" width="600" height="230" fill="#caf0f8" opacity="0.5"/>
+        <text x="140" y="95" font-size="38" class="anim-float">❄️❄️❄️</text>
+        ${person(210, 145, '#457b9d', true, true)}
+        <text x="320" y="155" font-size="48" class="anim-pulse">🧺🔥♨️</text>
+      `;
+      break;
+
+    case 'drop_water_grace':
+      content = `
+        <text x="180" y="135" font-size="48" class="anim-bounce">💧</text>
+        <text x="285" y="135" font-size="32">➡️</text>
+        <text x="370" y="145" font-size="56" class="anim-pulse">⛲🌊✨</text>
+      `;
+      break;
+
+    case 'grass_trees_soldiers':
+      content = `
+        ${person(170, 145, '#9e2a2b', true, false)}
+        <text x="150" y="92" font-size="28" class="anim-bounce">😱💨</text>
+        <g transform="translate(390, 130)" class="anim-sway">
+          ${tree(0, 0)}
+          ${step >= 1 ? '<text x="-25" y="-20" font-size="32">💂‍♂️⚔️💂‍♂️</text>' : ''}
+        </g>
+      `;
+      break;
+
+    case 'eat_fruit_worship_tree':
+      content = `
+        ${tree(390, 125)}
+        <text x="365" y="105" font-size="28">🍎🍊</text>
+        ${person(240, 145, '#e76f51', true, true)}
+        <text x="295" y="135" font-size="34" class="anim-bounce">🙇‍♂️💖</text>
+      `;
+      break;
+
+    case 'long_road_horse_power':
+      content = `
+        <path d="M80,175 Q300,130 520,175" stroke="#bc6c25" stroke-width="8" fill="none"/>
+        <text x="${140 + step * 145}" y="150" font-size="46" class="anim-bounce">🐎💨</text>
+        <text x="360" y="95" font-size="24" font-weight="bold" fill="#2d6a4f">${step === 2 ? '❤️ 日久見真心' : '🛣️ 漫漫長路'}</text>
+      `;
+      break;
+
+    case 'rolling_stone_moss':
+      content = `
+        <g transform="translate(${180 + step * 110}, 155)" class="anim-sway">
+          <circle cx="0" cy="0" r="32" fill="#adb5bd" stroke="#495057" stroke-width="4"/>
+          <text x="-22" y="8" font-size="20">💨滾動中</text>
+        </g>
+        <text x="460" y="165" font-size="36">🪨🌿</text>
+      `;
+      break;
+
+    case 'first_year_scholar':
+      content = `
+        <text x="120" y="135" font-size="24" font-weight="900" fill="#1d3557">1年：🎓狀元</text>
+        <text x="275" y="135" font-size="24" font-weight="900" fill="#bc6c25">${step >= 1 ? '2年：🥟豬肉粿' : ''}</text>
+        <text x="440" y="135" font-size="24" font-weight="900" fill="#d62828">${step === 2 ? '3年：📉落榜' : ''}</text>
+      `;
+      break;
+
+    case 'gold_not_afraid_fire':
+      content = `
+        <text x="260" y="165" font-size="68" class="anim-pulse">🔥🔥🔥</text>
+        <text x="275" y="120" font-size="44" class="anim-bounce">🥇✨</text>
+      `;
+      break;
+
+    case 'zhou_yu_huang_gai':
+      content = `
+        ${person(220, 145, '#1d3557', true, true)}
+        ${person(370, 145, '#9e2a2b', true, step === 2)}
+        <text x="285" y="125" font-size="36" class="anim-bounce">${step < 2 ? '🏏💥😫' : '😉👍🤝'}</text>
+      `;
+      break;
+
+    case 'liu_bei_jingzhou':
+      content = `
+        ${person(210, 145, '#2d6a4f', true, true)}
+        <rect x="245" y="115" width="75" height="50" fill="#ffd166" stroke="#7f5539" stroke-width="3"/>
+        <text x="262" y="145" font-size="18" font-weight="900">荊州</text>
+        ${person(410, 145, '#e63946', true, false)}
+        <text x="355" y="105" font-size="24">${step >= 1 ? '🤲還來！ 🙅‍♂️不還！' : ''}</text>
+      `;
+      break;
+
+    case 'zhang_fei_needle':
+      content = `
+        ${person(230, 145, '#2b2d42', true, true)}
+        <text x="210" y="92" font-size="32" class="anim-pulse">👀</text>
+        <text x="340" y="140" font-size="44" class="anim-bounce">🪡🧵✨</text>
+      `;
+      break;
+
+    case 'sun_wukong_72':
+      content = `
+        <text x="210" y="150" font-size="56" class="anim-bounce">🐵🪄</text>
+        <text x="340" y="135" font-size="44" class="anim-pulse">${step === 0 ? '☁️💨' : step === 1 ? '🐅🦅🏯' : '✨72變！'}</text>
+      `;
+      break;
+
+    case 'kongming_empty_city':
+      content = `
+        <rect x="220" y="65" width="160" height="115" fill="#6c757d" stroke="#343a40" stroke-width="4"/>
+        <rect x="275" y="125" width="50" height="55" fill="#1d3557"/>
+        ${person(300, 95, '#457b9d', true, true)}
+        <text x="285" y="60" font-size="24" class="anim-float">🎶🎐</text>
+        <text x="425" y="150" font-size="36" class="anim-bounce">${step === 2 ? '🐎😱撤退！' : '⚔️🐎'}</text>
+      `;
+      break;
+
+    default:
+      content = `${person(300, 145, '#457b9d', true, true)}`;
+  }
+
+  svg.innerHTML = bg + content;
+}
+</script>
+</body>
+</html>
